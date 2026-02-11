@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">KyuubiMask</string>
+    <string name="app_subtitle">Nine-Tailed Fox Mask • Privacy First</string>
+    
+    <!-- Status -->
+    <string name="label_status">Service Status</string>
+    <string name="status_active">🦊 Active &amp; Protecting</string>
+    <string name="status_disabled">Disabled</string>
+    <string name="status_permission_required">⚠️ Permission Required</string>
+    <string name="status_checking">Checking…</string>
+    
+    <!-- Settings -->
+    <string name="label_enable_masking">Enable Notification Masking</string>
+    <string name="label_enable_description">Hide sensitive notification content</string>
+    <string name="btn_grant_permission">Grant Notification Access</string>
+    <string name="label_apps_to_mask">Apps to Mask</string>
+    
+    <!-- Masked notification -->
+    <string name="masked_text">New notification</string>
+    
+    <!-- Privacy -->
+    <string name="privacy_notice">No data is stored or transmitted. Your notifications stay private.</string>
+    
+    <!-- Errors -->
+    <string name="error_open_settings">Cannot open settings</string>
+</resources>
