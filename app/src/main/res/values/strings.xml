@@ -19,7 +19,6 @@
     
     <!-- Masked notification -->
     <string name="masked_text">New notification</string>
-    <string name="masked_app_fallback">App</string>
     
     <!-- Privacy -->
     <string name="privacy_notice">No data is stored or transmitted. Your notifications stay private.</string>

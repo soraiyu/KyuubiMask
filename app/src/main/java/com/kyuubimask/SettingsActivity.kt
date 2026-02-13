@@ -94,10 +94,10 @@ class SettingsActivity : AppCompatActivity() {
         // Clear log button
         binding.btnClearLog.setOnClickListener {
             debugLogs.clear()
-            binding.tvDebugLog.text = getString(R.string.debug_waiting)
+            binding.tvDebugLog.text = "Waiting for notifications..."
         }
         
-        addDebugLog(getString(R.string.debug_waiting))
+        addDebugLog("App started. Waiting for notifications...")
     }
     
     override fun onDestroy() {
