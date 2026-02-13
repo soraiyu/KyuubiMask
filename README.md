@@ -31,3 +31,13 @@ APKは `app/build/outputs/apk/debug/app-debug.apk` に生成されます。
 - ❌ データ保存なし
 - ❌ ログ記録なし
 - ✅ 完全オフライン動作
+
+## 質問・相談・コントリビューション
+
+作りたいアプリや機能についてのご相談、質問、提案など、お気軽にお寄せください！
+
+- 💬 [GitHubのIssueで質問する](https://github.com/soraiyu/KyuubiMask/issues)
+- 🤝 [コントリビューションガイドを見る](CONTRIBUTING.md)
+- 💡 アイデアの共有や意見交換も大歓迎です
+
+どんな相談でも歓迎します。コミュニティでサポートいたします。
