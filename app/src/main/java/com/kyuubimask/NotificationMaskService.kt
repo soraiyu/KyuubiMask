@@ -1,10 +1,32 @@
+/*
+ * Copyright 2026 KyuubiMask Contributors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.kyuubimask
 
+import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Notification
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
+import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
+import com.kyuubimask.data.PreferencesRepository
+import java.util.Objects
 
 /**
  * NotificationMaskService - Core notification masking service
@@ -17,26 +39,25 @@ import androidx.core.app.NotificationCompat
  */
 class NotificationMaskService : NotificationListenerService() {
 
-    companion object {
-        // Default apps to mask - configurable via SharedPreferences
-        val DEFAULT_MASKED_APPS = setOf(
-            "com.whatsapp",
-            "org.telegram.messenger", 
-            "com.google.android.gm",
-            "jp.naver.line.android"
-        )
+    private lateinit var prefsRepository: PreferencesRepository
 
-        // SharedPreferences key
-        const val PREFS_NAME = "kyuubi_prefs"
-        const val KEY_MASKED_APPS = "masked_apps"
-        const val KEY_SERVICE_ENABLED = "service_enabled"
-        
+    companion object {
         // Debug broadcast
         const val ACTION_DEBUG_LOG = "com.kyuubimask.DEBUG_LOG"
         const val EXTRA_LOG_MESSAGE = "log_message"
+        
+        // Tag to identify masked notifications and prevent re-masking
+        private const val MASKED_TAG = "kyuubimask_masked"
+    }
+
+    override fun onCreate() {
+        super.onCreate()
+        prefsRepository = PreferencesRepository(applicationContext)
     }
 
     private fun sendDebugLog(message: String) {
+        if (!BuildConfig.DEBUG) return  // Only log in debug builds
+        
         val intent = Intent(ACTION_DEBUG_LOG).apply {
             putExtra(EXTRA_LOG_MESSAGE, message)
             setPackage(packageName) // Send only to our app
@@ -65,23 +86,20 @@ class NotificationMaskService : NotificationListenerService() {
         
         // Skip our own notifications to prevent infinite loop
         if (packageName == this.packageName) return
+        
+        // Skip already masked notifications
+        if (sbn.tag == MASKED_TAG) return
 
         // Check if service is enabled
-        val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
-        val isEnabled = prefs.getBoolean(KEY_SERVICE_ENABLED, true)
-        
-        // Get list of apps to mask
-        val maskedApps = prefs.getStringSet(KEY_MASKED_APPS, DEFAULT_MASKED_APPS) 
-            ?: DEFAULT_MASKED_APPS
-
-        // Debug log - show all notifications (package name only, not content)
-        val isMasked = packageName in maskedApps
-        val status = if (isMasked && isEnabled) "🦊 MASKED" else "⏭️ SKIP"
-        sendDebugLog("$status: $packageName")
-
-        if (!isEnabled) return
+        if (!prefsRepository.isServiceEnabled) return
 
         // Check if this app should be masked
+        val isMasked = prefsRepository.isAppMasked(packageName)
+        
+        // Debug log - show all notifications (package name only, not content)
+        val status = if (isMasked) "🦊 MASKED" else "⏭️ SKIP"
+        sendDebugLog("$status: $packageName")
+
         if (isMasked) {
             maskNotification(sbn)
         }
@@ -92,6 +110,15 @@ class NotificationMaskService : NotificationListenerService() {
      * PRIVACY: No content from original notification is logged or stored
      */
     private fun maskNotification(sbn: StatusBarNotification) {
+        // Check POST_NOTIFICATIONS permission for Android 13+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+                != PackageManager.PERMISSION_GRANTED) {
+                sendDebugLog("❌ POST_NOTIFICATIONS permission not granted")
+                return
+            }
+        }
+        
         // Cancel the original notification
         cancelNotification(sbn.key)
 
@@ -123,11 +150,20 @@ class NotificationMaskService : NotificationListenerService() {
             .build()
 
         // Post the masked notification with unique ID based on original
-        val notificationId = sbn.id + sbn.packageName.hashCode()
+        // Use Objects.hash to avoid collision issues
+        val notificationId = generateNotificationId(sbn)
         val manager = getSystemService(NOTIFICATION_SERVICE) as android.app.NotificationManager
-        manager.notify(notificationId, maskedNotification)
+        manager.notify(MASKED_TAG, notificationId, maskedNotification)
         
         sendDebugLog("✅ Masked notification posted for: $appName")
+    }
+    
+    /**
+     * Generate a unique notification ID from StatusBarNotification
+     * Uses Objects.hash to prevent collisions
+     */
+    private fun generateNotificationId(sbn: StatusBarNotification): Int {
+        return Objects.hash(sbn.packageName, sbn.id, sbn.tag ?: "")
     }
 
     override fun onNotificationRemoved(sbn: StatusBarNotification?) {
