@@ -3,7 +3,11 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <!-- PRIVACY: No INTERNET permission - this app works completely offline -->
+    
     <!-- Required for notification access -->
+    
+    <!-- Required to post notifications on Android 13+ (API 33+) -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     
     <application
         android:name=".KyuubiMaskApp"

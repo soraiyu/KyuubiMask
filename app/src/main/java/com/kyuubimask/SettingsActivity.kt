@@ -15,15 +15,18 @@
  */
 package com.kyuubimask
 
+import android.Manifest
 import android.content.BroadcastReceiver
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.kyuubimask.data.PreferencesRepository
@@ -42,6 +45,20 @@ class SettingsActivity : AppCompatActivity() {
     private lateinit var prefsRepository: PreferencesRepository
     private val debugLogs = mutableListOf<String>()
     
+    // Request notification permission for Android 13+
+    private val requestPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted: Boolean ->
+        if (isGranted) {
+            addDebugLog("✅ POST_NOTIFICATIONS permission granted")
+            Toast.makeText(this, R.string.post_notification_permission_granted, Toast.LENGTH_SHORT).show()
+        } else {
+            addDebugLog("❌ POST_NOTIFICATIONS permission denied")
+            Toast.makeText(this, R.string.error_post_notification_denied, Toast.LENGTH_LONG).show()
+        }
+        updateServiceStatus()
+    }
+    
     private val debugReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             intent?.getStringExtra(NotificationMaskService.EXTRA_LOG_MESSAGE)?.let { message ->
@@ -59,6 +76,9 @@ class SettingsActivity : AppCompatActivity() {
         
         setupUI()
         updateServiceStatus()
+        
+        // Check and request notification permission on Android 13+
+        checkNotificationPermission()
         
         // Register debug receiver only in debug builds
         if (BuildConfig.DEBUG) {
@@ -108,6 +128,51 @@ class SettingsActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         updateServiceStatus()
+    }
+    
+    /**
+     * Check notification permission for Android 13+
+     */
+    private fun checkNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            when {
+                ContextCompat.checkSelfPermission(
+                    this,
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) == PackageManager.PERMISSION_GRANTED -> {
+                    // Permission already granted
+                    addDebugLog("✅ POST_NOTIFICATIONS permission already granted")
+                }
+                shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS) -> {
+                    // Show rationale and request permission
+                    Toast.makeText(
+                        this,
+                        R.string.post_notification_permission_required,
+                        Toast.LENGTH_LONG
+                    ).show()
+                    requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                }
+                else -> {
+                    // Request permission directly
+                    requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                }
+            }
+        }
+    }
+    
+    /**
+     * Check if POST_NOTIFICATIONS permission is granted (Android 13+)
+     */
+    private fun hasPostNotificationPermission(): Boolean {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.POST_NOTIFICATIONS
+            ) == PackageManager.PERMISSION_GRANTED
+        } else {
+            // Permission not required for Android < 13
+            true
+        }
     }
 
     private fun setupUI() {
@@ -179,18 +244,25 @@ class SettingsActivity : AppCompatActivity() {
      * Updates UI based on service status
      */
     private fun updateServiceStatus() {
-        val hasPermission = isNotificationServiceEnabled()
+        val hasNotificationListenerPermission = isNotificationServiceEnabled()
+        val hasPostNotificationPermission = hasPostNotificationPermission()
         val isEnabled = prefsRepository.isServiceEnabled
 
         binding.tvStatus.text = when {
-            !hasPermission -> getString(R.string.status_permission_required)
+            !hasNotificationListenerPermission -> getString(R.string.status_permission_required)
+            !hasPostNotificationPermission && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU -> 
+                getString(R.string.post_notification_permission_required)
             isEnabled -> getString(R.string.status_active)
             else -> getString(R.string.status_disabled)
         }
 
+        val isFullyOperational = hasNotificationListenerPermission && 
+                                 hasPostNotificationPermission && 
+                                 isEnabled
+        
         binding.tvStatus.setTextColor(
             getColor(
-                if (hasPermission && isEnabled) R.color.status_active
+                if (isFullyOperational) R.color.status_active
                 else R.color.status_inactive
             )
         )

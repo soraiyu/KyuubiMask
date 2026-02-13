@@ -14,6 +14,7 @@
     <string name="label_enable_masking">Enable Notification Masking</string>
     <string name="label_enable_description">Hide sensitive notification content</string>
     <string name="btn_grant_permission">Grant Notification Access</string>
+    <string name="btn_grant_post_notification">Grant Post Notification Permission</string>
     <string name="label_apps_to_mask">Apps to Mask</string>
     
     <!-- Masked notification -->
@@ -22,6 +23,10 @@
     <!-- Privacy -->
     <string name="privacy_notice">No data is stored or transmitted. Your notifications stay private.</string>
     
+    <!-- Permissions -->
+    <string name="post_notification_permission_required">Notification permission required for Android 13+</string>
+    <string name="post_notification_permission_granted">✅ Notification permission granted</string>
+    
     <!-- Debug -->
     <string name="label_debug_log">Debug Log</string>
     <string name="btn_clear">Clear</string>
@@ -29,4 +34,5 @@
     
     <!-- Errors -->
     <string name="error_open_settings">Cannot open settings</string>
+    <string name="error_post_notification_denied">POST_NOTIFICATION permission not granted</string>
 </resources>
