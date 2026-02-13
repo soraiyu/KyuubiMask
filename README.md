@@ -6,6 +6,8 @@
 
 ## ビルド手順
 
+詳細なビルドと実機テストのガイドは [BUILD_AND_TEST.md](BUILD_AND_TEST.md) をご覧ください。
+
 ```bash
 cd KyuubiMask
 
