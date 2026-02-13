@@ -127,7 +127,7 @@ class NotificationMaskService : NotificationListenerService() {
             val appInfo = packageManager.getApplicationInfo(sbn.packageName, 0)
             packageManager.getApplicationLabel(appInfo).toString()
         } catch (e: Exception) {
-            "App" // Fallback if app name can't be retrieved
+            getString(R.string.masked_app_fallback) // Fallback if app name can't be retrieved
         }
 
         // Build masked notification
