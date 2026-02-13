@@ -22,6 +22,11 @@
     <!-- Privacy -->
     <string name="privacy_notice">No data is stored or transmitted. Your notifications stay private.</string>
     
+    <!-- Debug -->
+    <string name="label_debug_log">Debug Log</string>
+    <string name="btn_clear">Clear</string>
+    <string name="debug_waiting">Waiting for notifications…</string>
+    
     <!-- Errors -->
     <string name="error_open_settings">Cannot open settings</string>
 </resources>

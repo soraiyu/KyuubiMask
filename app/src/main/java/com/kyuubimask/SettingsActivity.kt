@@ -1,12 +1,19 @@
 package com.kyuubimask
 
+import android.content.BroadcastReceiver
 import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.os.Bundle
 import android.provider.Settings
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.kyuubimask.databinding.ActivitySettingsBinding
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 /**
  * SettingsActivity - Main UI for configuring KyuubiMask
@@ -15,6 +22,16 @@ import com.kyuubimask.databinding.ActivitySettingsBinding
 class SettingsActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivitySettingsBinding
+    private val debugLogs = mutableListOf<String>()
+    private val maxLogs = 50
+    
+    private val debugReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            intent?.getStringExtra(NotificationMaskService.EXTRA_LOG_MESSAGE)?.let { message ->
+                addDebugLog(message)
+            }
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -23,6 +40,37 @@ class SettingsActivity : AppCompatActivity() {
 
         setupUI()
         updateServiceStatus()
+        
+        // Register debug receiver
+        LocalBroadcastManager.getInstance(this).registerReceiver(
+            debugReceiver,
+            IntentFilter(NotificationMaskService.ACTION_DEBUG_LOG)
+        )
+        
+        // Clear log button
+        binding.btnClearLog.setOnClickListener {
+            debugLogs.clear()
+            binding.tvDebugLog.text = "Waiting for notifications..."
+        }
+        
+        addDebugLog("App started. Waiting for notifications...")
+    }
+    
+    override fun onDestroy() {
+        super.onDestroy()
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(debugReceiver)
+    }
+    
+    private fun addDebugLog(message: String) {
+        val timestamp = SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(Date())
+        val logEntry = "[$timestamp] $message"
+        
+        debugLogs.add(0, logEntry) // Add to top
+        if (debugLogs.size > maxLogs) {
+            debugLogs.removeAt(debugLogs.size - 1)
+        }
+        
+        binding.tvDebugLog.text = debugLogs.joinToString("\n")
     }
 
     override fun onResume() {
@@ -40,6 +88,7 @@ class SettingsActivity : AppCompatActivity() {
         binding.switchEnable.setOnCheckedChangeListener { _, isChecked ->
             prefs.edit().putBoolean(NotificationMaskService.KEY_SERVICE_ENABLED, isChecked).apply()
             updateServiceStatus()
+            addDebugLog(if (isChecked) "🟢 Masking enabled" else "🔴 Masking disabled")
         }
 
         // Permission button
