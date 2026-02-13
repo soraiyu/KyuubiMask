@@ -5,7 +5,6 @@ import android.content.Intent
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import androidx.core.app.NotificationCompat
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
 
 /**
  * NotificationMaskService - Core notification masking service
@@ -40,8 +39,9 @@ class NotificationMaskService : NotificationListenerService() {
     private fun sendDebugLog(message: String) {
         val intent = Intent(ACTION_DEBUG_LOG).apply {
             putExtra(EXTRA_LOG_MESSAGE, message)
+            setPackage(packageName) // Send only to our app
         }
-        LocalBroadcastManager.getInstance(this).sendBroadcast(intent)
+        sendBroadcast(intent)
     }
 
     override fun onListenerConnected() {

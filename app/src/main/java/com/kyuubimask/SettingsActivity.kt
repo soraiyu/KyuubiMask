@@ -5,11 +5,11 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import com.kyuubimask.databinding.ActivitySettingsBinding
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -42,10 +42,12 @@ class SettingsActivity : AppCompatActivity() {
         updateServiceStatus()
         
         // Register debug receiver
-        LocalBroadcastManager.getInstance(this).registerReceiver(
-            debugReceiver,
-            IntentFilter(NotificationMaskService.ACTION_DEBUG_LOG)
-        )
+        val filter = IntentFilter(NotificationMaskService.ACTION_DEBUG_LOG)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            registerReceiver(debugReceiver, filter, Context.RECEIVER_NOT_EXPORTED)
+        } else {
+            registerReceiver(debugReceiver, filter)
+        }
         
         // Clear log button
         binding.btnClearLog.setOnClickListener {
@@ -58,7 +60,7 @@ class SettingsActivity : AppCompatActivity() {
     
     override fun onDestroy() {
         super.onDestroy()
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(debugReceiver)
+        unregisterReceiver(debugReceiver)
     }
     
     private fun addDebugLog(message: String) {
