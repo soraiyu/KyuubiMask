@@ -25,6 +25,7 @@ import android.os.Bundle
 import android.provider.Settings
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import com.kyuubimask.data.PreferencesRepository
 import com.kyuubimask.databinding.ActivitySettingsBinding
 import java.text.SimpleDateFormat
@@ -62,11 +63,12 @@ class SettingsActivity : AppCompatActivity() {
         // Register debug receiver only in debug builds
         if (BuildConfig.DEBUG) {
             val filter = IntentFilter(NotificationMaskService.ACTION_DEBUG_LOG)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                registerReceiver(debugReceiver, filter, Context.RECEIVER_NOT_EXPORTED)
-            } else {
-                registerReceiver(debugReceiver, filter)
-            }
+            ContextCompat.registerReceiver(
+                this,
+                debugReceiver,
+                filter,
+                ContextCompat.RECEIVER_NOT_EXPORTED
+            )
         }
         
         // Clear log button

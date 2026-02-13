@@ -15,10 +15,15 @@
  */
 package com.kyuubimask
 
+import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Notification
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
+import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import com.kyuubimask.data.PreferencesRepository
 import java.util.Objects
@@ -104,6 +109,7 @@ class NotificationMaskService : NotificationListenerService() {
      * Masks a notification by canceling original and posting a generic one
      * PRIVACY: No content from original notification is logged or stored
      */
+    @SuppressLint("NotificationPermission")
     private fun maskNotification(sbn: StatusBarNotification) {
         // Cancel the original notification
         cancelNotification(sbn.key)
@@ -139,6 +145,16 @@ class NotificationMaskService : NotificationListenerService() {
         // Use Objects.hash to avoid collision issues
         val notificationId = generateNotificationId(sbn)
         val manager = getSystemService(NOTIFICATION_SERVICE) as android.app.NotificationManager
+        
+        // Check POST_NOTIFICATIONS permission for Android 13+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+                != PackageManager.PERMISSION_GRANTED) {
+                sendDebugLog("❌ POST_NOTIFICATIONS permission not granted")
+                return
+            }
+        }
+        
         manager.notify(MASKED_TAG, notificationId, maskedNotification)
         
         sendDebugLog("✅ Masked notification posted for: $appName")
