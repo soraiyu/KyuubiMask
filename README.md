@@ -33,6 +33,8 @@ APKは `app/build/outputs/apk/debug/app-debug.apk` に生成されます。
 
 ビルドされたAPKは、GitHub Actions の Artifacts からダウンロードできます。
 
+**📥 APKダウンロード方法**: [DOWNLOAD_APK.md](DOWNLOAD_APK.md) に画像付き完全ガイドがあります！
+
 ## テスト手順
 
 1. APKをインストール

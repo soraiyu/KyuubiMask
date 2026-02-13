@@ -46,6 +46,10 @@ KyuubiMask には GitHub Actions による自動ビルドシステムが組み�
 
 ### ビルドされたAPKを取得する
 
+**📥 詳細なダウンロード手順は [DOWNLOAD_APK.md](DOWNLOAD_APK.md) をご覧ください！**
+
+画像付きの完全ガイドで、初めての方でも迷わずダウンロードできます。
+
 #### 方法1: GitHub Actions の Artifacts から
 
 1. [GitHub Actions ページ](https://github.com/soraiyu/KyuubiMask/actions) にアクセス
@@ -53,11 +57,15 @@ KyuubiMask には GitHub Actions による自動ビルドシステムが組み�
 3. 下部の「Artifacts」セクションから `app-debug` をダウンロード
 4. ZIPファイルを解凍して `app-debug.apk` を取得
 
+**困ったら**: [DOWNLOAD_APK.md の詳細ガイド](DOWNLOAD_APK.md#方法1-github-actions-artifacts-からダウンロード)
+
 #### 方法2: Release ページから（タグビルドの場合）
 
 1. [Releases ページ](https://github.com/soraiyu/KyuubiMask/releases) にアクセス
 2. 最新のリリースをクリック
 3. Assets から `app-release-unsigned.apk` をダウンロード
+
+**困ったら**: [DOWNLOAD_APK.md の詳細ガイド](DOWNLOAD_APK.md#方法2-github-releases-からダウンロード)
 
 ### ビルドステータスの確認
 
