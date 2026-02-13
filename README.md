@@ -2,6 +2,8 @@
 
 プライバシー重視の通知マスキングツール
 
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
+
 ## ビルド手順
 
 ```bash
@@ -41,3 +43,17 @@ APKは `app/build/outputs/apk/debug/app-debug.apk` に生成されます。
 - 💡 アイデアの共有や意見交換も大歓迎です
 
 どんな相談でも歓迎します。コミュニティでサポートいたします。
+
+## ライセンス
+
+このプロジェクトは [Apache License 2.0](LICENSE) の下でライセンスされています。
+
+## 開発・テスト
+
+```bash
+# テストの実行
+./gradlew test
+
+# インストルメントテストの実行（エミュレーター/実機が必要）
+./gradlew connectedAndroidTest
+```
