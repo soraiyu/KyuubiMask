@@ -1,6 +1,7 @@
 package com.kyuubimask
 
 import android.app.Notification
+import android.content.Intent
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import androidx.core.app.NotificationCompat
@@ -29,6 +30,28 @@ class NotificationMaskService : NotificationListenerService() {
         const val PREFS_NAME = "kyuubi_prefs"
         const val KEY_MASKED_APPS = "masked_apps"
         const val KEY_SERVICE_ENABLED = "service_enabled"
+        
+        // Debug broadcast
+        const val ACTION_DEBUG_LOG = "com.kyuubimask.DEBUG_LOG"
+        const val EXTRA_LOG_MESSAGE = "log_message"
+    }
+
+    private fun sendDebugLog(message: String) {
+        val intent = Intent(ACTION_DEBUG_LOG).apply {
+            putExtra(EXTRA_LOG_MESSAGE, message)
+            setPackage(packageName) // Send only to our app
+        }
+        sendBroadcast(intent)
+    }
+
+    override fun onListenerConnected() {
+        super.onListenerConnected()
+        sendDebugLog("✅ Service connected!")
+    }
+
+    override fun onListenerDisconnected() {
+        super.onListenerDisconnected()
+        sendDebugLog("❌ Service disconnected")
     }
 
     /**
@@ -38,21 +61,28 @@ class NotificationMaskService : NotificationListenerService() {
     override fun onNotificationPosted(sbn: StatusBarNotification?) {
         sbn ?: return
 
+        val packageName = sbn.packageName
+        
+        // Skip our own notifications to prevent infinite loop
+        if (packageName == this.packageName) return
+
         // Check if service is enabled
         val prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
-        if (!prefs.getBoolean(KEY_SERVICE_ENABLED, true)) return
-
+        val isEnabled = prefs.getBoolean(KEY_SERVICE_ENABLED, true)
+        
         // Get list of apps to mask
         val maskedApps = prefs.getStringSet(KEY_MASKED_APPS, DEFAULT_MASKED_APPS) 
             ?: DEFAULT_MASKED_APPS
 
-        val packageName = sbn.packageName
+        // Debug log - show all notifications (package name only, not content)
+        val isMasked = packageName in maskedApps
+        val status = if (isMasked && isEnabled) "🦊 MASKED" else "⏭️ SKIP"
+        sendDebugLog("$status: $packageName")
 
-        // Skip our own notifications to prevent infinite loop
-        if (packageName == this.packageName) return
+        if (!isEnabled) return
 
         // Check if this app should be masked
-        if (packageName in maskedApps) {
+        if (isMasked) {
             maskNotification(sbn)
         }
     }
@@ -96,6 +126,8 @@ class NotificationMaskService : NotificationListenerService() {
         val notificationId = sbn.id + sbn.packageName.hashCode()
         val manager = getSystemService(NOTIFICATION_SERVICE) as android.app.NotificationManager
         manager.notify(notificationId, maskedNotification)
+        
+        sendDebugLog("✅ Masked notification posted for: $appName")
     }
 
     override fun onNotificationRemoved(sbn: StatusBarNotification?) {
