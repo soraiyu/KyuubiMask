@@ -35,11 +35,25 @@ class PreferencesRepository(context: Context) {
         private const val KEY_SERVICE_ENABLED = "service_enabled"
         
         // Default apps to mask
+        // Privacy-first: Static list only, never fetched from network
         val DEFAULT_MASKED_APPS = setOf(
-            "com.whatsapp",
-            "org.telegram.messenger",
-            "com.google.android.gm",
-            "jp.naver.line.android"
+            // Messaging apps
+            "com.whatsapp",              // WhatsApp
+            "org.telegram.messenger",    // Telegram
+            "jp.naver.line.android",     // LINE
+            "org.thoughtcrime.securesms", // Signal
+            "com.discord",               // Discord
+            
+            // Email apps
+            "com.google.android.gm",     // Gmail
+            "com.fsck.k9",               // K-9 Mail (F-Droid recommended)
+            
+            // Business/Productivity apps
+            "com.slack",                 // Slack
+            "com.microsoft.teams",       // Microsoft Teams
+            "us.zoom.videomeetings",     // Zoom
+            "com.notion.id",             // Notion
+            "com.atlassian.jira.core.ui" // Jira
         )
         
         // Constants
