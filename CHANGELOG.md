@@ -13,6 +13,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - LICENSE file (Apache 2.0) for open source
 - CONTRIBUTING.md with contribution guidelines
 - Debug logging now gated with BuildConfig.DEBUG
+- BUILD_AND_TEST.md with comprehensive build and testing guide
+- QUICKSTART.md for quick device testing
+- **GitHub Actions CI/CD workflows**
+  - Automatic APK build on push to main branches
+  - Automatic APK build on pull requests
+  - Release build workflow with artifact upload
+  - Build status badge in README
 
 ### Changed
 - Refactored SharedPreferences access to use PreferencesRepository

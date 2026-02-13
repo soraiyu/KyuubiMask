@@ -3,10 +3,13 @@
 プライバシー重視の通知マスキングツール
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
+[![Android CI](https://github.com/soraiyu/KyuubiMask/actions/workflows/android-ci.yml/badge.svg)](https://github.com/soraiyu/KyuubiMask/actions/workflows/android-ci.yml)
 
 ## ビルド手順
 
 詳細なビルドと実機テストのガイドは [BUILD_AND_TEST.md](BUILD_AND_TEST.md) をご覧ください。
+
+### ローカルビルド
 
 ```bash
 cd KyuubiMask
@@ -19,6 +22,16 @@ cd KyuubiMask
 ```
 
 APKは `app/build/outputs/apk/debug/app-debug.apk` に生成されます。
+
+### CI/CD 自動ビルド
+
+このリポジトリには GitHub Actions が設定されており、以下の場合に自動的にビルドが実行されます：
+
+- **Push時**: main, master, develop, copilot/** ブランチへのpush
+- **Pull Request時**: main, master, develop ブランチへのPR
+- **タグ作成時**: `v*` タグでリリースビルド
+
+ビルドされたAPKは、GitHub Actions の Artifacts からダウンロードできます。
 
 ## テスト手順
 
