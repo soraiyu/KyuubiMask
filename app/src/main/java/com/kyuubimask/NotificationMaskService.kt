@@ -18,6 +18,7 @@ package com.kyuubimask
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Notification
+import android.app.PendingIntent
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
@@ -153,6 +154,33 @@ class NotificationMaskService : NotificationListenerService() {
             "App" // Fallback if app name can't be retrieved
         }
 
+        // Generate unique notification ID once for both PendingIntent and notification
+        val notificationId = generateNotificationId(sbn)
+
+        // Create PendingIntent to open the masked app when notification is tapped
+        // PRIVACY: Only uses package name (already tracked), no notification content
+        val launchIntent = packageManager.getLaunchIntentForPackage(packageName)
+        val contentIntent = if (launchIntent != null) {
+            // Set flags to bring app to front or reuse existing instance
+            launchIntent.addFlags(
+                Intent.FLAG_ACTIVITY_NEW_TASK or 
+                Intent.FLAG_ACTIVITY_CLEAR_TOP or
+                Intent.FLAG_ACTIVITY_SINGLE_TOP
+            )
+            
+            // Create PendingIntent with appropriate flags for the Android version
+            val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            } else {
+                PendingIntent.FLAG_UPDATE_CURRENT
+            }
+            
+            // Use notification ID as request code to ensure uniqueness per notification
+            PendingIntent.getActivity(this, notificationId, launchIntent, flags)
+        } else {
+            null
+        }
+
         // Build masked notification with grouping
         // PRIVACY: Generic text only, no original content
         val maskedNotification = NotificationCompat.Builder(this, KyuubiMaskApp.CHANNEL_ID)
@@ -163,6 +191,7 @@ class NotificationMaskService : NotificationListenerService() {
             .setVisibility(NotificationCompat.VISIBILITY_PRIVATE)
             .setAutoCancel(true)
             .apply {
+                contentIntent?.let { setContentIntent(it) }
                 // Group notifications by app package name
                 // This makes notifications from the same app appear together
                 setGroup("$GROUP_PREFIX$packageName")
@@ -176,9 +205,7 @@ class NotificationMaskService : NotificationListenerService() {
             }
             .build()
 
-        // Post the masked notification with unique ID based on original
-        // Use Objects.hash to avoid collision issues
-        val notificationId = generateNotificationId(sbn)
+        // Post the masked notification with unique ID
         val manager = getSystemService(NOTIFICATION_SERVICE) as android.app.NotificationManager
         manager.notify(MASKED_TAG, notificationId, maskedNotification)
         
