@@ -186,7 +186,6 @@ class NotificationMaskService : NotificationListenerService() {
             .setAutoCancel(true)
             .apply {
                 contentIntent?.let { setContentIntent(it) }
-                
                 // Group notifications by app package name
                 // This makes notifications from the same app appear together
                 setGroup("$GROUP_PREFIX$packageName")
