@@ -140,6 +140,7 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="24dp">
 
+            <!-- Messaging Apps -->
             <com.google.android.material.chip.Chip
                 android:id="@+id/chipWhatsapp"
                 android:layout_width="wrap_content"
@@ -159,6 +160,34 @@
                 app:checkedIconTint="@color/primary" />
 
             <com.google.android.material.chip.Chip
+                android:id="@+id/chipLine"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="LINE"
+                style="@style/Widget.Material3.Chip.Filter"
+                app:chipBackgroundColor="@color/chip_background"
+                app:checkedIconTint="@color/primary" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipSignal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Signal"
+                style="@style/Widget.Material3.Chip.Filter"
+                app:chipBackgroundColor="@color/chip_background"
+                app:checkedIconTint="@color/primary" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipDiscord"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Discord"
+                style="@style/Widget.Material3.Chip.Filter"
+                app:chipBackgroundColor="@color/chip_background"
+                app:checkedIconTint="@color/primary" />
+
+            <!-- Email Apps -->
+            <com.google.android.material.chip.Chip
                 android:id="@+id/chipGmail"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -168,10 +197,56 @@
                 app:checkedIconTint="@color/primary" />
 
             <com.google.android.material.chip.Chip
-                android:id="@+id/chipLine"
+                android:id="@+id/chipK9Mail"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="LINE"
+                android:text="K-9 Mail"
+                style="@style/Widget.Material3.Chip.Filter"
+                app:chipBackgroundColor="@color/chip_background"
+                app:checkedIconTint="@color/primary" />
+
+            <!-- Business Apps -->
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipSlack"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Slack"
+                style="@style/Widget.Material3.Chip.Filter"
+                app:chipBackgroundColor="@color/chip_background"
+                app:checkedIconTint="@color/primary" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipTeams"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Teams"
+                style="@style/Widget.Material3.Chip.Filter"
+                app:chipBackgroundColor="@color/chip_background"
+                app:checkedIconTint="@color/primary" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipZoom"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Zoom"
+                style="@style/Widget.Material3.Chip.Filter"
+                app:chipBackgroundColor="@color/chip_background"
+                app:checkedIconTint="@color/primary" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipNotion"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Notion"
+                style="@style/Widget.Material3.Chip.Filter"
+                app:chipBackgroundColor="@color/chip_background"
+                app:checkedIconTint="@color/primary" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipJira"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Jira"
                 style="@style/Widget.Material3.Chip.Filter"
                 app:chipBackgroundColor="@color/chip_background"
                 app:checkedIconTint="@color/primary" />

@@ -192,6 +192,7 @@ class SettingsActivity : AppCompatActivity() {
         // App selection chips
         val maskedApps = prefsRepository.maskedApps.toMutableSet()
 
+        // Messaging Apps
         // WhatsApp
         binding.chipWhatsapp.isChecked = prefsRepository.isAppMasked("com.whatsapp")
         binding.chipWhatsapp.setOnCheckedChangeListener { _, isChecked ->
@@ -204,16 +205,66 @@ class SettingsActivity : AppCompatActivity() {
             updateMaskedApp("org.telegram.messenger", isChecked, maskedApps)
         }
 
+        // LINE
+        binding.chipLine.isChecked = prefsRepository.isAppMasked("jp.naver.line.android")
+        binding.chipLine.setOnCheckedChangeListener { _, isChecked ->
+            updateMaskedApp("jp.naver.line.android", isChecked, maskedApps)
+        }
+
+        // Signal
+        binding.chipSignal.isChecked = prefsRepository.isAppMasked("org.thoughtcrime.securesms")
+        binding.chipSignal.setOnCheckedChangeListener { _, isChecked ->
+            updateMaskedApp("org.thoughtcrime.securesms", isChecked, maskedApps)
+        }
+
+        // Discord
+        binding.chipDiscord.isChecked = prefsRepository.isAppMasked("com.discord")
+        binding.chipDiscord.setOnCheckedChangeListener { _, isChecked ->
+            updateMaskedApp("com.discord", isChecked, maskedApps)
+        }
+
+        // Email Apps
         // Gmail
         binding.chipGmail.isChecked = prefsRepository.isAppMasked("com.google.android.gm")
         binding.chipGmail.setOnCheckedChangeListener { _, isChecked ->
             updateMaskedApp("com.google.android.gm", isChecked, maskedApps)
         }
 
-        // LINE
-        binding.chipLine.isChecked = prefsRepository.isAppMasked("jp.naver.line.android")
-        binding.chipLine.setOnCheckedChangeListener { _, isChecked ->
-            updateMaskedApp("jp.naver.line.android", isChecked, maskedApps)
+        // K-9 Mail
+        binding.chipK9Mail.isChecked = prefsRepository.isAppMasked("com.fsck.k9")
+        binding.chipK9Mail.setOnCheckedChangeListener { _, isChecked ->
+            updateMaskedApp("com.fsck.k9", isChecked, maskedApps)
+        }
+
+        // Business Apps
+        // Slack
+        binding.chipSlack.isChecked = prefsRepository.isAppMasked("com.slack")
+        binding.chipSlack.setOnCheckedChangeListener { _, isChecked ->
+            updateMaskedApp("com.slack", isChecked, maskedApps)
+        }
+
+        // Teams
+        binding.chipTeams.isChecked = prefsRepository.isAppMasked("com.microsoft.teams")
+        binding.chipTeams.setOnCheckedChangeListener { _, isChecked ->
+            updateMaskedApp("com.microsoft.teams", isChecked, maskedApps)
+        }
+
+        // Zoom
+        binding.chipZoom.isChecked = prefsRepository.isAppMasked("us.zoom.videomeetings")
+        binding.chipZoom.setOnCheckedChangeListener { _, isChecked ->
+            updateMaskedApp("us.zoom.videomeetings", isChecked, maskedApps)
+        }
+
+        // Notion
+        binding.chipNotion.isChecked = prefsRepository.isAppMasked("com.notion.id")
+        binding.chipNotion.setOnCheckedChangeListener { _, isChecked ->
+            updateMaskedApp("com.notion.id", isChecked, maskedApps)
+        }
+
+        // Jira
+        binding.chipJira.isChecked = prefsRepository.isAppMasked("com.atlassian.jira.core.ui")
+        binding.chipJira.setOnCheckedChangeListener { _, isChecked ->
+            updateMaskedApp("com.atlassian.jira.core.ui", isChecked, maskedApps)
         }
     }
 

@@ -1,0 +1,57 @@
+Categories:
+  - Security
+  - Internet
+License: Apache-2.0
+AuthorName: soraiyu
+SourceCode: https://github.com/soraiyu/KyuubiMask
+IssueTracker: https://github.com/soraiyu/KyuubiMask/issues
+Changelog: https://github.com/soraiyu/KyuubiMask/blob/main/CHANGELOG.md
+
+AutoName: KyuubiMask
+
+Summary: Privacy-focused notification masking tool
+
+Description: |-
+  KyuubiMask is a privacy-first notification masking tool that protects your
+  sensitive information during screen sharing, presentations, or when your
+  screen is visible to others.
+  
+  Features:
+  * Complete offline operation - no internet permission
+  * No data storage or logging
+  * Masks notifications from messaging and business apps
+  * Open source with Apache 2.0 license
+  * No tracking, analytics, or ads
+  
+  Privacy:
+  * No data collection whatsoever
+  * Notification content is never stored
+  * Works completely offline
+  * No Google Play Services or third-party SDKs
+  
+  Supported apps include WhatsApp, Telegram, LINE, Gmail, and more.
+  You can select which apps to mask in the settings.
+  
+  Perfect for:
+  * Protecting privacy during screen sharing
+  * Presentations and demos
+  * Public spaces
+  * Screen recording
+
+RepoType: git
+Repo: https://github.com/soraiyu/KyuubiMask
+
+Builds:
+  - versionName: 1.0.0
+    versionCode: 1
+    commit: v1.0.0
+    subdir: app
+    gradle:
+      - yes
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags
+CurrentVersion: 1.0.0
+CurrentVersionCode: 1
+
+NoSourceSince: ''

@@ -72,10 +72,28 @@ class PreferencesRepositoryTest {
     fun `default masked apps should contain expected apps`() {
         val maskedApps = repository.maskedApps
         
+        // Original apps
         assertTrue(maskedApps.contains("com.whatsapp"))
         assertTrue(maskedApps.contains("org.telegram.messenger"))
         assertTrue(maskedApps.contains("com.google.android.gm"))
         assertTrue(maskedApps.contains("jp.naver.line.android"))
+        
+        // Newly added messaging apps
+        assertTrue(maskedApps.contains("org.thoughtcrime.securesms")) // Signal
+        assertTrue(maskedApps.contains("com.discord")) // Discord
+        
+        // Newly added email apps
+        assertTrue(maskedApps.contains("com.fsck.k9")) // K-9 Mail
+        
+        // Newly added business apps
+        assertTrue(maskedApps.contains("com.slack")) // Slack
+        assertTrue(maskedApps.contains("com.microsoft.teams")) // Teams
+        assertTrue(maskedApps.contains("us.zoom.videomeetings")) // Zoom
+        assertTrue(maskedApps.contains("com.notion.id")) // Notion
+        assertTrue(maskedApps.contains("com.atlassian.jira.core.ui")) // Jira
+        
+        // Verify total count
+        assertEquals(13, maskedApps.size)
     }
 
     @Test
