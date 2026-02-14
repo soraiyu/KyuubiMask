@@ -26,7 +26,7 @@ jobs:
       run: chmod +x gradlew
       
     - name: Run tests
-      run: ./gradlew test --stacktrace
+      run: ./gradlew test --info --stacktrace --scan  # --infoで詳細ログ、--scanでビルドスキャンURL出力
       continue-on-error: true
       
     - name: Build Debug APK
