@@ -185,7 +185,6 @@ class NotificationMaskService : NotificationListenerService() {
             .setVisibility(NotificationCompat.VISIBILITY_PRIVATE)
             .setAutoCancel(true)
             .apply {
-                // Set content intent to open the app when notification is tapped
                 contentIntent?.let { setContentIntent(it) }
                 
                 // Group notifications by app package name
