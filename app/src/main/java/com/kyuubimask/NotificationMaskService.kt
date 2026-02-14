@@ -168,7 +168,9 @@ class NotificationMaskService : NotificationListenerService() {
                 PendingIntent.FLAG_UPDATE_CURRENT
             }
             
-            PendingIntent.getActivity(this, packageName.hashCode(), launchIntent, flags)
+            // Use notification ID as request code to ensure uniqueness per notification
+            val requestCode = generateNotificationId(sbn)
+            PendingIntent.getActivity(this, requestCode, launchIntent, flags)
         } else {
             null
         }
