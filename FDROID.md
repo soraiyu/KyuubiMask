@@ -50,10 +50,10 @@ This document outlines KyuubiMask's readiness for F-Droid distribution.
 
 ## How to Submit
 
-1. Fork the [F-Droid Data repository](https://gitlab.com/fdroid/fdroiddata)
-2. Add the metadata file from `metadata/com.kyuubimask.yml`
-3. Submit a merge request
-4. Wait for F-Droid team review
+1. Fork the [F-Droid Data repository](https://gitlab.com/fdroid/fdroiddata).
+2. In your fork, create a new file at `metadata/com.kyuubimask.yml`.
+3. Copy the contents of this project's `metadata/com.kyuubimask.yml` file into the new file.
+4. Submit a merge request with your changes to the F-Droid Data repository.
 
 ## Additional Resources
 
