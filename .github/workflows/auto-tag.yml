@@ -14,6 +14,9 @@ jobs:
     name: Create Version Tag
     runs-on: ubuntu-latest
     
+    permissions:
+      contents: write  # Required to create and push tags
+    
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
