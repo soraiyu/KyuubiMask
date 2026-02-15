@@ -25,10 +25,15 @@ jobs:
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
       
-    - name: Run tests
-      run: ./gradlew test --stacktrace
+    - name: Run Unit Tests
+      run: ./gradlew testDebugUnitTest --info --stacktrace --scan
       continue-on-error: true
-      
+    - name: Upload Test Reports
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-reports
+        path: app/build/reports/tests/testDebugUnitTest/  
     - name: Build Debug APK
       run: ./gradlew assembleDebug --stacktrace
       
