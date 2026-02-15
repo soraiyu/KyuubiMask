@@ -148,4 +148,44 @@ class PreferencesRepositoryTest {
         assertFalse(newRepository.isServiceEnabled)
         assertTrue(newRepository.isAppMasked("com.test.persistent"))
     }
+    
+    @Test
+    fun `default notification sound should be true`() {
+        assertTrue(repository.notificationSound)
+    }
+    
+    @Test
+    fun `can set and get notification sound state`() {
+        repository.notificationSound = false
+        assertFalse(repository.notificationSound)
+        
+        repository.notificationSound = true
+        assertTrue(repository.notificationSound)
+    }
+    
+    @Test
+    fun `default notification vibrate should be true`() {
+        assertTrue(repository.notificationVibrate)
+    }
+    
+    @Test
+    fun `can set and get notification vibrate state`() {
+        repository.notificationVibrate = false
+        assertFalse(repository.notificationVibrate)
+        
+        repository.notificationVibrate = true
+        assertTrue(repository.notificationVibrate)
+    }
+    
+    @Test
+    fun `notification preferences persist across repository instances`() {
+        repository.notificationSound = false
+        repository.notificationVibrate = false
+        
+        // Create new repository instance
+        val newRepository = PreferencesRepository(context)
+        
+        assertFalse(newRepository.notificationSound)
+        assertFalse(newRepository.notificationVibrate)
+    }
 }
