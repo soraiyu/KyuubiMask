@@ -53,7 +53,7 @@ KyuubiMask には GitHub Actions による自動ビルドシステムが組み�
 2. ☕ JDK 17 のセットアップ
 3. 🧪 テストの実行 (`./gradlew test`)
 4. 🔨 Release APK のビルド (`./gradlew assembleRelease`)
-5. ✔️  APK が正しくビルドされたか確認
+5. ✔️ APK が正しくビルドされたか確認
 6. 📦 APK を Artifacts にアップロード (90日間保存)
 7. 🎉 GitHub Release の作成（タグの場合のみ）
 

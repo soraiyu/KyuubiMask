@@ -30,11 +30,18 @@ jobs:
       id: get_version
       run: |
         # Extract versionName from app/build.gradle.kts
+        # Expected format: versionName = "x.y.z"
         VERSION=$(grep -E '^\s*versionName\s*=\s*"' app/build.gradle.kts | sed -E 's/.*"(.+)".*/\1/')
         
         if [ -z "$VERSION" ]; then
           echo "❌ Could not extract version from build.gradle.kts"
+          echo "Expected format: versionName = \"x.y.z\""
           exit 1
+        fi
+        
+        # Validate version format (basic semver check)
+        if ! echo "$VERSION" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+'; then
+          echo "⚠️  Warning: Version '$VERSION' doesn't follow semver format (x.y.z)"
         fi
         
         echo "version=$VERSION" >> $GITHUB_OUTPUT
@@ -46,10 +53,7 @@ jobs:
       run: |
         TAG=v${{ steps.get_version.outputs.version }}
         
-        # Fetch all tags
-        git fetch --tags
-        
-        # Check if tag exists
+        # Check if tag exists (tags already fetched by checkout action)
         if git rev-parse "$TAG" >/dev/null 2>&1; then
           echo "exists=true" >> $GITHUB_OUTPUT
           echo "⚠️  Tag $TAG already exists"
