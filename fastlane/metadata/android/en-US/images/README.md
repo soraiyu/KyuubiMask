@@ -2,11 +2,11 @@
 
 This directory contains screenshots for app stores and F-Droid.
 
-## phoneScreenshots
-Place app screenshots here (recommended size: 1080x1920 or similar phone aspect ratios).
+## Required Structure
+- `phoneScreenshots/`: Place phone screenshots in this directory.
+- `featureGraphic.png`: Place the feature graphic file here.
 
-## featureGraphic  
-Place the feature graphic here (recommended size: 1024x500).
+Screenshots should be 1080x1920, and the feature graphic 1024x500.
 
 ## Guidelines
 - Use PNG or JPEG format
