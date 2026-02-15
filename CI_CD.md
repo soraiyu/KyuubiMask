@@ -24,10 +24,28 @@ KyuubiMask には GitHub Actions による自動ビルドシステムが組み�
 **成果物**:
 - `app-debug.apk` (GitHub Actions の Artifacts から取得可能)
 
-### 2. Release Build (release.yml)
+### 2. Auto Tag on PR Merge (auto-tag.yml)
+
+**トリガー条件**:
+- `main` または `master` ブランチへのPull Requestがマージされた時
+
+**実行内容**:
+1. ✅ コードのチェックアウト
+2. 📝 `app/build.gradle.kts` から `versionName` を抽出
+3. 🔍 同じタグが既に存在するか確認
+4. 🏷️ タグが存在しない場合、新しいバージョンタグを作成してpush
+5. 🚀 タグがpushされると、自動的に Release Build ワークフローが起動
+
+**メリット**:
+- PRマージ時に自動でバージョンタグが作成される
+- `build.gradle.kts` のバージョンを更新するだけでリリース可能
+- 手動でタグを作成する必要がない
+
+### 3. Release Build (release.yml)
 
 **トリガー条件**:
 - `v*` 形式のタグを作成した時 (例: `v1.0.1`, `v2.0.0`)
+- Auto Tag ワークフローによって自動作成されたタグ
 - 手動実行 (GitHub Actions の UI から)
 
 **実行内容**:
@@ -35,8 +53,9 @@ KyuubiMask には GitHub Actions による自動ビルドシステムが組み�
 2. ☕ JDK 17 のセットアップ
 3. 🧪 テストの実行 (`./gradlew test`)
 4. 🔨 Release APK のビルド (`./gradlew assembleRelease`)
-5. 📦 APK を Artifacts にアップロード (90日間保存)
-6. 🎉 GitHub Release の作成（タグの場合のみ）
+5. ✔️  APK が正しくビルドされたか確認
+6. 📦 APK を Artifacts にアップロード (90日間保存)
+7. 🎉 GitHub Release の作成（タグの場合のみ）
 
 **成果物**:
 - `app-release-unsigned.apk` (署名なし)
@@ -79,7 +98,35 @@ README.md のビルドバッジをクリックすると、最新のビルド状�
 
 ### リリースビルドの作成
 
-新しいバージョンをリリースする場合：
+新しいバージョンをリリースする場合、2つの方法があります：
+
+#### 方法1: 自動リリース（推奨）
+
+1. `app/build.gradle.kts` で `versionName` を更新：
+   ```kotlin
+   versionName = "1.0.1"  // 新しいバージョン番号に変更
+   ```
+
+2. 変更をコミットしてPRを作成：
+   ```bash
+   git add app/build.gradle.kts
+   git commit -m "Bump version to 1.0.1"
+   git push origin feature-branch
+   ```
+
+3. PRを `main` ブランチにマージ
+
+これにより、自動的に：
+- ✅ バージョンタグ（例: `v1.0.1`）が作成される
+- ✅ Release APK がビルドされる
+- ✅ GitHub Release が作成される
+- ✅ APK がリリースページに添付される
+
+**注意**: 同じバージョンのタグが既に存在する場合、新しいタグは作成されません。
+
+#### 方法2: 手動タグ作成
+
+従来の方法でも引き続きリリース可能です：
 
 ```bash
 # 1. バージョンタグを作成
@@ -125,6 +172,13 @@ git push origin v1.0.1
 - タグが `v` で始まっているか確認（例: `v1.0.0`）
 - タグを正しくpushしたか確認
 - GitHub Token の権限を確認（通常は自動）
+
+### 自動タグが作成されない
+
+- PRが `main` または `master` ブランチにマージされたか確認
+- `app/build.gradle.kts` の `versionName` が正しく設定されているか確認
+- 同じバージョンのタグが既に存在していないか確認（`git tag -l` で確認）
+- GitHub Actions のログを確認して、エラーメッセージを確認
 
 ## ワークフローのカスタマイズ
 

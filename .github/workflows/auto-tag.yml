@@ -1,0 +1,79 @@
+name: Auto Tag on PR Merge
+
+on:
+  pull_request:
+    types: [closed]
+    branches:
+      - main
+      - master
+
+jobs:
+  auto-tag:
+    # Only run if PR was merged (not just closed)
+    if: github.event.pull_request.merged == true
+    name: Create Version Tag
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        token: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: Configure Git
+      run: |
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+        
+    - name: Extract version from build.gradle.kts
+      id: get_version
+      run: |
+        # Extract versionName from app/build.gradle.kts
+        VERSION=$(grep -E '^\s*versionName\s*=\s*"' app/build.gradle.kts | sed -E 's/.*"(.+)".*/\1/')
+        
+        if [ -z "$VERSION" ]; then
+          echo "❌ Could not extract version from build.gradle.kts"
+          exit 1
+        fi
+        
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+        echo "tag=v$VERSION" >> $GITHUB_OUTPUT
+        echo "📦 Extracted version: $VERSION"
+        
+    - name: Check if tag already exists
+      id: check_tag
+      run: |
+        TAG=v${{ steps.get_version.outputs.version }}
+        
+        # Fetch all tags
+        git fetch --tags
+        
+        # Check if tag exists
+        if git rev-parse "$TAG" >/dev/null 2>&1; then
+          echo "exists=true" >> $GITHUB_OUTPUT
+          echo "⚠️  Tag $TAG already exists"
+        else
+          echo "exists=false" >> $GITHUB_OUTPUT
+          echo "✅ Tag $TAG does not exist yet"
+        fi
+        
+    - name: Create and push tag
+      if: steps.check_tag.outputs.exists == 'false'
+      run: |
+        TAG=v${{ steps.get_version.outputs.version }}
+        
+        echo "🏷️  Creating tag: $TAG"
+        git tag -a "$TAG" -m "Release $TAG - Auto-tagged on PR merge"
+        
+        echo "📤 Pushing tag: $TAG"
+        git push origin "$TAG"
+        
+        echo "✅ Tag created and pushed successfully!"
+        
+    - name: Tag already exists
+      if: steps.check_tag.outputs.exists == 'true'
+      run: |
+        TAG=v${{ steps.get_version.outputs.version }}
+        echo "ℹ️  Tag $TAG already exists. Skipping tag creation."
+        echo "💡 To create a new release, update the versionName in app/build.gradle.kts"
