@@ -200,8 +200,20 @@ class NotificationMaskService : NotificationListenerService() {
                 // Preserve original sort key if available
                 sbn.notification.sortKey?.let { setSortKey(it) }
                 
-                // Inherit defaults for sound/vibration
-                setDefaults(Notification.DEFAULT_ALL)
+                // Apply sound and vibration settings based on user preferences
+                var defaults = 0
+                if (prefsRepository.notificationSound) {
+                    defaults = defaults or Notification.DEFAULT_SOUND
+                }
+                if (prefsRepository.notificationVibrate) {
+                    defaults = defaults or Notification.DEFAULT_VIBRATE
+                }
+                // Always use default lights
+                defaults = defaults or Notification.DEFAULT_LIGHTS
+                
+                if (defaults != 0) {
+                    setDefaults(defaults)
+                }
             }
             .build()
 

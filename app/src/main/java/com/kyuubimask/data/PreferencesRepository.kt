@@ -33,6 +33,8 @@ class PreferencesRepository(context: Context) {
         const val PREFS_NAME = "kyuubi_prefs"
         private const val KEY_MASKED_APPS = "masked_apps"
         private const val KEY_SERVICE_ENABLED = "service_enabled"
+        private const val KEY_NOTIFICATION_SOUND = "notification_sound"
+        private const val KEY_NOTIFICATION_VIBRATE = "notification_vibrate"
         
         // Default apps to mask
         // Privacy-first: Static list only, never fetched from network
@@ -68,6 +70,28 @@ class PreferencesRepository(context: Context) {
         set(value) {
             preferences.edit()
                 .putBoolean(KEY_SERVICE_ENABLED, value)
+                .apply()
+        }
+    
+    /**
+     * Whether to play sound for masked notifications
+     */
+    var notificationSound: Boolean
+        get() = preferences.getBoolean(KEY_NOTIFICATION_SOUND, true)
+        set(value) {
+            preferences.edit()
+                .putBoolean(KEY_NOTIFICATION_SOUND, value)
+                .apply()
+        }
+    
+    /**
+     * Whether to vibrate for masked notifications
+     */
+    var notificationVibrate: Boolean
+        get() = preferences.getBoolean(KEY_NOTIFICATION_VIBRATE, true)
+        set(value) {
+            preferences.edit()
+                .putBoolean(KEY_NOTIFICATION_VIBRATE, value)
                 .apply()
         }
     

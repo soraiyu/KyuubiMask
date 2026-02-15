@@ -17,6 +17,13 @@
     <string name="btn_grant_post_notification">Grant Post Notification Permission</string>
     <string name="label_apps_to_mask">Apps to Mask</string>
     
+    <!-- Notification Settings -->
+    <string name="label_notification_settings">Notification Settings</string>
+    <string name="label_notification_sound">Play Sound</string>
+    <string name="label_notification_sound_description">Play sound when notifications are received</string>
+    <string name="label_notification_vibrate">Vibrate</string>
+    <string name="label_notification_vibrate_description">Vibrate when notifications are received</string>
+    
     <!-- Masked notification -->
     <string name="masked_text">New notification</string>
     

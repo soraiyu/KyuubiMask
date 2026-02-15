@@ -183,6 +183,20 @@ class SettingsActivity : AppCompatActivity() {
             updateServiceStatus()
             addDebugLog(if (isChecked) "🟢 Masking enabled" else "🔴 Masking disabled")
         }
+        
+        // Notification sound toggle
+        binding.switchSound.isChecked = prefsRepository.notificationSound
+        binding.switchSound.setOnCheckedChangeListener { _, isChecked ->
+            prefsRepository.notificationSound = isChecked
+            addDebugLog(if (isChecked) "🔊 Sound enabled" else "🔇 Sound disabled")
+        }
+        
+        // Notification vibrate toggle
+        binding.switchVibrate.isChecked = prefsRepository.notificationVibrate
+        binding.switchVibrate.setOnCheckedChangeListener { _, isChecked ->
+            prefsRepository.notificationVibrate = isChecked
+            addDebugLog(if (isChecked) "📳 Vibrate enabled" else "📴 Vibrate disabled")
+        }
 
         // Permission button
         binding.btnPermission.setOnClickListener {
