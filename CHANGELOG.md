@@ -18,7 +18,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **GitHub Actions CI/CD workflows**
   - Automatic APK build on push to main branches
   - Automatic APK build on pull requests
-  - Release build workflow with artifact upload
+  - Release build workflow with artifact upload and GitHub Release creation
+  - **Automatic version tagging on PR merge to main**
   - Build status badge in README
 
 ### Changed
