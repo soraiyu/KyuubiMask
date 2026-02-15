@@ -31,6 +31,18 @@ jobs:
     - name: Build Release APK (unsigned)
       run: ./gradlew assembleRelease --stacktrace
       
+    - name: Verify APK was built
+      run: |
+        if [ -f app/build/outputs/apk/release/app-release-unsigned.apk ]; then
+          echo "✅ APK built successfully"
+          ls -lh app/build/outputs/apk/release/app-release-unsigned.apk
+        else
+          echo "❌ APK not found at expected location"
+          echo "Contents of release directory:"
+          ls -la app/build/outputs/apk/release/ || echo "Release directory not found"
+          exit 1
+        fi
+      
     - name: Upload Release APK
       uses: actions/upload-artifact@v4
       with:
