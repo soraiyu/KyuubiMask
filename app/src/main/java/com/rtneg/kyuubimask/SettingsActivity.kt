@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.kyuubimask
+package com.rtneg.kyuubimask
 
 import android.Manifest
 import android.content.BroadcastReceiver
@@ -29,8 +29,8 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import com.kyuubimask.data.PreferencesRepository
-import com.kyuubimask.databinding.ActivitySettingsBinding
+import com.rtneg.kyuubimask.data.PreferencesRepository
+import com.rtneg.kyuubimask.databinding.ActivitySettingsBinding
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
