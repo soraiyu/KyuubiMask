@@ -17,6 +17,8 @@ package com.rtneg.kyuubimask
 
 import android.Manifest
 import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -41,6 +43,7 @@ import java.util.Objects
  * - Minimal memory footprint
  * - No in-memory state tracking
  * - No debug logging
+ * - Runs as foreground service for better persistence
  */
 class NotificationMaskService : NotificationListenerService() {
 
@@ -49,11 +52,68 @@ class NotificationMaskService : NotificationListenerService() {
     companion object {
         // Tag to identify masked notifications and prevent re-masking
         private const val MASKED_TAG = "kyuubimask_masked"
+        
+        // Foreground service notification channel and ID
+        private const val FOREGROUND_CHANNEL_ID = "kyuubimask_service"
+        private const val FOREGROUND_NOTIFICATION_ID = 1001
     }
 
     override fun onCreate() {
         super.onCreate()
         prefsRepository = PreferencesRepository(applicationContext)
+        
+        // Start as foreground service to prevent Android from killing it
+        startForeground(FOREGROUND_NOTIFICATION_ID, createForegroundNotification())
+    }
+    
+    override fun onDestroy() {
+        super.onDestroy()
+        // Stop foreground service
+        stopForeground(STOP_FOREGROUND_REMOVE)
+    }
+    
+    /**
+     * Create notification for foreground service
+     * This keeps the service running and prevents Android from killing it
+     */
+    private fun createForegroundNotification(): Notification {
+        // Create notification channel for Android O+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(
+                FOREGROUND_CHANNEL_ID,
+                getString(R.string.service_channel_name),
+                NotificationManager.IMPORTANCE_LOW // Low importance to avoid disturbing user
+            ).apply {
+                description = getString(R.string.service_channel_description)
+                setShowBadge(false)
+            }
+            
+            val notificationManager = getSystemService(NotificationManager::class.java)
+            notificationManager.createNotificationChannel(channel)
+        }
+        
+        // Create intent to open settings when notification is tapped
+        val notificationIntent = Intent(this, SettingsActivity::class.java)
+        val pendingIntent = PendingIntent.getActivity(
+            this,
+            0,
+            notificationIntent,
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+            } else {
+                PendingIntent.FLAG_UPDATE_CURRENT
+            }
+        )
+        
+        return NotificationCompat.Builder(this, FOREGROUND_CHANNEL_ID)
+            .setContentTitle(getString(R.string.service_running_title))
+            .setContentText(getString(R.string.service_running_text))
+            .setSmallIcon(R.drawable.ic_mask)
+            .setContentIntent(pendingIntent)
+            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setOngoing(true) // Cannot be dismissed by user
+            .setShowWhen(false)
+            .build()
     }
 
     /**
