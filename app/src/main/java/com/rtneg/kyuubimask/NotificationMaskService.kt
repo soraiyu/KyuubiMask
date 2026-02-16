@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.kyuubimask
+package com.rtneg.kyuubimask
 
 import android.Manifest
 import android.annotation.SuppressLint
@@ -26,7 +26,7 @@ import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
-import com.kyuubimask.data.PreferencesRepository
+import com.rtneg.kyuubimask.data.PreferencesRepository
 import java.util.Objects
 
 /**

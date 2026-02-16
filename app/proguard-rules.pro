@@ -1,3 +1,3 @@
 # KyuubiMask ProGuard Rules
 -keepattributes *Annotation*
--keep class com.kyuubimask.** { *; }
+-keep class com.rtneg.kyuubimask.** { *; }
