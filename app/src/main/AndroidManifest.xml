@@ -9,6 +9,9 @@
     <!-- Required to post notifications on Android 13+ (API 33+) -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     
+    <!-- Required for notification vibration -->
+    <uses-permission android:name="android.permission.VIBRATE" />
+    
     <application
         android:name=".KyuubiMaskApp"
         android:allowBackup="false"
