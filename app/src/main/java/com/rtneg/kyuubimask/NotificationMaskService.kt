@@ -49,7 +49,7 @@ class NotificationMaskService : NotificationListenerService() {
 
     companion object {
         // Debug broadcast
-        const val ACTION_DEBUG_LOG = "com.kyuubimask.DEBUG_LOG"
+        const val ACTION_DEBUG_LOG = "com.rtneg.kyuubimask.DEBUG_LOG"
         const val EXTRA_LOG_MESSAGE = "log_message"
         
         // Tag to identify masked notifications and prevent re-masking
