@@ -29,8 +29,8 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import com.kyuubimask.data.PreferencesRepository
-import com.kyuubimask.databinding.ActivitySettingsBinding
+import com.rtneg.kyuubimask.data.PreferencesRepository
+import com.rtneg.kyuubimask.databinding.ActivitySettingsBinding
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
