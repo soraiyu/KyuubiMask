@@ -162,10 +162,7 @@ class NotificationMaskService : NotificationListenerService() {
         // PRIVACY: PendingIntent is opaque; notification content remains masked
         // LIMITATION: Deep link may indirectly reveal context (acceptable UX trade-off)
         // SECURITY: Safe because sbn.packageName verified in onNotificationPosted (line 100)
-        val contentIntent = sbn.notification.contentIntent?.let { originalIntent ->
-            // Use the original PendingIntent for deep linking
-            originalIntent
-        } ?: run {
+        val contentIntent = sbn.notification.contentIntent ?: run {
             val launchIntent = packageManager.getLaunchIntentForPackage(packageName)
             if (launchIntent != null) {
                 // Set flags to bring app to front or reuse existing instance
