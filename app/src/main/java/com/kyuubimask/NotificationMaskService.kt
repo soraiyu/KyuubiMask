@@ -158,27 +158,32 @@ class NotificationMaskService : NotificationListenerService() {
         val notificationId = generateNotificationId(sbn)
 
         // Create PendingIntent to open the masked app when notification is tapped
-        // PRIVACY: Only uses package name (already tracked), no notification content
-        val launchIntent = packageManager.getLaunchIntentForPackage(packageName)
-        val contentIntent = if (launchIntent != null) {
-            // Set flags to bring app to front or reuse existing instance
-            launchIntent.addFlags(
-                Intent.FLAG_ACTIVITY_NEW_TASK or 
-                Intent.FLAG_ACTIVITY_CLEAR_TOP or
-                Intent.FLAG_ACTIVITY_SINGLE_TOP
-            )
-            
-            // Create PendingIntent with appropriate flags for the Android version
-            val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        // Uses original notification's contentIntent to enable deep linking (e.g., specific chat/message)
+        // PRIVACY: PendingIntent is opaque; notification content remains masked
+        // LIMITATION: Deep link may indirectly reveal context (acceptable UX trade-off)
+        // SECURITY: Safe because sbn.packageName verified in onNotificationPosted (line 100)
+        val contentIntent = sbn.notification.contentIntent ?: run {
+            val launchIntent = packageManager.getLaunchIntentForPackage(packageName)
+            if (launchIntent != null) {
+                // Set flags to bring app to front or reuse existing instance
+                launchIntent.addFlags(
+                    Intent.FLAG_ACTIVITY_NEW_TASK or 
+                    Intent.FLAG_ACTIVITY_CLEAR_TOP or
+                    Intent.FLAG_ACTIVITY_SINGLE_TOP
+                )
+                
+                // Create PendingIntent with appropriate flags for the Android version
+                val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                } else {
+                    PendingIntent.FLAG_UPDATE_CURRENT
+                }
+                
+                // Use notification ID as request code to ensure uniqueness per notification
+                PendingIntent.getActivity(this, notificationId, launchIntent, flags)
             } else {
-                PendingIntent.FLAG_UPDATE_CURRENT
+                null
             }
-            
-            // Use notification ID as request code to ensure uniqueness per notification
-            PendingIntent.getActivity(this, notificationId, launchIntent, flags)
-        } else {
-            null
         }
 
         // Build masked notification with grouping
