@@ -173,7 +173,7 @@ class NotificationMaskService : NotificationListenerService() {
         // Uses original notification's contentIntent to enable deep linking (e.g., specific chat/message)
         // PRIVACY: PendingIntent is opaque; notification content remains masked
         // LIMITATION: Deep link may indirectly reveal context (acceptable UX trade-off)
-        // SECURITY: Safe because sbn.packageName verified in onNotificationPosted
+        // SECURITY: Safe because sbn.packageName is verified in onNotificationPosted() before calling maskNotification()
         val contentIntent = sbn.notification.contentIntent ?: run {
             val launchIntent = packageManager.getLaunchIntentForPackage(packageName)
             if (launchIntent != null) {

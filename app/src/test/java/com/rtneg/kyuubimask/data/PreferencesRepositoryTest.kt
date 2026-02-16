@@ -92,7 +92,8 @@ class PreferencesRepositoryTest {
         assertTrue(maskedApps.contains("com.notion.id")) // Notion
         assertTrue(maskedApps.contains("com.atlassian.jira.core.ui")) // Jira
         
-        // Verify total count
+        // Verify total count (12 apps total across all categories)
+        // Note: Original test expected 13, but the DEFAULT_MASKED_APPS list always contained 12 apps
         assertEquals(12, maskedApps.size)
     }
 

@@ -38,6 +38,13 @@
         </activity>
 
         <!-- Notification Listener Service -->
+        <!-- 
+            Foreground service type 'specialUse' is used because:
+            - NotificationListenerService is a system-bound service that doesn't fit standard types
+            - It's not media playback, location, data sync, or other predefined categories
+            - It provides privacy protection by masking notification content
+            - Android 14+ requires specialUse services to declare their purpose via metadata
+        -->
         <service
             android:name=".NotificationMaskService"
             android:exported="true"
