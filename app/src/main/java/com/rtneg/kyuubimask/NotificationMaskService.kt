@@ -16,7 +16,6 @@
 package com.rtneg.kyuubimask
 
 import android.Manifest
-import android.annotation.SuppressLint
 import android.app.Notification
 import android.app.PendingIntent
 import android.content.Intent
@@ -37,57 +36,24 @@ import java.util.Objects
  * - No data storage
  * - No network access
  * - Original notification content is never persisted
- * - Notification grouping state stored in memory only (cleared on service restart)
+ * 
+ * OPTIMIZED FOR MEMORY:
+ * - Minimal memory footprint
+ * - No in-memory state tracking
+ * - No debug logging
  */
 class NotificationMaskService : NotificationListenerService() {
 
     private lateinit var prefsRepository: PreferencesRepository
-    
-    // PRIVACY: Memory-only storage, cleared when service stops
-    // Only stores package names and counts, never notification content
-    private val notificationCounts = mutableMapOf<String, Int>()
 
     companion object {
-        // Debug broadcast
-        const val ACTION_DEBUG_LOG = "com.rtneg.kyuubimask.DEBUG_LOG"
-        const val EXTRA_LOG_MESSAGE = "log_message"
-        
         // Tag to identify masked notifications and prevent re-masking
         private const val MASKED_TAG = "kyuubimask_masked"
-        
-        // Group prefix for notification grouping
-        private const val GROUP_PREFIX = "kyuubimask_group_"
     }
 
     override fun onCreate() {
         super.onCreate()
         prefsRepository = PreferencesRepository(applicationContext)
-    }
-    
-    override fun onDestroy() {
-        super.onDestroy()
-        // PRIVACY: Clear all in-memory state when service stops
-        notificationCounts.clear()
-    }
-
-    private fun sendDebugLog(message: String) {
-        if (!BuildConfig.DEBUG) return  // Only log in debug builds
-        
-        val intent = Intent(ACTION_DEBUG_LOG).apply {
-            putExtra(EXTRA_LOG_MESSAGE, message)
-            setPackage(packageName) // Send only to our app
-        }
-        sendBroadcast(intent)
-    }
-
-    override fun onListenerConnected() {
-        super.onListenerConnected()
-        sendDebugLog("✅ Service connected!")
-    }
-
-    override fun onListenerDisconnected() {
-        super.onListenerDisconnected()
-        sendDebugLog("❌ Service disconnected")
     }
 
     /**
@@ -109,13 +75,7 @@ class NotificationMaskService : NotificationListenerService() {
         if (!prefsRepository.isServiceEnabled) return
 
         // Check if this app should be masked
-        val isMasked = prefsRepository.isAppMasked(packageName)
-        
-        // Debug log - show all notifications (package name only, not content)
-        val status = if (isMasked) "🦊 MASKED" else "⏭️ SKIP"
-        sendDebugLog("$status: $packageName")
-
-        if (isMasked) {
+        if (prefsRepository.isAppMasked(packageName)) {
             maskNotification(sbn)
         }
     }
@@ -123,25 +83,17 @@ class NotificationMaskService : NotificationListenerService() {
     /**
      * Masks a notification by canceling original and posting a generic one
      * PRIVACY: No content from original notification is logged or stored
-     * 
-     * Notifications are grouped by app package name for better organization.
-     * Group state is stored in memory only and cleared when service restarts.
      */
     private fun maskNotification(sbn: StatusBarNotification) {
         // Check POST_NOTIFICATIONS permission for Android 13+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
                 != PackageManager.PERMISSION_GRANTED) {
-                sendDebugLog("❌ POST_NOTIFICATIONS permission not granted")
                 return
             }
         }
         
         val packageName = sbn.packageName
-        
-        // PRIVACY: Increment count in memory only (never persisted)
-        val currentCount = notificationCounts.getOrDefault(packageName, 0) + 1
-        notificationCounts[packageName] = currentCount
         
         // Cancel the original notification
         cancelNotification(sbn.key)
@@ -154,14 +106,14 @@ class NotificationMaskService : NotificationListenerService() {
             "App" // Fallback if app name can't be retrieved
         }
 
-        // Generate unique notification ID once for both PendingIntent and notification
+        // Generate unique notification ID
         val notificationId = generateNotificationId(sbn)
 
         // Create PendingIntent to open the masked app when notification is tapped
         // Uses original notification's contentIntent to enable deep linking (e.g., specific chat/message)
         // PRIVACY: PendingIntent is opaque; notification content remains masked
         // LIMITATION: Deep link may indirectly reveal context (acceptable UX trade-off)
-        // SECURITY: Safe because sbn.packageName verified in onNotificationPosted (line 100)
+        // SECURITY: Safe because sbn.packageName verified in onNotificationPosted
         val contentIntent = sbn.notification.contentIntent ?: run {
             val launchIntent = packageManager.getLaunchIntentForPackage(packageName)
             if (launchIntent != null) {
@@ -186,7 +138,7 @@ class NotificationMaskService : NotificationListenerService() {
             }
         }
 
-        // Build masked notification with grouping
+        // Build masked notification
         // PRIVACY: Generic text only, no original content
         val maskedNotification = NotificationCompat.Builder(this, KyuubiMaskApp.CHANNEL_ID)
             .setContentTitle(appName)
@@ -197,10 +149,6 @@ class NotificationMaskService : NotificationListenerService() {
             .setAutoCancel(true)
             .apply {
                 contentIntent?.let { setContentIntent(it) }
-                // Group notifications by app package name
-                // This makes notifications from the same app appear together
-                setGroup("$GROUP_PREFIX$packageName")
-                setGroupSummary(false)
                 
                 // Preserve original sort key if available
                 sbn.notification.sortKey?.let { setSortKey(it) }
@@ -220,8 +168,6 @@ class NotificationMaskService : NotificationListenerService() {
         // Post the masked notification with unique ID
         val manager = getSystemService(NOTIFICATION_SERVICE) as android.app.NotificationManager
         manager.notify(MASKED_TAG, notificationId, maskedNotification)
-        
-        sendDebugLog("✅ Masked notification posted for: $appName (count: $currentCount)")
     }
     
     /**
@@ -230,26 +176,5 @@ class NotificationMaskService : NotificationListenerService() {
      */
     private fun generateNotificationId(sbn: StatusBarNotification): Int {
         return Objects.hash(sbn.packageName, sbn.id, sbn.tag ?: "")
-    }
-
-    override fun onNotificationRemoved(sbn: StatusBarNotification?) {
-        sbn ?: return
-        
-        // Skip our own notifications
-        if (sbn.packageName == this.packageName) return
-        if (sbn.tag == MASKED_TAG) return
-        
-        // PRIVACY: Decrement count in memory only (never persisted)
-        // Only track counts for masked apps to maintain privacy
-        if (prefsRepository.isAppMasked(sbn.packageName)) {
-            val currentCount = notificationCounts.getOrDefault(sbn.packageName, 0)
-            if (currentCount > 0) {
-                notificationCounts[sbn.packageName] = currentCount - 1
-            }
-            // Clean up if count reaches zero
-            if (notificationCounts[sbn.packageName] == 0) {
-                notificationCounts.remove(sbn.packageName)
-            }
-        }
     }
 }

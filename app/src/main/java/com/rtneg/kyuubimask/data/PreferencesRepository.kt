@@ -57,9 +57,6 @@ class PreferencesRepository(context: Context) {
             "com.notion.id",             // Notion
             "com.atlassian.jira.core.ui" // Jira
         )
-        
-        // Constants
-        const val MAX_DEBUG_LOGS = 50
     }
     
     /**

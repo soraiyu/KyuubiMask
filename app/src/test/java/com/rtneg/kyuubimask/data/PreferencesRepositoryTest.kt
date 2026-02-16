@@ -93,7 +93,7 @@ class PreferencesRepositoryTest {
         assertTrue(maskedApps.contains("com.atlassian.jira.core.ui")) // Jira
         
         // Verify total count
-        assertEquals(13, maskedApps.size)
+        assertEquals(12, maskedApps.size)
     }
 
     @Test

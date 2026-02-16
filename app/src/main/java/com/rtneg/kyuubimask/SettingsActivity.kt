@@ -16,11 +16,9 @@
 package com.rtneg.kyuubimask
 
 import android.Manifest
-import android.content.BroadcastReceiver
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -31,40 +29,27 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.rtneg.kyuubimask.data.PreferencesRepository
 import com.rtneg.kyuubimask.databinding.ActivitySettingsBinding
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 
 /**
  * SettingsActivity - Main UI for configuring KyuubiMask
  * Minimal UI focused on privacy and simplicity
+ * Optimized for low memory usage
  */
 class SettingsActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivitySettingsBinding
     private lateinit var prefsRepository: PreferencesRepository
-    private val debugLogs = mutableListOf<String>()
     
     // Request notification permission for Android 13+
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted: Boolean ->
         if (isGranted) {
-            addDebugLog("✅ POST_NOTIFICATIONS permission granted")
             Toast.makeText(this, R.string.post_notification_permission_granted, Toast.LENGTH_SHORT).show()
         } else {
-            addDebugLog("❌ POST_NOTIFICATIONS permission denied")
             Toast.makeText(this, R.string.error_post_notification_denied, Toast.LENGTH_LONG).show()
         }
         updateServiceStatus()
-    }
-    
-    private val debugReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context?, intent: Intent?) {
-            intent?.getStringExtra(NotificationMaskService.EXTRA_LOG_MESSAGE)?.let { message ->
-                addDebugLog(message)
-            }
-        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -79,50 +64,10 @@ class SettingsActivity : AppCompatActivity() {
         
         // Check and request notification permission on Android 13+
         checkNotificationPermission()
-        
-        // Register debug receiver only in debug builds
-        if (BuildConfig.DEBUG) {
-            val filter = IntentFilter(NotificationMaskService.ACTION_DEBUG_LOG)
-            ContextCompat.registerReceiver(
-                this,
-                debugReceiver,
-                filter,
-                ContextCompat.RECEIVER_NOT_EXPORTED
-            )
-        }
-        
-        // Clear log button
-        binding.btnClearLog.setOnClickListener {
-            debugLogs.clear()
-            binding.tvDebugLog.text = "Waiting for notifications..."
-        }
-        
-        addDebugLog("App started. Waiting for notifications...")
     }
     
     override fun onDestroy() {
         super.onDestroy()
-        if (BuildConfig.DEBUG) {
-            try {
-                unregisterReceiver(debugReceiver)
-            } catch (e: IllegalArgumentException) {
-                // Receiver not registered, ignore
-            }
-        }
-    }
-    
-    private fun addDebugLog(message: String) {
-        if (!BuildConfig.DEBUG) return
-        
-        val timestamp = SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(Date())
-        val logEntry = "[$timestamp] $message"
-        
-        debugLogs.add(0, logEntry) // Add to top
-        if (debugLogs.size > PreferencesRepository.MAX_DEBUG_LOGS) {
-            debugLogs.removeAt(debugLogs.size - 1)
-        }
-        
-        binding.tvDebugLog.text = debugLogs.joinToString("\n")
     }
 
     override fun onResume() {
@@ -141,7 +86,6 @@ class SettingsActivity : AppCompatActivity() {
                     Manifest.permission.POST_NOTIFICATIONS
                 ) == PackageManager.PERMISSION_GRANTED -> {
                     // Permission already granted
-                    addDebugLog("✅ POST_NOTIFICATIONS permission already granted")
                 }
                 shouldShowRequestPermissionRationale(Manifest.permission.POST_NOTIFICATIONS) -> {
                     // Show rationale and request permission
@@ -159,7 +103,7 @@ class SettingsActivity : AppCompatActivity() {
             }
         }
     }
-    
+
     /**
      * Check if POST_NOTIFICATIONS permission is granted (Android 13+)
      */
@@ -181,21 +125,18 @@ class SettingsActivity : AppCompatActivity() {
         binding.switchEnable.setOnCheckedChangeListener { _, isChecked ->
             prefsRepository.isServiceEnabled = isChecked
             updateServiceStatus()
-            addDebugLog(if (isChecked) "🟢 Masking enabled" else "🔴 Masking disabled")
         }
         
         // Notification sound toggle
         binding.switchSound.isChecked = prefsRepository.notificationSound
         binding.switchSound.setOnCheckedChangeListener { _, isChecked ->
             prefsRepository.notificationSound = isChecked
-            addDebugLog(if (isChecked) "🔊 Sound enabled" else "🔇 Sound disabled")
         }
         
         // Notification vibrate toggle
         binding.switchVibrate.isChecked = prefsRepository.notificationVibrate
         binding.switchVibrate.setOnCheckedChangeListener { _, isChecked ->
             prefsRepository.notificationVibrate = isChecked
-            addDebugLog(if (isChecked) "📳 Vibrate enabled" else "📴 Vibrate disabled")
         }
 
         // Permission button
