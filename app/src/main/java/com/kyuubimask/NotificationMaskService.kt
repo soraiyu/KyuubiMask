@@ -158,10 +158,12 @@ class NotificationMaskService : NotificationListenerService() {
         val notificationId = generateNotificationId(sbn)
 
         // Create PendingIntent to open the masked app when notification is tapped
-        // PRIVACY: Uses original contentIntent for deep linking, or falls back to launch intent
-        // This preserves the original app's deep link behavior (e.g., opening specific chat/message)
+        // PRIVACY NOTE: Uses original notification's contentIntent to enable deep linking.
+        // - PendingIntent is an opaque object - our service cannot access its internal data/URIs
+        // - The notification content itself remains masked (title, text, etc. are still hidden)
+        // - Trade-off: Enables better UX (deep linking) while maintaining content privacy
+        // - Falls back to launch intent if original notification has no contentIntent
         val contentIntent = sbn.notification.contentIntent ?: run {
-            // Fallback to launch intent if original notification has no contentIntent
             val launchIntent = packageManager.getLaunchIntentForPackage(packageName)
             if (launchIntent != null) {
                 // Set flags to bring app to front or reuse existing instance
