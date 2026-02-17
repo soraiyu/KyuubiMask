@@ -132,8 +132,10 @@ class NotificationMaskService : NotificationListenerService() {
         if (sbn.tag == MASKED_TAG) return
         
         // Also check notification extras for the masked tag
-        val extras = sbn.notification?.extras
-        if (extras?.getBoolean(MASKED_TAG, false) == true) return
+        // If notification or extras is null (shouldn't happen in practice), we proceed with normal processing
+        sbn.notification?.extras?.let { extras ->
+            if (extras.getBoolean(MASKED_TAG, false)) return
+        }
 
         // Check if service is enabled
         if (!prefsRepository.isServiceEnabled) return
