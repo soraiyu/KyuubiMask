@@ -12,6 +12,10 @@
     <!-- Required for notification vibration -->
     <uses-permission android:name="android.permission.VIBRATE" />
     
+    <!-- Required to run as foreground service to prevent Android from killing the app -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+    
     <application
         android:name=".KyuubiMaskApp"
         android:allowBackup="false"
@@ -34,13 +38,26 @@
         </activity>
 
         <!-- Notification Listener Service -->
+        <!-- 
+            Foreground service type 'specialUse' is used because:
+            - NotificationListenerService is a system-bound service that doesn't fit standard types
+            - It's not media playback, location, data sync, or other predefined categories
+            - It provides privacy protection by masking notification content
+            - Android 14+ requires specialUse services to declare their purpose via metadata
+        -->
         <service
             android:name=".NotificationMaskService"
             android:exported="true"
+            android:foregroundServiceType="specialUse"
             android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
             <intent-filter>
                 <action android:name="android.service.notification.NotificationListenerService" />
             </intent-filter>
+            
+            <!-- Required metadata for special use foreground service (Android 14+) -->
+            <property 
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Notification privacy protection" />
         </service>
 
     </application>
