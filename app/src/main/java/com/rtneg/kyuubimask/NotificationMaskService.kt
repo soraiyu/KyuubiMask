@@ -228,11 +228,10 @@ class NotificationMaskService : NotificationListenerService() {
                 setDefaults(defaults)
                 
                 // Mark this notification as already masked to prevent re-processing
-                // Create a new Bundle with the MASKED_TAG to properly identify this as a masked notification
-                val extras = android.os.Bundle().apply {
+                // Use addExtras to preserve existing notification data (title, text, etc.)
+                addExtras(android.os.Bundle().apply {
                     putBoolean(MASKED_TAG, true)
-                }
-                setExtras(extras)
+                })
             }
             .build()
 
