@@ -50,8 +50,11 @@ class NotificationMaskService : NotificationListenerService() {
     private lateinit var prefsRepository: PreferencesRepository
 
     companion object {
-        // Tag to identify masked notifications and prevent re-masking
+        // Tag to identify masked notifications in the notification system
         private const val MASKED_TAG = "kyuubimask_masked"
+        
+        // Key for extras Bundle to mark a notification as already masked
+        private const val EXTRA_KEY_IS_MASKED = "kyuubimask_is_masked"
         
         // Foreground service notification channel and ID
         private const val FOREGROUND_CHANNEL_ID = "kyuubimask_service"
@@ -131,10 +134,10 @@ class NotificationMaskService : NotificationListenerService() {
         // Skip already masked notifications by checking tag or extras
         if (sbn.tag == MASKED_TAG) return
         
-        // Also check notification extras for the masked tag
+        // Also check notification extras for the masked flag
         // If notification or extras is null (shouldn't happen in practice), we proceed with normal processing
         sbn.notification?.extras?.let { extras ->
-            if (extras.getBoolean(MASKED_TAG, false)) return
+            if (extras.getBoolean(EXTRA_KEY_IS_MASKED, false)) return
         }
 
         // Check if service is enabled
@@ -232,7 +235,7 @@ class NotificationMaskService : NotificationListenerService() {
                 // Mark this notification as already masked to prevent re-processing
                 // Use addExtras to preserve existing notification data (title, text, etc.)
                 addExtras(android.os.Bundle().apply {
-                    putBoolean(MASKED_TAG, true)
+                    putBoolean(EXTRA_KEY_IS_MASKED, true)
                 })
             }
             .build()
