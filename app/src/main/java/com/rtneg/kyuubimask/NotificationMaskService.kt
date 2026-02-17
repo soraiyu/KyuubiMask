@@ -105,7 +105,7 @@ class NotificationMaskService : NotificationListenerService() {
             }
         )
         
-        return NotificationCompat.Builder(this, FOREGROUND_CHANNEL_ID)
+        return androidx.core.app.NotificationCompat.Builder(this, FOREGROUND_CHANNEL_ID)
             .setContentTitle(getString(R.string.service_running_title))
             .setContentText(getString(R.string.service_running_text))
             .setSmallIcon(R.drawable.ic_mask)
