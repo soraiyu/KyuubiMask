@@ -128,8 +128,12 @@ class NotificationMaskService : NotificationListenerService() {
         // Skip our own notifications to prevent infinite loop
         if (packageName == this.packageName) return
         
-        // Skip already masked notifications
+        // Skip already masked notifications by checking tag or extras
         if (sbn.tag == MASKED_TAG) return
+        
+        // Also check notification extras for the masked tag
+        val extras = sbn.notification?.extras
+        if (extras?.getBoolean(MASKED_TAG, false) == true) return
 
         // Check if service is enabled
         if (!prefsRepository.isServiceEnabled) return
@@ -222,6 +226,11 @@ class NotificationMaskService : NotificationListenerService() {
                     defaults = defaults or Notification.DEFAULT_VIBRATE
                 }
                 setDefaults(defaults)
+                
+                // Mark this notification as already masked to prevent re-processing
+                addExtras(android.os.Bundle().apply {
+                    putBoolean(MASKED_TAG, true)
+                })
             }
             .build()
 
