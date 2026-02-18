@@ -134,10 +134,8 @@ class NotificationMaskService : NotificationListenerService() {
         // Skip our own notifications to prevent infinite loop
         if (packageName == this.packageName) return
         
-        // Skip already masked notifications by checking tag or extras
-        if (sbn.tag == MASKED_TAG) return
-        
-        // Also check notification extras for the masked flag
+        // Skip already masked notifications by checking extras
+        // Check notification extras for the masked flag
         // If notification or extras is null (shouldn't happen in practice), we proceed with normal processing
         sbn.notification?.extras?.let { extras ->
             if (extras.getBoolean(EXTRA_KEY_IS_MASKED, false)) return
@@ -164,7 +162,8 @@ class NotificationMaskService : NotificationListenerService() {
     private fun maskNotification(sbn: StatusBarNotification) {
         val notificationKey = sbn.key
         
-        // Mark this notification as being processed
+        // Prevent duplicate processing (defensive check before adding)
+        if (processingKeys.contains(notificationKey)) return
         processingKeys.add(notificationKey)
         
         try {
@@ -230,11 +229,13 @@ class NotificationMaskService : NotificationListenerService() {
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                 .setVisibility(NotificationCompat.VISIBILITY_PRIVATE)
                 .setAutoCancel(true)
+                .setOnlyAlertOnce(true)  // Prevent duplicate sound/vibration on updates
                 .apply {
                     contentIntent?.let { setContentIntent(it) }
                     
-                    // Preserve original sort key if available
+                    // Preserve original notification properties
                     sbn.notification.sortKey?.let { setSortKey(it) }
+                    sbn.notification.group?.let { setGroup(it) }
                     
                     // Apply sound and vibration settings based on user preferences
                     var defaults = Notification.DEFAULT_LIGHTS // Always use default lights
@@ -254,15 +255,15 @@ class NotificationMaskService : NotificationListenerService() {
                 }
                 .build()
 
-            // Post the masked notification with unique ID
+            // Post the masked notification with unique ID (no tag parameter)
             val manager = getSystemService(NOTIFICATION_SERVICE) as android.app.NotificationManager
-            manager.notify(MASKED_TAG, notificationId, maskedNotification)
+            manager.notify(notificationId, maskedNotification)
         } finally {
             // Remove from processing set after a delay to handle race conditions
             // Use a short delay to allow the notification system to process the cancellation
             android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
                 processingKeys.remove(notificationKey)
-            }, 500) // 500ms delay should be sufficient
+            }, 300) // 300ms delay is sufficient for most cases
         }
     }
     
