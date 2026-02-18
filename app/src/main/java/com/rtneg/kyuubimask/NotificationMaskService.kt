@@ -129,21 +129,14 @@ class NotificationMaskService : NotificationListenerService() {
     override fun onNotificationPosted(sbn: StatusBarNotification?) {
         sbn ?: return
 
-        // Skip masked notifications immediately to prevent double processing
-        // This is the most critical check to prevent infinite loops
-        if (sbn.tag == MASKED_TAG) return
+        // CRITICAL: Skip our own masked notifications immediately
+        // This is the first and most important check to prevent infinite loops
+        if (isMyMaskedNotification(sbn)) return
 
         val packageName = sbn.packageName
         
         // Skip our own notifications to prevent infinite loop
         if (packageName == this.packageName) return
-        
-        // Skip already masked notifications by checking extras
-        // Check notification extras for the masked flag
-        // If notification or extras is null (shouldn't happen in practice), we proceed with normal processing
-        sbn.notification?.extras?.let { extras ->
-            if (extras.getBoolean(EXTRA_KEY_IS_MASKED, false)) return
-        }
         
         // Skip if this notification is already being processed
         // This prevents race conditions when apps re-post notifications
@@ -157,6 +150,28 @@ class NotificationMaskService : NotificationListenerService() {
         if (prefsRepository.isAppMasked(packageName)) {
             maskNotification(sbn)
         }
+    }
+    
+    /**
+     * Check if a notification is our own masked notification
+     * Uses both tag and extras for robust detection
+     */
+    private fun isMyMaskedNotification(sbn: StatusBarNotification): Boolean {
+        // Tag check (enhanced - checks if tag starts with MASKED_TAG)
+        if (sbn.tag?.startsWith(MASKED_TAG) == true) {
+            android.util.Log.d("KyuubiMask", "🚫 Skipped my masked notification by tag: ${sbn.key}")
+            return true
+        }
+        
+        // Extras check (backup verification)
+        sbn.notification?.extras?.let { extras ->
+            if (extras.getBoolean(EXTRA_KEY_IS_MASKED, false)) {
+                android.util.Log.d("KyuubiMask", "🚫 Skipped my masked notification by extras: ${sbn.key}")
+                return true
+            }
+        }
+        
+        return false
     }
 
     /**
@@ -259,11 +274,13 @@ class NotificationMaskService : NotificationListenerService() {
                 }
                 .build()
 
-            // Post the masked notification with tag to prevent re-processing
-            // The tag ensures that when this notification triggers onNotificationPosted,
-            // it will be immediately skipped by the tag check
+            // Post the masked notification with package-specific tag
+            // The package-specific tag ensures unique identification and prevents re-processing
+            val maskedTag = "$MASKED_TAG.$packageName"
             val manager = getSystemService(NOTIFICATION_SERVICE) as android.app.NotificationManager
-            manager.notify(MASKED_TAG, notificationId, maskedNotification)
+            manager.notify(maskedTag, notificationId, maskedNotification)
+            
+            android.util.Log.d("KyuubiMask", "✅ Masked posted: tag=$maskedTag, id=$notificationId, key=$notificationKey")
         } finally {
             // Remove from processing set after a delay to handle race conditions
             // Use a short delay to allow the notification system to process the cancellation
