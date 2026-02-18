@@ -129,6 +129,10 @@ class NotificationMaskService : NotificationListenerService() {
     override fun onNotificationPosted(sbn: StatusBarNotification?) {
         sbn ?: return
 
+        // Skip masked notifications immediately to prevent double processing
+        // This is the most critical check to prevent infinite loops
+        if (sbn.tag == MASKED_TAG) return
+
         val packageName = sbn.packageName
         
         // Skip our own notifications to prevent infinite loop
@@ -255,9 +259,11 @@ class NotificationMaskService : NotificationListenerService() {
                 }
                 .build()
 
-            // Post the masked notification with unique ID (no tag parameter)
+            // Post the masked notification with tag to prevent re-processing
+            // The tag ensures that when this notification triggers onNotificationPosted,
+            // it will be immediately skipped by the tag check
             val manager = getSystemService(NOTIFICATION_SERVICE) as android.app.NotificationManager
-            manager.notify(notificationId, maskedNotification)
+            manager.notify(MASKED_TAG, notificationId, maskedNotification)
         } finally {
             // Remove from processing set after a delay to handle race conditions
             // Use a short delay to allow the notification system to process the cancellation
