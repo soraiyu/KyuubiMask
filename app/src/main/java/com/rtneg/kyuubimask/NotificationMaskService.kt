@@ -129,9 +129,9 @@ class NotificationMaskService : NotificationListenerService() {
     override fun onNotificationPosted(sbn: StatusBarNotification?) {
         sbn ?: return
 
-        // CRITICAL: Skip our own masked notifications immediately
-        // This is the first and most important check to prevent infinite loops
-        if (isMyMaskedNotification(sbn)) return
+        // CRITICAL: Check if we've already posted a masked notification for this app
+        // This is the strongest defense against duplicate notifications
+        if (isAlreadyMasked(sbn)) return
 
         val packageName = sbn.packageName
         
@@ -153,22 +153,35 @@ class NotificationMaskService : NotificationListenerService() {
     }
     
     /**
-     * Check if a notification is our own masked notification
-     * Uses both tag and extras for robust detection
+     * Check if we've already posted a masked notification for this app
+     * Uses getActiveNotifications() to detect existing masked notifications
+     * This is the strongest check to prevent duplicates
      */
-    private fun isMyMaskedNotification(sbn: StatusBarNotification): Boolean {
-        // Tag check (enhanced - checks if tag starts with MASKED_TAG)
-        if (sbn.tag?.startsWith(MASKED_TAG) == true) {
-            android.util.Log.d("KyuubiMask", "🚫 Skipped my masked notification by tag: ${sbn.key}")
-            return true
-        }
-        
-        // Extras check (backup verification)
-        sbn.notification?.extras?.let { extras ->
-            if (extras.getBoolean(EXTRA_KEY_IS_MASKED, false)) {
-                android.util.Log.d("KyuubiMask", "🚫 Skipped my masked notification by extras: ${sbn.key}")
-                return true
+    private fun isAlreadyMasked(sbn: StatusBarNotification): Boolean {
+        try {
+            val manager = getSystemService(NOTIFICATION_SERVICE) as android.app.NotificationManager
+            val activeNotifications = manager.activeNotifications
+            
+            // Check if there's already a masked notification for this package
+            val maskedTagPrefix = "$MASKED_TAG.${sbn.packageName}"
+            
+            for (activeNotif in activeNotifications) {
+                // Check if this is one of our masked notifications
+                if (activeNotif.tag?.startsWith(MASKED_TAG) == true) {
+                    android.util.Log.d("KyuubiMask", "🚫 Already masked notification exists, skipping: ${sbn.key}")
+                    return true
+                }
+                
+                // Also check extras as backup
+                activeNotif.notification?.extras?.let { extras ->
+                    if (extras.getBoolean(EXTRA_KEY_IS_MASKED, false)) {
+                        android.util.Log.d("KyuubiMask", "🚫 Already masked notification exists (extras), skipping: ${sbn.key}")
+                        return true
+                    }
+                }
             }
+        } catch (e: Exception) {
+            android.util.Log.e("KyuubiMask", "Error checking active notifications", e)
         }
         
         return false
@@ -198,6 +211,18 @@ class NotificationMaskService : NotificationListenerService() {
             
             // Cancel the original notification
             cancelNotification(sbn.key)
+            
+            // Cancel any existing masked notification for this package to prevent duplicates
+            val maskedTag = "$MASKED_TAG.$packageName"
+            val notificationId = generateNotificationId(sbn)
+            val manager = getSystemService(NOTIFICATION_SERVICE) as android.app.NotificationManager
+            
+            try {
+                manager.cancel(maskedTag, notificationId)
+                android.util.Log.d("KyuubiMask", "🗑️ Cancelled existing masked notification if any: tag=$maskedTag, id=$notificationId")
+            } catch (e: Exception) {
+                android.util.Log.w("KyuubiMask", "Could not cancel existing notification", e)
+            }
 
             // Get app name for the masked notification title
             val appName = try {
@@ -206,9 +231,6 @@ class NotificationMaskService : NotificationListenerService() {
             } catch (e: Exception) {
                 "App" // Fallback if app name can't be retrieved
             }
-
-            // Generate unique notification ID
-            val notificationId = generateNotificationId(sbn)
 
             // Create PendingIntent to open the masked app when notification is tapped
             // Uses original notification's contentIntent to enable deep linking (e.g., specific chat/message)
@@ -275,9 +297,7 @@ class NotificationMaskService : NotificationListenerService() {
                 .build()
 
             // Post the masked notification with package-specific tag
-            // The package-specific tag ensures unique identification and prevents re-processing
-            val maskedTag = "$MASKED_TAG.$packageName"
-            val manager = getSystemService(NOTIFICATION_SERVICE) as android.app.NotificationManager
+            // The tag and manager were already defined above when we cancelled existing notification
             manager.notify(maskedTag, notificationId, maskedNotification)
             
             android.util.Log.d("KyuubiMask", "✅ Masked posted: tag=$maskedTag, id=$notificationId, key=$notificationKey")
