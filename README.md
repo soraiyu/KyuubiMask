@@ -1,6 +1,6 @@
 # KyuubiMask 🦊
 
-**A Privacy-Focused Notification Masking Tool for Android**
+**Daily Privacy Guardian for Your Notifications**
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Android CI](https://github.com/soraiyu/KyuubiMask/actions/workflows/android-ci.yml/badge.svg)](https://github.com/soraiyu/KyuubiMask/actions/workflows/android-ci.yml)
@@ -11,14 +11,17 @@
 
 ## English
 
-KyuubiMask protects your privacy during screen sharing and presentations by masking sensitive notification content from messaging, email, and business apps.
+KyuubiMask protects your privacy in everyday situations—on trains, at work, around family and friends, or in cafes. It prevents sensitive notification content from being exposed when someone looks over your shoulder, appears on your lock screen, or gets captured in screenshots. Whether you're commuting, working in an office, or relaxing at home, KyuubiMask ensures your private messages stay private.
 
 > **Note**: This project includes AI-generated code to accelerate development while maintaining code quality and security standards.
 
 ### Features
 
 - 🔒 **Privacy First** - Completely offline, zero data collection
-- 🦊 **Notification Masking** - Protect sensitive information during screen sharing
+- 👀 **Shoulder Surfing Protection** - Prevents others from seeing notification content over your shoulder
+- 📱 **Lock Screen Privacy** - Hides sensitive information even when your phone is locked
+- 📸 **Prevents Screenshot Leaks** - Masked notifications won't expose sensitive data in screenshots
+- 🦊 **Smart Notification Masking** - Replace sensitive content with generic text automatically
 - 🚀 **Always-On Optimization** - Reduced memory usage, resistant to being killed by Android OS
 - 🎯 **12 Apps Supported** - Messaging, email, and business apps
 - 🌍 **F-Droid Ready** - Open source, no tracking
@@ -40,7 +43,9 @@ You can easily select which apps to mask in the settings screen.
 
 ### Privacy Statement
 
-Your privacy is our top priority. See full [Privacy Policy](PRIVACY.md) for details.
+Your privacy is our top priority in every daily situation. See full [Privacy Policy](PRIVACY.md) for details.
+
+KyuubiMask protects your notifications everywhere—in crowded trains, at the office, around family, in cafes, or anywhere your phone might be visible to others. It prevents prying eyes from seeing your private messages, emails, and app notifications in all everyday scenarios.
 
 - ❌ **No Internet Permission** - Works completely offline
 - ❌ **No Data Collection** - We don't collect, store, or transmit any data
@@ -52,7 +57,7 @@ Your privacy is our top priority. See full [Privacy Policy](PRIVACY.md) for deta
 ### Installation
 
 #### F-Droid (Recommended)
-Coming soon to F-Droid. Perfect for privacy-conscious users who value open source software.
+Preparing for F-Droid submission. Perfect for privacy-conscious users who value open source software.
 
 #### GitHub Releases
 Download the latest APK from the releases page.
@@ -135,14 +140,17 @@ This project is licensed under the [Apache License 2.0](LICENSE).
 
 ## 日本語
 
-KyuubiMaskは、画面共有やプレゼン中にメッセージング、メール、ビジネスアプリからの機密情報を含む通知をマスクして、プライバシーを保護します。
+KyuubiMaskは、電車の中、職場、家族や友人の近く、カフェなど、日常のあらゆる場面であなたのプライバシーを守ります。肩越しに覗かれる、ロック画面にそのまま表示される、スクリーンショットに写り込むといった日常的なリスクから、機密性の高い通知内容を保護します。通勤中でも、オフィスでも、自宅でリラックスしている時でも、KyuubiMaskがあなたのプライベートメッセージをしっかり守ります。
 
 > **注意**: このプロジェクトには、コード品質とセキュリティ基準を維持しながら開発を加速するため、AI生成コードが含まれています。
 
 ### 特徴
 
 - 🔒 **プライバシー第一** - 完全オフライン、データ収集なし
-- 🦊 **通知のマスキング** - 機密情報を画面共有から保護
+- 👀 **肩越し覗き見防止** - 他人に通知内容を見られないように保護
+- 📱 **ロック画面プライバシー** - 画面ロック時も機密情報を隠す
+- 📸 **スクリーンショット漏洩防止** - マスクされた通知は画面キャプチャでも安全
+- 🦊 **スマート通知マスキング** - 機密情報を自動的に一般的なテキストに置き換え
 - 🚀 **常時起動最適化** - メモリ使用量を削減し、終了されにくい設計
 - 🎯 **12個のアプリに対応** - メッセージ、メール、ビジネスアプリ
 - 🌍 **F-Droid準拠** - オープンソース、トラッキングなし
@@ -164,7 +172,9 @@ KyuubiMaskは、画面共有やプレゼン中にメッセージング、メー�
 
 ### プライバシーステートメント
 
-お客様のプライバシーが最優先事項です。詳細は [プライバシーポリシー](PRIVACY.md) をご覧ください。
+お客様のプライバシーが日常のあらゆる場面で最優先事項です。詳細は [プライバシーポリシー](PRIVACY.md) をご覧ください。
+
+KyuubiMaskは、満員電車、オフィス、家族の近く、カフェなど、スマートフォンが他人の目に触れる可能性があるあらゆる場所で通知を保護します。プライベートメッセージ、メール、アプリ通知を覗き見から守り、日常的なシーンでのプライバシー漏洩を防ぎます。
 
 - ❌ **インターネット権限なし** - 完全オフライン動作
 - ❌ **データ収集なし** - データの収集、保存、送信は一切行いません
@@ -176,7 +186,7 @@ KyuubiMaskは、画面共有やプレゼン中にメッセージング、メー�
 ### インストール
 
 #### F-Droid (推奨)
-F-Droidでの公開準備中です。完全にオープンソースで、プライバシーを重視するユーザーに最適です。
+F-Droid申請準備中です。完全にオープンソースで、プライバシーを重視するユーザーに最適です。
 
 #### GitHub Releases
 リリースページから最新のAPKをダウンロードできます。
