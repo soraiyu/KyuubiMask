@@ -17,6 +17,21 @@
    - Android 8.0 (API 26) 以上
    - 開発者オプションが有効
 
+### dev container での Tailscale 利用（任意）
+
+systemd なしの dev container で Tailscale を使う場合は、次の補助スクリプトを使用してください。
+
+```bash
+# Tailscale の開始/再接続
+./scripts/tailscale-up.sh
+
+# Tailscale から切断
+./scripts/tailscale-down.sh
+
+# ローカル tailscaled デーモン停止
+./scripts/tailscaled-stop.sh
+```
+
 ## ビルド手順
 
 ### 1. コマンドラインからビルド
