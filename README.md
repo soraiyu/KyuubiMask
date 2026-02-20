@@ -122,6 +122,21 @@ These optimizations ensure the notification masking feature remains active while
 ./gradlew connectedAndroidTest
 ```
 
+#### Tailscale Helpers (dev container)
+
+If you're using this repository in a dev container without systemd, use these helper scripts:
+
+```bash
+# Start/reconnect Tailscale
+./scripts/tailscale-up.sh
+
+# Disconnect from Tailscale
+./scripts/tailscale-down.sh
+
+# Stop local tailscaled daemon
+./scripts/tailscaled-stop.sh
+```
+
 ### Questions, Support & Contributions
 
 Feel free to reach out with questions, suggestions, or ideas!
@@ -249,6 +264,21 @@ APKは `app/build/outputs/apk/debug/app-debug.apk` に生成されます。
 
 # インストルメントテストの実行（エミュレーター/実機が必要）
 ./gradlew connectedAndroidTest
+```
+
+#### Tailscale補助スクリプト（dev container向け）
+
+このリポジトリを systemd なしの dev container で使う場合は、次のスクリプトを利用してください。
+
+```bash
+# Tailscale の開始/再接続
+./scripts/tailscale-up.sh
+
+# Tailscale から切断
+./scripts/tailscale-down.sh
+
+# ローカル tailscaled デーモン停止
+./scripts/tailscaled-stop.sh
 ```
 
 ### 質問・相談・コントリビューション
