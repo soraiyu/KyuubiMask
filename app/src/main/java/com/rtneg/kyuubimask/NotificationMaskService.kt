@@ -15,20 +15,16 @@
  */
 package com.rtneg.kyuubimask
 
-import android.Manifest
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.os.Build
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
-import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import com.rtneg.kyuubimask.data.PreferencesRepository
-import java.util.Objects
 
 /**
  * NotificationMaskService - Core notification masking service
@@ -50,9 +46,6 @@ class NotificationMaskService : NotificationListenerService() {
     private lateinit var prefsRepository: PreferencesRepository
 
     companion object {
-        // Tag to identify masked notifications and prevent re-masking
-        private const val MASKED_TAG = "kyuubimask_masked"
-        
         // Foreground service notification channel and ID
         private const val FOREGROUND_CHANNEL_ID = "kyuubimask_service"
         private const val FOREGROUND_NOTIFICATION_ID = 1001
@@ -129,112 +122,15 @@ class NotificationMaskService : NotificationListenerService() {
         if (packageName == this.packageName) return
         
         // Skip already masked notifications
-        if (sbn.tag == MASKED_TAG) return
+        if (sbn.tag == NotificationMaskStrategy.MASKED_TAG) return
 
         // Check if service is enabled
         if (!prefsRepository.isServiceEnabled) return
 
         // Check if this app should be masked
         if (prefsRepository.isAppMasked(packageName)) {
-            maskNotification(sbn)
+        // Delegate to strategy registry for app-specific masking
+            NotificationMaskStrategyRegistry.findStrategy(packageName)?.mask(sbn, this)
         }
-    }
-
-    /**
-     * Masks a notification by canceling original and posting a generic one
-     * PRIVACY: No content from original notification is logged or stored
-     */
-    private fun maskNotification(sbn: StatusBarNotification) {
-        // Check POST_NOTIFICATIONS permission for Android 13+
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
-                != PackageManager.PERMISSION_GRANTED) {
-                return
-            }
-        }
-        
-        val packageName = sbn.packageName
-        
-        // Cancel the original notification
-        cancelNotification(sbn.key)
-
-        // Get app name for the masked notification title
-        val appName = try {
-            val appInfo = packageManager.getApplicationInfo(sbn.packageName, 0)
-            packageManager.getApplicationLabel(appInfo).toString()
-        } catch (e: Exception) {
-            "App" // Fallback if app name can't be retrieved
-        }
-
-        // Generate unique notification ID
-        val notificationId = generateNotificationId(sbn)
-
-        // Create PendingIntent to open the masked app when notification is tapped
-        // Uses original notification's contentIntent to enable deep linking (e.g., specific chat/message)
-        // PRIVACY: PendingIntent is opaque; notification content remains masked
-        // LIMITATION: Deep link may indirectly reveal context (acceptable UX trade-off)
-        // SECURITY: Safe because sbn.packageName is verified in onNotificationPosted() before calling maskNotification()
-        val contentIntent = sbn.notification.contentIntent ?: run {
-            val launchIntent = packageManager.getLaunchIntentForPackage(packageName)
-            if (launchIntent != null) {
-                // Set flags to bring app to front or reuse existing instance
-                launchIntent.addFlags(
-                    Intent.FLAG_ACTIVITY_NEW_TASK or 
-                    Intent.FLAG_ACTIVITY_CLEAR_TOP or
-                    Intent.FLAG_ACTIVITY_SINGLE_TOP
-                )
-                
-                // Create PendingIntent with appropriate flags for the Android version
-                val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-                } else {
-                    PendingIntent.FLAG_UPDATE_CURRENT
-                }
-                
-                // Use notification ID as request code to ensure uniqueness per notification
-                PendingIntent.getActivity(this, notificationId, launchIntent, flags)
-            } else {
-                null
-            }
-        }
-
-        // Build masked notification
-        // PRIVACY: Generic text only, no original content
-        val maskedNotification = NotificationCompat.Builder(this, KyuubiMaskApp.CHANNEL_ID)
-            .setContentTitle(appName)
-            .setContentText(getString(R.string.masked_text))
-            .setSmallIcon(R.drawable.ic_mask)
-            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-            .setVisibility(NotificationCompat.VISIBILITY_PRIVATE)
-            .setAutoCancel(true)
-            .apply {
-                contentIntent?.let { setContentIntent(it) }
-                
-                // Preserve original sort key if available
-                sbn.notification.sortKey?.let { setSortKey(it) }
-                
-                // Apply sound and vibration settings based on user preferences
-                var defaults = Notification.DEFAULT_LIGHTS // Always use default lights
-                if (prefsRepository.notificationSound) {
-                    defaults = defaults or Notification.DEFAULT_SOUND
-                }
-                if (prefsRepository.notificationVibrate) {
-                    defaults = defaults or Notification.DEFAULT_VIBRATE
-                }
-                setDefaults(defaults)
-            }
-            .build()
-
-        // Post the masked notification with unique ID
-        val manager = getSystemService(NOTIFICATION_SERVICE) as android.app.NotificationManager
-        manager.notify(MASKED_TAG, notificationId, maskedNotification)
-    }
-    
-    /**
-     * Generate a unique notification ID from StatusBarNotification
-     * Uses Objects.hash to prevent collisions
-     */
-    private fun generateNotificationId(sbn: StatusBarNotification): Int {
-        return Objects.hash(sbn.packageName, sbn.id, sbn.tag ?: "")
     }
 }
