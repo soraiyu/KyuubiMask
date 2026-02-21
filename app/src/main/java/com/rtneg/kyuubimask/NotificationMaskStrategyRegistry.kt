@@ -30,7 +30,7 @@ import com.rtneg.kyuubimask.strategy.SlackMaskStrategy
  */
 object NotificationMaskStrategyRegistry {
 
-    private val strategies = mutableListOf<NotificationMaskStrategy>()
+    private val strategies = java.util.concurrent.CopyOnWriteArrayList<NotificationMaskStrategy>()
 
     init {
         // 対応アプリのストラテジーを登録する（追加はここに register() を追記するだけ）
