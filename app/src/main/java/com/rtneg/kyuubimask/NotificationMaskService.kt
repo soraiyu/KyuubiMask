@@ -127,10 +127,8 @@ class NotificationMaskService : NotificationListenerService() {
         // Check if service is enabled
         if (!prefsRepository.isServiceEnabled) return
 
-        // Check if this app should be masked
-        if (prefsRepository.isAppMasked(packageName)) {
         // Delegate to strategy registry for app-specific masking
-            NotificationMaskStrategyRegistry.findStrategy(packageName)?.mask(sbn, this)
-        }
+        // The registry is the single source of truth for which apps are masked
+        NotificationMaskStrategyRegistry.findStrategy(packageName)?.mask(sbn, this)
     }
 }

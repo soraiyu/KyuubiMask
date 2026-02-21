@@ -23,7 +23,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
-import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
@@ -69,85 +68,13 @@ class PreferencesRepositoryTest {
     }
 
     @Test
-    fun `default masked apps should contain expected apps`() {
-        val maskedApps = repository.maskedApps
-        
-        // Original apps
-        assertTrue(maskedApps.contains("com.whatsapp"))
-        assertTrue(maskedApps.contains("org.telegram.messenger"))
-        assertTrue(maskedApps.contains("com.google.android.gm"))
-        assertTrue(maskedApps.contains("jp.naver.line.android"))
-        
-        // Newly added messaging apps
-        assertTrue(maskedApps.contains("org.thoughtcrime.securesms")) // Signal
-        assertTrue(maskedApps.contains("com.discord")) // Discord
-        
-        // Newly added email apps
-        assertTrue(maskedApps.contains("com.fsck.k9")) // K-9 Mail
-        
-        // Newly added business apps
-        assertTrue(maskedApps.contains("com.slack")) // Slack
-        assertTrue(maskedApps.contains("com.microsoft.teams")) // Teams
-        assertTrue(maskedApps.contains("us.zoom.videomeetings")) // Zoom
-        assertTrue(maskedApps.contains("com.notion.id")) // Notion
-        assertTrue(maskedApps.contains("com.atlassian.jira.core.ui")) // Jira
-        
-        // Verify total count (12 apps total across all categories)
-        // Note: Original test expected 13, but the DEFAULT_MASKED_APPS list always contained 12 apps
-        assertEquals(12, maskedApps.size)
-    }
-
-    @Test
-    fun `can add app to masked apps`() {
-        val testPackage = "com.test.app"
-        assertFalse(repository.isAppMasked(testPackage))
-
-        repository.addMaskedApp(testPackage)
-        assertTrue(repository.isAppMasked(testPackage))
-    }
-
-    @Test
-    fun `can remove app from masked apps`() {
-        val testPackage = "com.whatsapp"
-        assertTrue(repository.isAppMasked(testPackage))
-
-        repository.removeMaskedApp(testPackage)
-        assertFalse(repository.isAppMasked(testPackage))
-    }
-
-    @Test
-    fun `adding same app twice should not duplicate`() {
-        val testPackage = "com.test.app"
-        repository.addMaskedApp(testPackage)
-        val sizeAfterFirst = repository.maskedApps.size
-
-        repository.addMaskedApp(testPackage)
-        val sizeAfterSecond = repository.maskedApps.size
-
-        assertEquals(sizeAfterFirst, sizeAfterSecond)
-    }
-
-    @Test
-    fun `can set custom masked apps list`() {
-        val customApps = setOf("com.custom1", "com.custom2")
-        repository.maskedApps = customApps
-
-        assertEquals(customApps, repository.maskedApps)
-        assertTrue(repository.isAppMasked("com.custom1"))
-        assertTrue(repository.isAppMasked("com.custom2"))
-        assertFalse(repository.isAppMasked("com.whatsapp"))
-    }
-
-    @Test
     fun `preferences persist across repository instances`() {
         repository.isServiceEnabled = false
-        repository.addMaskedApp("com.test.persistent")
 
         // Create new repository instance
         val newRepository = PreferencesRepository(context)
 
         assertFalse(newRepository.isServiceEnabled)
-        assertTrue(newRepository.isAppMasked("com.test.persistent"))
     }
     
     @Test
