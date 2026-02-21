@@ -45,6 +45,18 @@ import java.util.Objects
  */
 abstract class AbstractMaskStrategy : NotificationMaskStrategy {
 
+    // PreferencesRepository はストラテジーインスタンスごとに初回呼び出し時のみ生成する
+    // applicationContext を使用してサービス Context のリークを防ぐ
+    @Volatile
+    private var prefsRepository: PreferencesRepository? = null
+
+    private fun getPrefsRepository(context: Context): PreferencesRepository =
+        prefsRepository ?: synchronized(this) {
+            prefsRepository ?: PreferencesRepository(context.applicationContext).also {
+                prefsRepository = it
+            }
+        }
+
     /**
      * マスク後の通知本文テキストを返す
      * アプリ固有のサブクラスでオーバーライドしてカスタマイズ可能
@@ -89,8 +101,8 @@ abstract class AbstractMaskStrategy : NotificationMaskStrategy {
         val contentIntent = sbn.notification.contentIntent
             ?: createLaunchIntent(context, packageName, notificationId)
 
-        // ユーザー設定（サウンド・バイブレーション）を取得
-        val prefsRepository = PreferencesRepository(context)
+        // ユーザー設定（サウンド・バイブレーション）を初回のみ生成したリポジトリから取得
+        val prefsRepository = getPrefsRepository(context)
 
         // マスク済み通知を構築して投稿
         val maskedNotification =
