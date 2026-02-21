@@ -34,6 +34,6 @@ class SlackMaskStrategy : AbstractMaskStrategy() {
         packageName == SLACK_PACKAGE
 
     companion object {
-        const val SLACK_PACKAGE = "com.slack"
+        const val SLACK_PACKAGE = "com.Slack"
     }
 }

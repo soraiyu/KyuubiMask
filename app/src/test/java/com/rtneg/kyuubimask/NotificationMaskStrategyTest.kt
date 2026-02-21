@@ -28,11 +28,12 @@ class NotificationMaskStrategyTest {
 
     @Test
     fun `SlackMaskStrategy canHandle returns true for Slack package`() {
-        assertTrue(SlackMaskStrategy().canHandle("com.slack"))
+        assertTrue(SlackMaskStrategy().canHandle("com.Slack"))
     }
 
     @Test
     fun `SlackMaskStrategy canHandle returns false for other packages`() {
+        assertFalse(SlackMaskStrategy().canHandle("com.slack")) // lowercase must not match
         assertFalse(SlackMaskStrategy().canHandle("com.whatsapp"))
         assertFalse(SlackMaskStrategy().canHandle("jp.naver.line.android"))
         assertFalse(SlackMaskStrategy().canHandle("com.discord"))
@@ -42,13 +43,14 @@ class NotificationMaskStrategyTest {
 
     @Test
     fun `registry returns SlackMaskStrategy for Slack package`() {
-        val strategy = NotificationMaskStrategyRegistry.findStrategy("com.slack")
+        val strategy = NotificationMaskStrategyRegistry.findStrategy("com.Slack")
         assertNotNull(strategy)
         assertTrue(strategy is SlackMaskStrategy)
     }
 
     @Test
     fun `registry returns null for non-Slack packages`() {
+        assertNull(NotificationMaskStrategyRegistry.findStrategy("com.slack")) // lowercase must not match
         assertNull(NotificationMaskStrategyRegistry.findStrategy("com.whatsapp"))
         assertNull(NotificationMaskStrategyRegistry.findStrategy("jp.naver.line.android"))
         assertNull(NotificationMaskStrategyRegistry.findStrategy("com.unknown.app"))
