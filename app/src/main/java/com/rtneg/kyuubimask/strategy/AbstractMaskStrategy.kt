@@ -24,8 +24,10 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
+import android.util.Log
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
+import com.rtneg.kyuubimask.BuildConfig
 import com.rtneg.kyuubimask.KyuubiMaskApp
 import com.rtneg.kyuubimask.NotificationMaskStrategy
 import com.rtneg.kyuubimask.R
@@ -69,6 +71,13 @@ abstract class AbstractMaskStrategy : NotificationMaskStrategy {
         listenerService: NotificationListenerService,
     ): Boolean {
         val context: Context = listenerService
+        val packageName = sbn.packageName
+
+        // Cancel the original notification first, before the permission check.
+        // This ensures the original content is always hidden even when POST_NOTIFICATIONS
+        // permission has not been granted (Android 13+).
+        listenerService.cancelNotification(sbn.key)
+        if (BuildConfig.DEBUG) Log.d(TAG, "Cancelled original notification from $packageName")
 
         // Android 13 以上では POST_NOTIFICATIONS 権限を確認
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -77,14 +86,10 @@ abstract class AbstractMaskStrategy : NotificationMaskStrategy {
                     Manifest.permission.POST_NOTIFICATIONS,
                 ) != PackageManager.PERMISSION_GRANTED
             ) {
+                if (BuildConfig.DEBUG) Log.w(TAG, "POST_NOTIFICATIONS permission not granted – masked notification not posted")
                 return false
             }
         }
-
-        val packageName = sbn.packageName
-
-        // 元の通知をキャンセル
-        listenerService.cancelNotification(sbn.key)
 
         // アプリ名を取得（失敗時は "App" にフォールバック）
         val appName = try {
@@ -110,6 +115,7 @@ abstract class AbstractMaskStrategy : NotificationMaskStrategy {
         val manager =
             context.getSystemService(Context.NOTIFICATION_SERVICE) as android.app.NotificationManager
         manager.notify(NotificationMaskStrategy.MASKED_TAG, notificationId, maskedNotification)
+        if (BuildConfig.DEBUG) Log.d(TAG, "Posted masked notification for $appName ($packageName)")
 
         return true
     }
@@ -167,5 +173,9 @@ abstract class AbstractMaskStrategy : NotificationMaskStrategy {
             PendingIntent.FLAG_UPDATE_CURRENT
         }
         return PendingIntent.getActivity(context, notificationId, launchIntent, flags)
+    }
+
+    companion object {
+        private const val TAG = "KyuubiMask"
     }
 }

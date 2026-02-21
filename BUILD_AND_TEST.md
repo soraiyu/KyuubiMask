@@ -114,52 +114,50 @@ adb install -r app/build/outputs/apk/debug/app-debug.apk
 
 ### 通知マスキングテスト
 
-#### テスト1: WhatsApp の通知をマスクする
+#### テスト1: Slack の通知をマスクする
 
-**前提**: WhatsApp がインストールされている
+**前提**: Slack がインストールされており、通知アクセス権限が付与済み
 
-1. KyuubiMask で "WhatsApp" チップが選択されていることを確認
-2. WhatsApp で誰かにメッセージを送ってもらう（または自分に送る）
+1. KyuubiMask を起動し、ステータスが「🦊 Active & Protecting」であることを確認
+2. Slack でメッセージを受信する（または誰かに送ってもらう）
 3. 通知バーを確認:
-   - ✅ 正常: "WhatsApp" / "New notification" と表示される
-   - ❌ 異常: メッセージ内容が見える
+   - ✅ 正常: 「Slack」/「New notification」と表示される（内容は非表示）
+   - ❌ 異常: メッセージ内容がそのまま見える
 
 #### テスト2: マスキングの無効化
 
-1. KyuubiMask で "Enable Notification Masking" スイッチをオフにする
-2. WhatsApp で再度メッセージを受信
+1. KyuubiMask で「Enable Notification Masking」スイッチをオフにする
+2. Slack で再度メッセージを受信
 3. 通知バーを確認:
-   - ✅ 正常: メッセージ内容がそのまま表示される
-   - ❌ 異常: マスクされている
-
-#### テスト3: アプリごとの設定
-
-1. KyuubiMask で "Telegram" チップをオンにする
-2. WhatsApp と Telegram の両方から通知を受信
-3. 確認:
-   - WhatsApp: マスクされる ✅
-   - Telegram: マスクされる ✅
-4. WhatsApp チップをオフにする
-5. 再度両方から通知を受信
-6. 確認:
-   - WhatsApp: マスクされない ✅
-   - Telegram: マスクされる ✅
+   - ✅ 正常: メッセージ内容がそのまま表示される（マスクされない）
+   - ❌ 異常: まだマスクされている
 
 ### デバッグログの確認（Debug ビルドのみ）
 
-Debug ビルドの場合、アプリ画面下部にリアルタイムログが表示されます：
+Debug ビルドでは `adb logcat` でリアルタイムにマスク処理の流れを確認できます：
+
+```bash
+# KyuubiMask のログのみ表示
+adb logcat -s KyuubiMask
+
+# または全ログをファイルに保存
+adb logcat > debug.log
+```
+
+期待されるログ出力:
 
 ```
-[14:23:45] App started. Waiting for notifications...
-[14:24:10] ✅ Service connected!
-[14:24:32] 🦊 MASKED: com.whatsapp
-[14:24:32] ✅ Masked notification posted for: WhatsApp
+D KyuubiMask: Service created
+D KyuubiMask: Masking notification from com.slack
+D KyuubiMask: Cancelled original notification from com.slack
+D KyuubiMask: Posted masked notification for Slack (com.slack)
 ```
 
 このログで以下を確認:
-- サービスが接続されているか
-- 通知が正しく検出されているか
-- マスキングが実行されているか
+- `Service created` が出ていない → 通知アクセス権限が付与されていない
+- `Masking notification from com.slack` が出ていない → サービスが Slack の通知を受信できていない
+- `POST_NOTIFICATIONS permission not granted` が出ている → Android 13+ で通知権限を付与する必要がある
+- `Cancelled original` は出るが `Posted masked` が出ない → POST_NOTIFICATIONS 権限がない
 
 ## トラブルシューティング
 
@@ -189,11 +187,11 @@ Debug ビルドの場合、アプリ画面下部にリアルタイムログが�
 ### 問題: 通知がマスクされない
 
 **チェックリスト**:
-- [ ] 通知アクセス権限が付与されているか？
-- [ ] サービスが「Active & Protecting」になっているか？
+- [ ] 通知アクセス権限が付与されているか？（"Grant Notification Access" ボタンから設定）
+- [ ] サービスが「🦊 Active & Protecting」になっているか？
 - [ ] マスキングスイッチがオンになっているか？
-- [ ] 対象アプリのチップが選択されているか？
-- [ ] デバッグログに "Service connected" が表示されているか？
+- [ ] Android 13 以上の場合、POST_NOTIFICATIONS 権限が付与されているか？
+- [ ] `adb logcat -s KyuubiMask` でログを確認（Debug ビルドのみ）
 
 **解決策**:
 1. アプリを再起動
@@ -296,9 +294,8 @@ jobs:
 - [ ] ビルドが成功する
 - [ ] アプリが起動する
 - [ ] 通知アクセス権限を付与できる
-- [ ] 通知が正しくマスクされる
+- [ ] Slack の通知が正しくマスクされる（内容が「New notification」になる）
 - [ ] マスキングの有効/無効が切り替えられる
-- [ ] アプリごとの選択が機能する
 - [ ] バッテリー消費が少ない
 - [ ] メモリ使用量が適切
 - [ ] ネットワーク通信が発生しない

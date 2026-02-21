@@ -23,6 +23,7 @@ import android.content.Intent
 import android.os.Build
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.rtneg.kyuubimask.data.PreferencesRepository
 
@@ -49,11 +50,13 @@ class NotificationMaskService : NotificationListenerService() {
         // Foreground service notification channel and ID
         private const val FOREGROUND_CHANNEL_ID = "kyuubimask_service"
         private const val FOREGROUND_NOTIFICATION_ID = 1001
+        private const val TAG = "KyuubiMask"
     }
 
     override fun onCreate() {
         super.onCreate()
         prefsRepository = PreferencesRepository(applicationContext)
+        if (BuildConfig.DEBUG) Log.d(TAG, "Service created")
         
         // Start as foreground service to prevent Android from killing it
         startForeground(FOREGROUND_NOTIFICATION_ID, createForegroundNotification())
@@ -125,10 +128,19 @@ class NotificationMaskService : NotificationListenerService() {
         if (sbn.tag == NotificationMaskStrategy.MASKED_TAG) return
 
         // Check if service is enabled
-        if (!prefsRepository.isServiceEnabled) return
+        if (!prefsRepository.isServiceEnabled) {
+            if (BuildConfig.DEBUG) Log.d(TAG, "Service disabled – skipping $packageName")
+            return
+        }
 
         // Delegate to strategy registry for app-specific masking
         // The registry is the single source of truth for which apps are masked
-        NotificationMaskStrategyRegistry.findStrategy(packageName)?.mask(sbn, this)
+        val strategy = NotificationMaskStrategyRegistry.findStrategy(packageName)
+        if (strategy != null) {
+            if (BuildConfig.DEBUG) Log.d(TAG, "Masking notification from $packageName")
+            strategy.mask(sbn, this)
+        } else {
+            if (BuildConfig.DEBUG) Log.d(TAG, "No strategy for $packageName – passing through")
+        }
     }
 }
