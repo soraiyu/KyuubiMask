@@ -15,38 +15,31 @@
  */
 package com.rtneg.kyuubimask
 
-import com.rtneg.kyuubimask.strategy.DefaultMaskStrategy
-import com.rtneg.kyuubimask.strategy.LineMaskStrategy
-import com.rtneg.kyuubimask.strategy.WhatsAppMaskStrategy
+import com.rtneg.kyuubimask.strategy.SlackMaskStrategy
 
 /**
  * 通知マスク戦略のレジストリ（シングルトン）
  *
+ * 現在は Slack のみを対象とする。
  * 新しいアプリ対応を追加する方法:
  * 1. AbstractMaskStrategy を継承したクラスを作成（例: DiscordMaskStrategy）
  * 2. この init ブロックに register(DiscordMaskStrategy()) を追加
- *    ※ DefaultMaskStrategy より前に登録すること
  *
  * ストラテジーは登録順に検索され、最初にマッチしたものが使用される。
+ * 登録されていないアプリの通知はマスクされずそのまま表示される。
  */
 object NotificationMaskStrategyRegistry {
 
     private val strategies = mutableListOf<NotificationMaskStrategy>()
 
     init {
-        // アプリ固有のストラテジーを先に登録（追加はここに register() を追記するだけ）
-        register(WhatsAppMaskStrategy())
-        register(LineMaskStrategy())
+        // 対応アプリのストラテジーを登録する（追加はここに register() を追記するだけ）
+        register(SlackMaskStrategy())
         // 例: register(DiscordMaskStrategy())
-        // 例: register(XMaskStrategy())
-
-        // フォールバック用のデフォルトストラテジーは必ず最後に登録
-        register(DefaultMaskStrategy())
     }
 
     /**
      * 新しいストラテジーを登録する
-     * DefaultMaskStrategy より前に呼び出すこと
      */
     fun register(strategy: NotificationMaskStrategy) {
         strategies.add(strategy)
@@ -55,7 +48,7 @@ object NotificationMaskStrategyRegistry {
     /**
      * パッケージ名に対応するストラテジーを検索する
      * 登録順に検索し、最初にマッチしたものを返す
-     * DefaultMaskStrategy が登録されている限り null にはならない
+     * 対応するストラテジーがない場合は null を返す（通知はマスクされない）
      */
     fun findStrategy(packageName: String): NotificationMaskStrategy? =
         strategies.firstOrNull { it.canHandle(packageName) }

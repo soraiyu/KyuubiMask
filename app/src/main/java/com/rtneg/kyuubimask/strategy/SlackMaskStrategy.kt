@@ -16,10 +16,10 @@
 package com.rtneg.kyuubimask.strategy
 
 /**
- * WhatsApp 専用のマスク戦略
+ * Slack 専用のマスク戦略
  *
- * WhatsApp は MessagingStyle を使った複雑な通知形式を持つため、
- * 専用ストラテジーで将来的な拡張に備えている。
+ * Slack はチャンネル名・送信者名・メッセージ本文が通知に含まれるため、
+ * プライバシー保護の観点から通知内容をマスクする。
  * 現時点では AbstractMaskStrategy の汎用マスク処理を使用する。
  *
  * 新しいアプリを追加する場合の参考実装:
@@ -28,12 +28,12 @@ package com.rtneg.kyuubimask.strategy
  * 3. 必要に応じて getMaskedText() や buildMaskedNotification() をオーバーライド
  * 4. NotificationMaskStrategyRegistry の init ブロックに register() を追加
  */
-class WhatsAppMaskStrategy : AbstractMaskStrategy() {
+class SlackMaskStrategy : AbstractMaskStrategy() {
 
     override fun canHandle(packageName: String): Boolean =
-        packageName == WHATSAPP_PACKAGE
+        packageName == SLACK_PACKAGE
 
     companion object {
-        const val WHATSAPP_PACKAGE = "com.whatsapp"
+        const val SLACK_PACKAGE = "com.slack"
     }
 }
