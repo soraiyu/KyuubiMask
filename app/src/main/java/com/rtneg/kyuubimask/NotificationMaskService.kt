@@ -25,6 +25,7 @@ import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import android.util.Log
 import androidx.core.app.NotificationCompat
+import com.rtneg.kyuubimask.data.DebugLogRepository
 import com.rtneg.kyuubimask.data.PreferencesRepository
 
 /**
@@ -56,7 +57,10 @@ class NotificationMaskService : NotificationListenerService() {
     override fun onCreate() {
         super.onCreate()
         prefsRepository = PreferencesRepository(applicationContext)
-        if (BuildConfig.DEBUG) Log.d(TAG, "Service created")
+        if (BuildConfig.DEBUG) {
+            Log.d(TAG, "Service created")
+            DebugLogRepository.add("Service started")
+        }
         
         // Start as foreground service to prevent Android from killing it
         startForeground(FOREGROUND_NOTIFICATION_ID, createForegroundNotification())
@@ -129,7 +133,10 @@ class NotificationMaskService : NotificationListenerService() {
 
         // Check if service is enabled
         if (!prefsRepository.isServiceEnabled) {
-            if (BuildConfig.DEBUG) Log.d(TAG, "Service disabled – skipping $packageName")
+            if (BuildConfig.DEBUG) {
+                Log.d(TAG, "Service disabled – skipping $packageName")
+                DebugLogRepository.add("Disabled – skipped: $packageName")
+            }
             return
         }
 
@@ -137,10 +144,16 @@ class NotificationMaskService : NotificationListenerService() {
         // The registry is the single source of truth for which apps are masked
         val strategy = NotificationMaskStrategyRegistry.findStrategy(packageName)
         if (strategy != null) {
-            if (BuildConfig.DEBUG) Log.d(TAG, "Masking notification from $packageName")
+            if (BuildConfig.DEBUG) {
+                Log.d(TAG, "Masking notification from $packageName")
+                DebugLogRepository.add("Masking: $packageName")
+            }
             strategy.mask(sbn, this)
         } else {
-            if (BuildConfig.DEBUG) Log.d(TAG, "No strategy for $packageName – passing through")
+            if (BuildConfig.DEBUG) {
+                Log.d(TAG, "No strategy for $packageName – passing through")
+                DebugLogRepository.add("Pass-through: $packageName")
+            }
         }
     }
 }

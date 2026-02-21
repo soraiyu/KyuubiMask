@@ -134,30 +134,30 @@ adb install -r app/build/outputs/apk/debug/app-debug.apk
 
 ### デバッグログの確認（Debug ビルドのみ）
 
-Debug ビルドでは `adb logcat` でリアルタイムにマスク処理の流れを確認できます：
+Debug ビルドでは、設定画面の下部に **Debug Log** パネルが自動的に表示されます。
+ADB / logcat を使わずに、アプリ内でリアルタイムにマスキング動作を確認できます。
 
-```bash
-# KyuubiMask のログのみ表示
-adb logcat -s KyuubiMask
+#### パネルの見かた
 
-# または全ログをファイルに保存
-adb logcat > debug.log
-```
+| 表示例 | 意味 |
+|---|---|
+| `[14:23:45] Service started` | サービスが起動した |
+| `[14:24:32] Masking: com.slack` | Slack 通知を検出してマスク開始 |
+| `[14:24:32] Cancelled: com.slack` | 元の通知をキャンセルした |
+| `[14:24:32] ✅ Masked: Slack (com.slack)` | マスク通知の投稿に成功 |
+| `[14:24:32] Pass-through: com.other.app` | 対象外アプリ（スルー） |
+| `[14:24:32] Disabled – skipped: com.slack` | サービスが無効のためスキップ |
+| `[14:24:32] ERROR: POST_NOTIFICATIONS not granted` | 通知権限が未付与（要対応） |
 
-期待されるログ出力:
+#### 操作
+- パネルは1秒ごとに自動更新される
+- **Clear** ボタンでログをリセットできる
+- 最新50件まで保持（超えると古いものから削除）
 
-```
-D KyuubiMask: Service created
-D KyuubiMask: Masking notification from com.slack
-D KyuubiMask: Cancelled original notification from com.slack
-D KyuubiMask: Posted masked notification for Slack (com.slack)
-```
+**注意**: プライバシー保護のため、通知の本文・送信者名・チャンネル名などは記録されません。
+パッケージ名とイベント種別のみが記録されます。
 
-このログで以下を確認:
-- `Service created` が出ていない → 通知アクセス権限が付与されていない
-- `Masking notification from com.slack` が出ていない → サービスが Slack の通知を受信できていない
-- `POST_NOTIFICATIONS permission not granted` が出ている → Android 13+ で通知権限を付与する必要がある
-- `Cancelled original` は出るが `Posted masked` が出ない → POST_NOTIFICATIONS 権限がない
+Release ビルドではこのパネルは表示されません。
 
 ## トラブルシューティング
 
@@ -191,7 +191,7 @@ D KyuubiMask: Posted masked notification for Slack (com.slack)
 - [ ] サービスが「🦊 Active & Protecting」になっているか？
 - [ ] マスキングスイッチがオンになっているか？
 - [ ] Android 13 以上の場合、POST_NOTIFICATIONS 権限が付与されているか？
-- [ ] `adb logcat -s KyuubiMask` でログを確認（Debug ビルドのみ）
+- [ ] Debug ビルドの場合、設定画面下部の **Debug Log** パネルにエラーが出ていないか？
 
 **解決策**:
 1. アプリを再起動

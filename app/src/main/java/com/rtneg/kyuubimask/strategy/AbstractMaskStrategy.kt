@@ -31,6 +31,7 @@ import com.rtneg.kyuubimask.BuildConfig
 import com.rtneg.kyuubimask.KyuubiMaskApp
 import com.rtneg.kyuubimask.NotificationMaskStrategy
 import com.rtneg.kyuubimask.R
+import com.rtneg.kyuubimask.data.DebugLogRepository
 import com.rtneg.kyuubimask.data.PreferencesRepository
 import java.util.Objects
 
@@ -77,7 +78,10 @@ abstract class AbstractMaskStrategy : NotificationMaskStrategy {
         // This ensures the original content is always hidden even when POST_NOTIFICATIONS
         // permission has not been granted (Android 13+).
         listenerService.cancelNotification(sbn.key)
-        if (BuildConfig.DEBUG) Log.d(TAG, "Cancelled original notification from $packageName")
+        if (BuildConfig.DEBUG) {
+            Log.d(TAG, "Cancelled original notification from $packageName")
+            DebugLogRepository.add("Cancelled: $packageName")
+        }
 
         // Android 13 以上では POST_NOTIFICATIONS 権限を確認
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -86,7 +90,10 @@ abstract class AbstractMaskStrategy : NotificationMaskStrategy {
                     Manifest.permission.POST_NOTIFICATIONS,
                 ) != PackageManager.PERMISSION_GRANTED
             ) {
-                if (BuildConfig.DEBUG) Log.w(TAG, "POST_NOTIFICATIONS permission not granted – masked notification not posted")
+                if (BuildConfig.DEBUG) {
+                    Log.w(TAG, "POST_NOTIFICATIONS permission not granted – masked notification not posted")
+                    DebugLogRepository.add("ERROR: POST_NOTIFICATIONS not granted")
+                }
                 return false
             }
         }
@@ -115,7 +122,10 @@ abstract class AbstractMaskStrategy : NotificationMaskStrategy {
         val manager =
             context.getSystemService(Context.NOTIFICATION_SERVICE) as android.app.NotificationManager
         manager.notify(NotificationMaskStrategy.MASKED_TAG, notificationId, maskedNotification)
-        if (BuildConfig.DEBUG) Log.d(TAG, "Posted masked notification for $appName ($packageName)")
+        if (BuildConfig.DEBUG) {
+            Log.d(TAG, "Posted masked notification for $appName ($packageName)")
+            DebugLogRepository.add("✅ Masked: $appName ($packageName)")
+        }
 
         return true
     }

@@ -22,11 +22,15 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.provider.Settings
+import android.view.View
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import com.rtneg.kyuubimask.data.DebugLogRepository
 import com.rtneg.kyuubimask.data.PreferencesRepository
 import com.rtneg.kyuubimask.databinding.ActivitySettingsBinding
 
@@ -39,6 +43,19 @@ class SettingsActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivitySettingsBinding
     private lateinit var prefsRepository: PreferencesRepository
+
+    // Debug log polling (DEBUG builds only)
+    private val debugHandler = Handler(Looper.getMainLooper())
+    private val debugRefreshRunnable = object : Runnable {
+        override fun run() {
+            refreshDebugLog()
+            debugHandler.postDelayed(this, DEBUG_POLL_INTERVAL_MS)
+        }
+    }
+
+    companion object {
+        private const val DEBUG_POLL_INTERVAL_MS = 1000L
+    }
     
     // Request notification permission for Android 13+
     private val requestPermissionLauncher = registerForActivityResult(
@@ -73,6 +90,15 @@ class SettingsActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         updateServiceStatus()
+        if (BuildConfig.DEBUG) {
+            refreshDebugLog()
+            debugHandler.postDelayed(debugRefreshRunnable, DEBUG_POLL_INTERVAL_MS)
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        debugHandler.removeCallbacks(debugRefreshRunnable)
     }
     
     /**
@@ -142,6 +168,25 @@ class SettingsActivity : AppCompatActivity() {
         // Permission button
         binding.btnPermission.setOnClickListener {
             openNotificationListenerSettings()
+        }
+
+        // Debug log panel (DEBUG builds only)
+        if (BuildConfig.DEBUG) {
+            binding.cardDebugLog.visibility = View.VISIBLE
+            binding.btnClearLog.setOnClickListener {
+                DebugLogRepository.clear()
+                refreshDebugLog()
+            }
+        }
+    }
+
+    /** Refresh the in-app debug log display from the in-memory buffer. */
+    private fun refreshDebugLog() {
+        val entries = DebugLogRepository.entries()
+        binding.tvDebugLog.text = if (entries.isEmpty()) {
+            getString(R.string.debug_waiting)
+        } else {
+            entries.joinToString("\n")
         }
     }
 
