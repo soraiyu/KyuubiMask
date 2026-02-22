@@ -18,7 +18,7 @@ Description: |-
   Features:
   * Complete offline operation - no internet permission
   * No data storage or logging
-  * Masks notifications from messaging and business apps
+  * Masks notifications from Slack
   * Open source with Apache 2.0 license
   * No tracking, analytics, or ads
   

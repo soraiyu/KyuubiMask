@@ -64,7 +64,7 @@ Download the latest APK from the releases page.
 2. Open the app
 3. Tap "Grant Notification Access"
 4. Enable KyuubiMask in the settings screen
-5. Send a notification from a target app (e.g., WhatsApp)
+5. Send a notification from a target app (e.g., Slack)
 6. Verify that the notification content is replaced with "New notification"
 
 ### Building from Source
@@ -202,7 +202,7 @@ F-Droid申請準備中です。完全にオープンソースで、プライバ�
 2. アプリを開く
 3. 「Grant Notification Access」をタップ
 4. 設定画面でKyuubiMaskを有効化
-5. マスク対象アプリ（WhatsApp等）から通知を送信
+5. マスク対象アプリ（Slack等）から通知を送信
 6. 通知内容が「New notification」に置き換わることを確認
 
 ### ソースからのビルド
