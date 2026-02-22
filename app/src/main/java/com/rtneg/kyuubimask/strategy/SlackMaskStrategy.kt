@@ -16,17 +16,17 @@
 package com.rtneg.kyuubimask.strategy
 
 /**
- * Slack 専用のマスク戦略
+ * Masking strategy dedicated to Slack.
  *
- * Slack はチャンネル名・送信者名・メッセージ本文が通知に含まれるため、
- * プライバシー保護の観点から通知内容をマスクする。
- * 現時点では AbstractMaskStrategy の汎用マスク処理を使用する。
+ * Since Slack notifications contain channel names, sender names, and message bodies,
+ * their content is masked to protect user privacy.
+ * Currently uses the generic masking logic of AbstractMaskStrategy.
  *
- * 新しいアプリを追加する場合の参考実装:
- * 1. AbstractMaskStrategy を継承したクラスを作成（このファイルをコピーして編集）
- * 2. canHandle() で対象パッケージ名を返す
- * 3. 必要に応じて getMaskedText() や buildMaskedNotification() をオーバーライド
- * 4. NotificationMaskStrategyRegistry の init ブロックに register() を追加
+ * Reference implementation for adding support for new apps:
+ * 1. Create a class extending AbstractMaskStrategy (copy and edit this file)
+ * 2. Return the target package name in canHandle()
+ * 3. Override getMaskedText() or buildMaskedNotification() as needed
+ * 4. Add register() to the init block of NotificationMaskStrategyRegistry
  */
 class SlackMaskStrategy : AbstractMaskStrategy() {
 

@@ -18,37 +18,37 @@ package com.rtneg.kyuubimask
 import com.rtneg.kyuubimask.strategy.SlackMaskStrategy
 
 /**
- * 通知マスク戦略のレジストリ（シングルトン）
+ * Registry of notification masking strategies (singleton).
  *
- * 現在は Slack のみを対象とする。
- * 新しいアプリ対応を追加する方法:
- * 1. AbstractMaskStrategy を継承したクラスを作成（例: DiscordMaskStrategy）
- * 2. この init ブロックに register(DiscordMaskStrategy()) を追加
+ * Currently only Slack is targeted.
+ * How to add support for a new app:
+ * 1. Create a class extending AbstractMaskStrategy (e.g., DiscordMaskStrategy)
+ * 2. Add register(DiscordMaskStrategy()) to this init block
  *
- * ストラテジーは登録順に検索され、最初にマッチしたものが使用される。
- * 登録されていないアプリの通知はマスクされずそのまま表示される。
+ * Strategies are searched in registration order; the first match is used.
+ * Notifications from unregistered apps are passed through without masking.
  */
 object NotificationMaskStrategyRegistry {
 
     private val strategies = java.util.concurrent.CopyOnWriteArrayList<NotificationMaskStrategy>()
 
     init {
-        // 対応アプリのストラテジーを登録する（追加はここに register() を追記するだけ）
+        // Register strategies for supported apps (just append register() calls here to add more)
         register(SlackMaskStrategy())
-        // 例: register(DiscordMaskStrategy())
+        // e.g.: register(DiscordMaskStrategy())
     }
 
     /**
-     * 新しいストラテジーを登録する
+     * Registers a new strategy.
      */
     fun register(strategy: NotificationMaskStrategy) {
         strategies.add(strategy)
     }
 
     /**
-     * パッケージ名に対応するストラテジーを検索する
-     * 登録順に検索し、最初にマッチしたものを返す
-     * 対応するストラテジーがない場合は null を返す（通知はマスクされない）
+     * Finds the strategy for the given package name.
+     * Searches in registration order and returns the first match.
+     * Returns null if no strategy is registered for the package (notification passes through unmasked).
      */
     fun findStrategy(packageName: String): NotificationMaskStrategy? =
         strategies.firstOrNull { it.canHandle(packageName) }
