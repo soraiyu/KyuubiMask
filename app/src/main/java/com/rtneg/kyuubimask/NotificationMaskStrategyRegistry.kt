@@ -35,7 +35,7 @@ object NotificationMaskStrategyRegistry {
     init {
         // Register strategies for supported apps (just append register() calls here to add more)
         register(SlackMaskStrategy())
-        // e.g.: register(DiscordMaskStrategy())
+// e.g., register(DiscordMaskStrategy())
     }
 
     /**
