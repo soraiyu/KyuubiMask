@@ -27,7 +27,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [33])
+@Config(sdk = [33], manifest = Config.NONE)
 class PreferencesRepositoryTest {
 
     private lateinit var context: Context
