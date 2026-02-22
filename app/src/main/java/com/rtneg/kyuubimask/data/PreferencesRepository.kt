@@ -31,32 +31,9 @@ class PreferencesRepository(context: Context) {
     
     companion object {
         const val PREFS_NAME = "kyuubi_prefs"
-        private const val KEY_MASKED_APPS = "masked_apps"
         private const val KEY_SERVICE_ENABLED = "service_enabled"
         private const val KEY_NOTIFICATION_SOUND = "notification_sound"
         private const val KEY_NOTIFICATION_VIBRATE = "notification_vibrate"
-        
-        // Default apps to mask
-        // Privacy-first: Static list only, never fetched from network
-        val DEFAULT_MASKED_APPS = setOf(
-            // Messaging apps
-            "com.whatsapp",              // WhatsApp
-            "org.telegram.messenger",    // Telegram
-            "jp.naver.line.android",     // LINE
-            "org.thoughtcrime.securesms", // Signal
-            "com.discord",               // Discord
-            
-            // Email apps
-            "com.google.android.gm",     // Gmail
-            "com.fsck.k9",               // K-9 Mail (F-Droid recommended)
-            
-            // Business/Productivity apps
-            "com.slack",                 // Slack
-            "com.microsoft.teams",       // Microsoft Teams
-            "us.zoom.videomeetings",     // Zoom
-            "com.notion.id",             // Notion
-            "com.atlassian.jira.core.ui" // Jira
-        )
     }
     
     /**
@@ -91,43 +68,4 @@ class PreferencesRepository(context: Context) {
                 .putBoolean(KEY_NOTIFICATION_VIBRATE, value)
                 .apply()
         }
-    
-    /**
-     * Set of package names for apps whose notifications should be masked
-     */
-    var maskedApps: Set<String>
-        get() = preferences.getStringSet(KEY_MASKED_APPS, DEFAULT_MASKED_APPS) 
-            ?: DEFAULT_MASKED_APPS
-        set(value) {
-            preferences.edit()
-                .putStringSet(KEY_MASKED_APPS, value)
-                .apply()
-        }
-    
-    /**
-     * Check if a specific app's notifications should be masked
-     */
-    fun isAppMasked(packageName: String): Boolean {
-        return packageName in maskedApps
-    }
-    
-    /**
-     * Add an app to the masked apps list
-     */
-    fun addMaskedApp(packageName: String) {
-        val current = maskedApps.toMutableSet()
-        if (current.add(packageName)) {
-            maskedApps = current
-        }
-    }
-    
-    /**
-     * Remove an app from the masked apps list
-     */
-    fun removeMaskedApp(packageName: String) {
-        val current = maskedApps.toMutableSet()
-        if (current.remove(packageName)) {
-            maskedApps = current
-        }
-    }
 }

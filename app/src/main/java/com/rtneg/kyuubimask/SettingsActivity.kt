@@ -22,11 +22,15 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.provider.Settings
+import android.view.View
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import com.rtneg.kyuubimask.data.DebugLogRepository
 import com.rtneg.kyuubimask.data.PreferencesRepository
 import com.rtneg.kyuubimask.databinding.ActivitySettingsBinding
 
@@ -39,6 +43,19 @@ class SettingsActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivitySettingsBinding
     private lateinit var prefsRepository: PreferencesRepository
+
+    // Debug log polling (DEBUG builds only)
+    private val debugHandler = Handler(Looper.getMainLooper())
+    private val debugRefreshRunnable = object : Runnable {
+        override fun run() {
+            refreshDebugLog()
+            debugHandler.postDelayed(this, DEBUG_POLL_INTERVAL_MS)
+        }
+    }
+
+    companion object {
+        private const val DEBUG_POLL_INTERVAL_MS = 1000L
+    }
     
     // Request notification permission for Android 13+
     private val requestPermissionLauncher = registerForActivityResult(
@@ -73,6 +90,15 @@ class SettingsActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         updateServiceStatus()
+        if (BuildConfig.DEBUG) {
+            refreshDebugLog()
+            debugHandler.postDelayed(debugRefreshRunnable, DEBUG_POLL_INTERVAL_MS)
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        debugHandler.removeCallbacks(debugRefreshRunnable)
     }
     
     /**
@@ -144,93 +170,23 @@ class SettingsActivity : AppCompatActivity() {
             openNotificationListenerSettings()
         }
 
-        // App selection chips
-        val maskedApps = prefsRepository.maskedApps.toMutableSet()
-
-        // Messaging Apps
-        // WhatsApp
-        binding.chipWhatsapp.isChecked = prefsRepository.isAppMasked("com.whatsapp")
-        binding.chipWhatsapp.setOnCheckedChangeListener { _, isChecked ->
-            updateMaskedApp("com.whatsapp", isChecked, maskedApps)
-        }
-
-        // Telegram
-        binding.chipTelegram.isChecked = prefsRepository.isAppMasked("org.telegram.messenger")
-        binding.chipTelegram.setOnCheckedChangeListener { _, isChecked ->
-            updateMaskedApp("org.telegram.messenger", isChecked, maskedApps)
-        }
-
-        // LINE
-        binding.chipLine.isChecked = prefsRepository.isAppMasked("jp.naver.line.android")
-        binding.chipLine.setOnCheckedChangeListener { _, isChecked ->
-            updateMaskedApp("jp.naver.line.android", isChecked, maskedApps)
-        }
-
-        // Signal
-        binding.chipSignal.isChecked = prefsRepository.isAppMasked("org.thoughtcrime.securesms")
-        binding.chipSignal.setOnCheckedChangeListener { _, isChecked ->
-            updateMaskedApp("org.thoughtcrime.securesms", isChecked, maskedApps)
-        }
-
-        // Discord
-        binding.chipDiscord.isChecked = prefsRepository.isAppMasked("com.discord")
-        binding.chipDiscord.setOnCheckedChangeListener { _, isChecked ->
-            updateMaskedApp("com.discord", isChecked, maskedApps)
-        }
-
-        // Email Apps
-        // Gmail
-        binding.chipGmail.isChecked = prefsRepository.isAppMasked("com.google.android.gm")
-        binding.chipGmail.setOnCheckedChangeListener { _, isChecked ->
-            updateMaskedApp("com.google.android.gm", isChecked, maskedApps)
-        }
-
-        // K-9 Mail
-        binding.chipK9Mail.isChecked = prefsRepository.isAppMasked("com.fsck.k9")
-        binding.chipK9Mail.setOnCheckedChangeListener { _, isChecked ->
-            updateMaskedApp("com.fsck.k9", isChecked, maskedApps)
-        }
-
-        // Business Apps
-        // Slack
-        binding.chipSlack.isChecked = prefsRepository.isAppMasked("com.slack")
-        binding.chipSlack.setOnCheckedChangeListener { _, isChecked ->
-            updateMaskedApp("com.slack", isChecked, maskedApps)
-        }
-
-        // Teams
-        binding.chipTeams.isChecked = prefsRepository.isAppMasked("com.microsoft.teams")
-        binding.chipTeams.setOnCheckedChangeListener { _, isChecked ->
-            updateMaskedApp("com.microsoft.teams", isChecked, maskedApps)
-        }
-
-        // Zoom
-        binding.chipZoom.isChecked = prefsRepository.isAppMasked("us.zoom.videomeetings")
-        binding.chipZoom.setOnCheckedChangeListener { _, isChecked ->
-            updateMaskedApp("us.zoom.videomeetings", isChecked, maskedApps)
-        }
-
-        // Notion
-        binding.chipNotion.isChecked = prefsRepository.isAppMasked("com.notion.id")
-        binding.chipNotion.setOnCheckedChangeListener { _, isChecked ->
-            updateMaskedApp("com.notion.id", isChecked, maskedApps)
-        }
-
-        // Jira
-        binding.chipJira.isChecked = prefsRepository.isAppMasked("com.atlassian.jira.core.ui")
-        binding.chipJira.setOnCheckedChangeListener { _, isChecked ->
-            updateMaskedApp("com.atlassian.jira.core.ui", isChecked, maskedApps)
+        // Debug log panel (DEBUG builds only)
+        if (BuildConfig.DEBUG) {
+            binding.cardDebugLog.visibility = View.VISIBLE
+            binding.btnClearLog.setOnClickListener {
+                DebugLogRepository.clear()
+                refreshDebugLog()
+            }
         }
     }
 
-    /**
-     * Updates the masked apps set in SharedPreferences
-     */
-    private fun updateMaskedApp(packageName: String, add: Boolean, currentSet: MutableSet<String>) {
-        if (add) {
-            prefsRepository.addMaskedApp(packageName)
+    /** Refresh the in-app debug log display from the in-memory buffer. */
+    private fun refreshDebugLog() {
+        val entries = DebugLogRepository.entries()
+        binding.tvDebugLog.text = if (entries.isEmpty()) {
+            getString(R.string.debug_waiting)
         } else {
-            prefsRepository.removeMaskedApp(packageName)
+            entries.joinToString("\n")
         }
     }
 
