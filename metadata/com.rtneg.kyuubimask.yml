@@ -1,6 +1,5 @@
 Categories:
   - Security
-  - Internet
 License: Apache-2.0
 AuthorName: soraiyu
 SourceCode: https://github.com/soraiyu/KyuubiMask
@@ -29,8 +28,8 @@ Description: |-
   * Works completely offline
   * No Google Play Services or third-party SDKs
   
-  Supported apps include WhatsApp, Telegram, LINE, Gmail, and more.
-  You can select which apps to mask in the settings.
+  Currently supports Slack, with more apps planned.
+  The service can be enabled or disabled in the settings.
   
   Perfect for:
   * Protecting privacy during screen sharing
@@ -53,5 +52,3 @@ AutoUpdateMode: Version
 UpdateCheckMode: Tags
 CurrentVersion: 1.0.0
 CurrentVersionCode: 1
-
-NoSourceSince: ''
