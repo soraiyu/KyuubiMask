@@ -36,20 +36,20 @@ import com.rtneg.kyuubimask.data.PreferencesRepository
 import java.util.Objects
 
 /**
- * マスク処理の共通ロジックを持つ抽象基底クラス
+ * Abstract base class containing common masking logic.
  *
- * 新しいアプリ対応を追加する最小手順:
- * 1. このクラスを継承したクラスを作成（例: DiscordMaskStrategy）
- * 2. canHandle() でパッケージ名を返す
- * 3. NotificationMaskStrategyRegistry の init ブロックに登録する
+ * Minimum steps to add support for a new app:
+ * 1. Create a class extending this class (e.g., DiscordMaskStrategy)
+ * 2. Return the package name in canHandle()
+ * 3. Register it in the init block of NotificationMaskStrategyRegistry
  *
- * 通知テキストや通知全体をカスタマイズしたい場合は
- * getMaskedText() または buildMaskedNotification() をオーバーライドする。
+ * Override getMaskedText() or buildMaskedNotification() to
+ * customize the notification text or the entire masked notification.
  */
 abstract class AbstractMaskStrategy : NotificationMaskStrategy {
 
-    // PreferencesRepository はストラテジーインスタンスごとに初回呼び出し時のみ生成する
-    // applicationContext を使用してサービス Context のリークを防ぐ
+    // PreferencesRepository is created lazily per strategy instance on first use.
+    // Uses applicationContext to avoid leaking the service Context.
     @Volatile
     private var prefsRepository: PreferencesRepository? = null
 
@@ -61,8 +61,8 @@ abstract class AbstractMaskStrategy : NotificationMaskStrategy {
         }
 
     /**
-     * マスク後の通知本文テキストを返す
-     * アプリ固有のサブクラスでオーバーライドしてカスタマイズ可能
+     * Returns the masked notification body text.
+     * Can be overridden in app-specific subclasses for customization.
      */
     protected open fun getMaskedText(context: Context): String =
         context.getString(R.string.masked_text)
@@ -83,7 +83,7 @@ abstract class AbstractMaskStrategy : NotificationMaskStrategy {
             DebugLogRepository.add("Cancelled: $packageName")
         }
 
-        // Android 13 以上では POST_NOTIFICATIONS 権限を確認
+        // Check POST_NOTIFICATIONS permission on Android 13+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ActivityCompat.checkSelfPermission(
                     context,
@@ -98,7 +98,7 @@ abstract class AbstractMaskStrategy : NotificationMaskStrategy {
             }
         }
 
-        // アプリ名を取得（失敗時は "App" にフォールバック）
+        // Get the app name (falls back to "App" on failure)
         val appName = try {
             val appInfo = context.packageManager.getApplicationInfo(packageName, 0)
             context.packageManager.getApplicationLabel(appInfo).toString()
@@ -106,17 +106,17 @@ abstract class AbstractMaskStrategy : NotificationMaskStrategy {
             "App"
         }
 
-        // 通知 ID を生成（パッケージ名・ID・タグの組み合わせで一意化）
+        // Generate notification ID (unique combination of package name, ID, and tag)
         val notificationId = Objects.hash(packageName, sbn.id, sbn.tag ?: "")
 
-        // 元の contentIntent を保持し、なければランチャーインテントを使用
+        // Preserve the original contentIntent; fall back to a launch intent if absent
         val contentIntent = sbn.notification.contentIntent
             ?: createLaunchIntent(context, packageName, notificationId)
 
-        // ユーザー設定（サウンド・バイブレーション）を初回のみ生成したリポジトリから取得
+        // Retrieve user preferences (sound, vibration) from the lazily-created repository
         val prefsRepository = getPrefsRepository(context)
 
-        // マスク済み通知を構築して投稿
+        // Build and post the masked notification
         val maskedNotification =
             buildMaskedNotification(context, sbn, appName, contentIntent, prefsRepository)
         val manager =
@@ -131,8 +131,8 @@ abstract class AbstractMaskStrategy : NotificationMaskStrategy {
     }
 
     /**
-     * マスク済み通知を構築する
-     * 通知全体をカスタマイズしたい場合はサブクラスでオーバーライドする
+     * Builds the masked notification.
+     * Override in a subclass to customize the entire notification.
      */
     protected open fun buildMaskedNotification(
         context: Context,
@@ -141,7 +141,7 @@ abstract class AbstractMaskStrategy : NotificationMaskStrategy {
         contentIntent: PendingIntent?,
         prefsRepository: PreferencesRepository,
     ): Notification {
-        // サウンド・バイブレーション・ライト設定を適用
+        // Apply sound, vibration, and light settings
         var defaults = Notification.DEFAULT_LIGHTS
         if (prefsRepository.notificationSound) defaults = defaults or Notification.DEFAULT_SOUND
         if (prefsRepository.notificationVibrate) defaults = defaults or Notification.DEFAULT_VIBRATE
@@ -156,14 +156,14 @@ abstract class AbstractMaskStrategy : NotificationMaskStrategy {
             .setDefaults(defaults)
             .apply {
                 contentIntent?.let { setContentIntent(it) }
-                // 元の並び替えキーを保持
+                // Preserve the original sort key
                 sbn.notification.sortKey?.let { setSortKey(it) }
             }
             .build()
     }
 
     /**
-     * アプリのランチャーインテントから PendingIntent を作成する
+     * Creates a PendingIntent from the app's launcher intent.
      */
     private fun createLaunchIntent(
         context: Context,

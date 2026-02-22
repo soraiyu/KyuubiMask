@@ -19,27 +19,27 @@ import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 
 /**
- * 通知マスク戦略のインターフェース
+ * Interface for notification masking strategies.
  *
- * アプリごとに通知形式（extras、MessagingStyle 等）が異なるため、
- * Strategy パターンを用いてアプリ固有の処理を分離する。
- * 新しいアプリへの対応は新クラスを作成して Registry に登録するだけでよい。
+ * Since each app has a different notification format (extras, MessagingStyle, etc.),
+ * app-specific processing is separated using the Strategy pattern.
+ * To add support for a new app, create a new class and register it in the Registry.
  */
 interface NotificationMaskStrategy {
 
     companion object {
-        // マスク済み通知を識別するタグ（二重マスク防止に使用）
+        // Tag to identify masked notifications (used to prevent double-masking)
         const val MASKED_TAG = "kyuubimask_masked"
     }
 
     /**
-     * このストラテジーが指定パッケージを処理できるか判定する
+     * Determines whether this strategy can handle the specified package.
      */
     fun canHandle(packageName: String): Boolean
 
     /**
-     * 元の通知をキャンセルし、マスク済み通知を投稿する
-     * @return マスク処理が成功した場合 true
+     * Cancels the original notification and posts a masked version.
+     * @return true if masking succeeded
      */
     fun mask(sbn: StatusBarNotification, listenerService: NotificationListenerService): Boolean
 }
