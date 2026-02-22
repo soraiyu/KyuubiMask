@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-02-22
+
 ### Added
 - Test infrastructure with JUnit and AndroidX Test
 - PreferencesRepository for centralized settings management
@@ -40,5 +42,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Real-time debug log viewer
 - Complete offline operation
 
-[Unreleased]: https://github.com/soraiyu/KyuubiMask/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/soraiyu/KyuubiMask/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/soraiyu/KyuubiMask/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/soraiyu/KyuubiMask/releases/tag/v1.0.0
