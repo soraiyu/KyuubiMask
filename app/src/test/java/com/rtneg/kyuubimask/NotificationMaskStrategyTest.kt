@@ -68,7 +68,7 @@ class NotificationMaskStrategyTest {
 
     @Test
     fun `LineMaskStrategy canHandle returns true for LINE package`() {
-        assertTrue(LineMaskStrategy().canHandle("jp.naver.line.android"))
+        assertTrue(LineMaskStrategy().canHandle(LineMaskStrategy.LINE_PACKAGE))
     }
 
     @Test
