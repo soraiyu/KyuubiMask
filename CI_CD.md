@@ -151,7 +151,7 @@ GitHub Actions でビルドされた APK をローカルにインストール済
 **1. ローカルの debug.keystore を Base64 エンコード**
 
 ```bash
-base64 -w 0 ~/.android/debug.keystore > /tmp/debug_keystore_base64.txt
+# macOS: base64 ~/.android/debug.keystore\nbase64 -w 0 ~/.android/debug.keystore > /tmp/debug_keystore_base64.txt
 ```
 
 **2. GitHub リポジトリのシークレットに追加**
