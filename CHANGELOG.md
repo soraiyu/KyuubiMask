@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-02-23
+
+### Added
+- Notification masking support for **Discord** (`com.discord`)
+- Notification masking support for **WhatsApp** (`com.whatsapp`)
+- Notification masking support for **LINE** (`jp.naver.line.android`)
+- Per-app toggle UI in Settings for Discord, WhatsApp, and LINE
+
 ## [1.1.0] - 2026-02-22
 
 ### Added
@@ -42,6 +50,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Real-time debug log viewer
 - Complete offline operation
 
-[Unreleased]: https://github.com/soraiyu/KyuubiMask/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/soraiyu/KyuubiMask/compare/v1.2.0...HEAD
+[1.2.0]: https://github.com/soraiyu/KyuubiMask/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/soraiyu/KyuubiMask/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/soraiyu/KyuubiMask/releases/tag/v1.0.0
