@@ -96,7 +96,7 @@ class NotificationMaskStrategyTest {
 
     @Test
     fun `registry returns WhatsAppMaskStrategy for WhatsApp package`() {
-        val strategy = NotificationMaskStrategyRegistry.findStrategy("com.whatsapp")
+        val strategy = NotificationMaskStrategyRegistry.findStrategy(WhatsAppMaskStrategy.WHATSAPP_PACKAGE)
         assertNotNull(strategy)
         assertTrue(strategy is WhatsAppMaskStrategy)
     }
