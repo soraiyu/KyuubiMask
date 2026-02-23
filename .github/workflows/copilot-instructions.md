@@ -60,4 +60,4 @@ Make the app work reliably with exactly ONE masked notification per original not
 3. **Simplicity** (minimal code)
 4. **Store-ready** (F-Droid/Play Store compliant)
 
-Always prioritize: Security > Privacy > Simplicity > Features
+Always prioritize: Privacy > Security > Simplicity > Features
