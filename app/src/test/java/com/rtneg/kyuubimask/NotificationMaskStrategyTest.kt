@@ -103,7 +103,7 @@ class NotificationMaskStrategyTest {
 
     @Test
     fun `registry returns LineMaskStrategy for LINE package`() {
-        val strategy = NotificationMaskStrategyRegistry.findStrategy("jp.naver.line.android")
+        val strategy = NotificationMaskStrategyRegistry.findStrategy(LineMaskStrategy.LINE_PACKAGE)
         assertNotNull(strategy)
         assertTrue(strategy is LineMaskStrategy)
     }
