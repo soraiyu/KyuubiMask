@@ -44,7 +44,7 @@ class NotificationMaskStrategyTest {
 
     @Test
     fun `DiscordMaskStrategy canHandle returns true for Discord package`() {
-        assertTrue(DiscordMaskStrategy().canHandle("com.discord"))
+        assertTrue(DiscordMaskStrategy().canHandle(DiscordMaskStrategy.DISCORD_PACKAGE))
     }
 
     @Test
