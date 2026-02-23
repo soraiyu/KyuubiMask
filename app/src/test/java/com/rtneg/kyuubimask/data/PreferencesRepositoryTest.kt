@@ -17,6 +17,10 @@ package com.rtneg.kyuubimask.data
 
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
+import com.rtneg.kyuubimask.strategy.DiscordMaskStrategy
+import com.rtneg.kyuubimask.strategy.LineMaskStrategy
+import com.rtneg.kyuubimask.strategy.SlackMaskStrategy
+import com.rtneg.kyuubimask.strategy.WhatsAppMaskStrategy
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -103,6 +107,40 @@ class PreferencesRepositoryTest {
         
         repository.notificationVibrate = true
         assertTrue(repository.notificationVibrate)
+    }
+
+    @Test
+    fun `default app enabled should be true`() {
+        assertTrue(repository.isAppEnabled(SlackMaskStrategy.SLACK_PACKAGE))
+        assertTrue(repository.isAppEnabled(DiscordMaskStrategy.DISCORD_PACKAGE))
+        assertTrue(repository.isAppEnabled(WhatsAppMaskStrategy.WHATSAPP_PACKAGE))
+        assertTrue(repository.isAppEnabled(LineMaskStrategy.LINE_PACKAGE))
+    }
+
+    @Test
+    fun `can set and get app enabled state`() {
+        repository.setAppEnabled(DiscordMaskStrategy.DISCORD_PACKAGE, false)
+        assertFalse(repository.isAppEnabled(DiscordMaskStrategy.DISCORD_PACKAGE))
+
+        repository.setAppEnabled(DiscordMaskStrategy.DISCORD_PACKAGE, true)
+        assertTrue(repository.isAppEnabled(DiscordMaskStrategy.DISCORD_PACKAGE))
+    }
+
+    @Test
+    fun `app enabled state persists across repository instances`() {
+        repository.setAppEnabled(WhatsAppMaskStrategy.WHATSAPP_PACKAGE, false)
+
+        val newRepository = PreferencesRepository(context)
+        assertFalse(newRepository.isAppEnabled(WhatsAppMaskStrategy.WHATSAPP_PACKAGE))
+    }
+
+    @Test
+    fun `app enabled state is independent per package`() {
+        repository.setAppEnabled(DiscordMaskStrategy.DISCORD_PACKAGE, false)
+
+        assertTrue(repository.isAppEnabled(WhatsAppMaskStrategy.WHATSAPP_PACKAGE))
+        assertTrue(repository.isAppEnabled(LineMaskStrategy.LINE_PACKAGE))
+        assertFalse(repository.isAppEnabled(DiscordMaskStrategy.DISCORD_PACKAGE))
     }
     
     @Test

@@ -15,12 +15,14 @@
  */
 package com.rtneg.kyuubimask
 
+import com.rtneg.kyuubimask.strategy.DiscordMaskStrategy
+import com.rtneg.kyuubimask.strategy.LineMaskStrategy
 import com.rtneg.kyuubimask.strategy.SlackMaskStrategy
+import com.rtneg.kyuubimask.strategy.WhatsAppMaskStrategy
 
 /**
  * Registry of notification masking strategies (singleton).
  *
- * Currently only Slack is targeted.
  * How to add support for a new app:
  * 1. Create a class extending AbstractMaskStrategy (e.g., DiscordMaskStrategy)
  * 2. Add register(DiscordMaskStrategy()) to this init block
@@ -35,7 +37,9 @@ object NotificationMaskStrategyRegistry {
     init {
         // Register strategies for supported apps (just append register() calls here to add more)
         register(SlackMaskStrategy())
-// e.g., register(DiscordMaskStrategy())
+        register(DiscordMaskStrategy())
+        register(WhatsAppMaskStrategy())
+        register(LineMaskStrategy())
     }
 
     /**

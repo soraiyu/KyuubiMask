@@ -33,6 +33,11 @@ import androidx.core.content.ContextCompat
 import com.rtneg.kyuubimask.data.DebugLogRepository
 import com.rtneg.kyuubimask.data.PreferencesRepository
 import com.rtneg.kyuubimask.databinding.ActivitySettingsBinding
+import com.rtneg.kyuubimask.strategy.DiscordMaskStrategy
+import com.rtneg.kyuubimask.strategy.LineMaskStrategy
+import com.rtneg.kyuubimask.strategy.SlackMaskStrategy
+import com.rtneg.kyuubimask.strategy.WhatsAppMaskStrategy
+import com.google.android.material.switchmaterial.SwitchMaterial
 
 /**
  * SettingsActivity - Main UI for configuring KyuubiMask
@@ -165,6 +170,12 @@ class SettingsActivity : AppCompatActivity() {
             prefsRepository.notificationVibrate = isChecked
         }
 
+        // Apps to Mask toggles
+        setupAppSwitch(binding.switchSlack, SlackMaskStrategy.SLACK_PACKAGE)
+        setupAppSwitch(binding.switchDiscord, DiscordMaskStrategy.DISCORD_PACKAGE)
+        setupAppSwitch(binding.switchWhatsApp, WhatsAppMaskStrategy.WHATSAPP_PACKAGE)
+        setupAppSwitch(binding.switchLine, LineMaskStrategy.LINE_PACKAGE)
+
         // Permission button
         binding.btnPermission.setOnClickListener {
             openNotificationListenerSettings()
@@ -187,6 +198,17 @@ class SettingsActivity : AppCompatActivity() {
             getString(R.string.debug_waiting)
         } else {
             entries.joinToString("\n")
+        }
+    }
+
+    /**
+     * Initialises a per-app masking switch: sets the current saved state and
+     * persists any change the user makes.
+     */
+    private fun setupAppSwitch(switch: SwitchMaterial, packageName: String) {
+        switch.isChecked = prefsRepository.isAppEnabled(packageName)
+        switch.setOnCheckedChangeListener { _, isChecked ->
+            prefsRepository.setAppEnabled(packageName, isChecked)
         }
     }
 

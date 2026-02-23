@@ -15,7 +15,10 @@
  */
 package com.rtneg.kyuubimask
 
+import com.rtneg.kyuubimask.strategy.DiscordMaskStrategy
+import com.rtneg.kyuubimask.strategy.LineMaskStrategy
 import com.rtneg.kyuubimask.strategy.SlackMaskStrategy
+import com.rtneg.kyuubimask.strategy.WhatsAppMaskStrategy
 import org.junit.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
@@ -39,6 +42,42 @@ class NotificationMaskStrategyTest {
         assertFalse(SlackMaskStrategy().canHandle("com.discord"))
     }
 
+    @Test
+    fun `DiscordMaskStrategy canHandle returns true for Discord package`() {
+        assertTrue(DiscordMaskStrategy().canHandle(DiscordMaskStrategy.DISCORD_PACKAGE))
+    }
+
+    @Test
+    fun `DiscordMaskStrategy canHandle returns false for other packages`() {
+        assertFalse(DiscordMaskStrategy().canHandle(SlackMaskStrategy.SLACK_PACKAGE))
+        assertFalse(DiscordMaskStrategy().canHandle(WhatsAppMaskStrategy.WHATSAPP_PACKAGE))
+        assertFalse(DiscordMaskStrategy().canHandle("com.unknown.app"))
+    }
+
+    @Test
+    fun `WhatsAppMaskStrategy canHandle returns true for WhatsApp package`() {
+        assertTrue(WhatsAppMaskStrategy().canHandle(WhatsAppMaskStrategy.WHATSAPP_PACKAGE))
+    }
+
+    @Test
+    fun `WhatsAppMaskStrategy canHandle returns false for other packages`() {
+        assertFalse(WhatsAppMaskStrategy().canHandle(SlackMaskStrategy.SLACK_PACKAGE))
+        assertFalse(WhatsAppMaskStrategy().canHandle(DiscordMaskStrategy.DISCORD_PACKAGE))
+        assertFalse(WhatsAppMaskStrategy().canHandle("com.unknown.app"))
+    }
+
+    @Test
+    fun `LineMaskStrategy canHandle returns true for LINE package`() {
+        assertTrue(LineMaskStrategy().canHandle(LineMaskStrategy.LINE_PACKAGE))
+    }
+
+    @Test
+    fun `LineMaskStrategy canHandle returns false for other packages`() {
+        assertFalse(LineMaskStrategy().canHandle(SlackMaskStrategy.SLACK_PACKAGE))
+        assertFalse(LineMaskStrategy().canHandle(DiscordMaskStrategy.DISCORD_PACKAGE))
+        assertFalse(LineMaskStrategy().canHandle("com.unknown.app"))
+    }
+
     // --- Registry tests ---
 
     @Test
@@ -49,10 +88,32 @@ class NotificationMaskStrategyTest {
     }
 
     @Test
-    fun `registry returns null for non-Slack packages`() {
+    fun `registry returns DiscordMaskStrategy for Discord package`() {
+        val strategy = NotificationMaskStrategyRegistry.findStrategy(DiscordMaskStrategy.DISCORD_PACKAGE)
+        assertNotNull(strategy)
+        assertTrue(strategy is DiscordMaskStrategy)
+    }
+
+    @Test
+    fun `registry returns WhatsAppMaskStrategy for WhatsApp package`() {
+        val strategy = NotificationMaskStrategyRegistry.findStrategy(WhatsAppMaskStrategy.WHATSAPP_PACKAGE)
+        assertNotNull(strategy)
+        assertTrue(strategy is WhatsAppMaskStrategy)
+    }
+
+    @Test
+    fun `registry returns LineMaskStrategy for LINE package`() {
+        val strategy = NotificationMaskStrategyRegistry.findStrategy(LineMaskStrategy.LINE_PACKAGE)
+        assertNotNull(strategy)
+        assertTrue(strategy is LineMaskStrategy)
+    }
+
+    @Test
+    fun `registry returns null for unknown packages`() {
         assertNull(NotificationMaskStrategyRegistry.findStrategy("com.slack")) // lowercase must not match
-        assertNull(NotificationMaskStrategyRegistry.findStrategy("com.whatsapp"))
-        assertNull(NotificationMaskStrategyRegistry.findStrategy("jp.naver.line.android"))
+        assertNull(NotificationMaskStrategyRegistry.findStrategy("org.telegram.messenger"))
+        assertNull(NotificationMaskStrategyRegistry.findStrategy("org.thoughtcrime.securesms"))
+        assertNull(NotificationMaskStrategyRegistry.findStrategy("com.google.android.gm"))
         assertNull(NotificationMaskStrategyRegistry.findStrategy("com.unknown.app"))
     }
 

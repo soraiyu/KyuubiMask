@@ -74,6 +74,14 @@ abstract class AbstractMaskStrategy : NotificationMaskStrategy {
         val context: Context = listenerService
         val packageName = sbn.packageName
 
+        // Retrieve user preferences (sound, vibration, per-app toggle) from the lazily-created repository
+        val prefsRepository = getPrefsRepository(context)
+
+        // Check per-app enabled preference — if disabled, leave the original notification untouched
+        if (!prefsRepository.isAppEnabled(packageName)) {
+            return false
+        }
+
         // Cancel the original notification first, before the permission check.
         // This ensures the original content is always hidden even when POST_NOTIFICATIONS
         // permission has not been granted (Android 13+).
@@ -112,9 +120,6 @@ abstract class AbstractMaskStrategy : NotificationMaskStrategy {
         // Preserve the original contentIntent; fall back to a launch intent if absent
         val contentIntent = sbn.notification.contentIntent
             ?: createLaunchIntent(context, packageName, notificationId)
-
-        // Retrieve user preferences (sound, vibration) from the lazily-created repository
-        val prefsRepository = getPrefsRepository(context)
 
         // Build and post the masked notification
         val maskedNotification =

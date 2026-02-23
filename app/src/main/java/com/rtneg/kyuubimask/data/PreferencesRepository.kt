@@ -34,6 +34,7 @@ class PreferencesRepository(context: Context) {
         private const val KEY_SERVICE_ENABLED = "service_enabled"
         private const val KEY_NOTIFICATION_SOUND = "notification_sound"
         private const val KEY_NOTIFICATION_VIBRATE = "notification_vibrate"
+        private const val KEY_APP_ENABLED_PREFIX = "app_enabled_"
     }
     
     /**
@@ -68,4 +69,20 @@ class PreferencesRepository(context: Context) {
                 .putBoolean(KEY_NOTIFICATION_VIBRATE, value)
                 .apply()
         }
+
+    /**
+     * Returns whether masking is enabled for the given package name.
+     * Defaults to true (enabled) when not explicitly set.
+     */
+    fun isAppEnabled(packageName: String): Boolean =
+        preferences.getBoolean(KEY_APP_ENABLED_PREFIX + packageName, true)
+
+    /**
+     * Sets whether masking is enabled for the given package name.
+     */
+    fun setAppEnabled(packageName: String, enabled: Boolean) {
+        preferences.edit()
+            .putBoolean(KEY_APP_ENABLED_PREFIX + packageName, enabled)
+            .apply()
+    }
 }
