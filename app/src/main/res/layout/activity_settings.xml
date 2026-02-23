@@ -158,6 +158,7 @@
                         android:id="@+id/switchSlack"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:contentDescription="@string/label_app_slack"
                         app:thumbTint="@color/switch_thumb"
                         app:trackTint="@color/switch_track" />
 
@@ -183,6 +184,7 @@
                         android:id="@+id/switchDiscord"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:contentDescription="@string/label_app_discord"
                         app:thumbTint="@color/switch_thumb"
                         app:trackTint="@color/switch_track" />
 
@@ -208,6 +210,7 @@
                         android:id="@+id/switchWhatsApp"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:contentDescription="@string/label_app_whatsapp"
                         app:thumbTint="@color/switch_thumb"
                         app:trackTint="@color/switch_track" />
 
@@ -232,6 +235,7 @@
                         android:id="@+id/switchLine"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:contentDescription="@string/label_app_line"
                         app:thumbTint="@color/switch_thumb"
                         app:trackTint="@color/switch_track" />
 

@@ -37,6 +37,7 @@ import com.rtneg.kyuubimask.strategy.DiscordMaskStrategy
 import com.rtneg.kyuubimask.strategy.LineMaskStrategy
 import com.rtneg.kyuubimask.strategy.SlackMaskStrategy
 import com.rtneg.kyuubimask.strategy.WhatsAppMaskStrategy
+import com.google.android.material.switchmaterial.SwitchMaterial
 
 /**
  * SettingsActivity - Main UI for configuring KyuubiMask
@@ -170,25 +171,10 @@ class SettingsActivity : AppCompatActivity() {
         }
 
         // Apps to Mask toggles
-        binding.switchSlack.isChecked = prefsRepository.isAppEnabled(SlackMaskStrategy.SLACK_PACKAGE)
-        binding.switchSlack.setOnCheckedChangeListener { _, isChecked ->
-            prefsRepository.setAppEnabled(SlackMaskStrategy.SLACK_PACKAGE, isChecked)
-        }
-
-        binding.switchDiscord.isChecked = prefsRepository.isAppEnabled(DiscordMaskStrategy.DISCORD_PACKAGE)
-        binding.switchDiscord.setOnCheckedChangeListener { _, isChecked ->
-            prefsRepository.setAppEnabled(DiscordMaskStrategy.DISCORD_PACKAGE, isChecked)
-        }
-
-        binding.switchWhatsApp.isChecked = prefsRepository.isAppEnabled(WhatsAppMaskStrategy.WHATSAPP_PACKAGE)
-        binding.switchWhatsApp.setOnCheckedChangeListener { _, isChecked ->
-            prefsRepository.setAppEnabled(WhatsAppMaskStrategy.WHATSAPP_PACKAGE, isChecked)
-        }
-
-        binding.switchLine.isChecked = prefsRepository.isAppEnabled(LineMaskStrategy.LINE_PACKAGE)
-        binding.switchLine.setOnCheckedChangeListener { _, isChecked ->
-            prefsRepository.setAppEnabled(LineMaskStrategy.LINE_PACKAGE, isChecked)
-        }
+        setupAppSwitch(binding.switchSlack, SlackMaskStrategy.SLACK_PACKAGE)
+        setupAppSwitch(binding.switchDiscord, DiscordMaskStrategy.DISCORD_PACKAGE)
+        setupAppSwitch(binding.switchWhatsApp, WhatsAppMaskStrategy.WHATSAPP_PACKAGE)
+        setupAppSwitch(binding.switchLine, LineMaskStrategy.LINE_PACKAGE)
 
         // Permission button
         binding.btnPermission.setOnClickListener {
@@ -212,6 +198,17 @@ class SettingsActivity : AppCompatActivity() {
             getString(R.string.debug_waiting)
         } else {
             entries.joinToString("\n")
+        }
+    }
+
+    /**
+     * Initialises a per-app masking switch: sets the current saved state and
+     * persists any change the user makes.
+     */
+    private fun setupAppSwitch(switch: SwitchMaterial, packageName: String) {
+        switch.isChecked = prefsRepository.isAppEnabled(packageName)
+        switch.setOnCheckedChangeListener { _, isChecked ->
+            prefsRepository.setAppEnabled(packageName, isChecked)
         }
     }
 
