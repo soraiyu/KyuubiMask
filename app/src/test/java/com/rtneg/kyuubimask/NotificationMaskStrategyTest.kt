@@ -73,8 +73,8 @@ class NotificationMaskStrategyTest {
 
     @Test
     fun `LineMaskStrategy canHandle returns false for other packages`() {
-        assertFalse(LineMaskStrategy().canHandle("com.Slack"))
-        assertFalse(LineMaskStrategy().canHandle("com.discord"))
+        assertFalse(LineMaskStrategy().canHandle(SlackMaskStrategy.SLACK_PACKAGE))
+        assertFalse(LineMaskStrategy().canHandle(DiscordMaskStrategy.DISCORD_PACKAGE))
         assertFalse(LineMaskStrategy().canHandle("com.unknown.app"))
     }
 
