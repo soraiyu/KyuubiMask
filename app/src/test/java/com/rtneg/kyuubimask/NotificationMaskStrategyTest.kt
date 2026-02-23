@@ -56,7 +56,7 @@ class NotificationMaskStrategyTest {
 
     @Test
     fun `WhatsAppMaskStrategy canHandle returns true for WhatsApp package`() {
-        assertTrue(WhatsAppMaskStrategy().canHandle("com.whatsapp"))
+        assertTrue(WhatsAppMaskStrategy().canHandle(WhatsAppMaskStrategy.WHATSAPP_PACKAGE))
     }
 
     @Test
