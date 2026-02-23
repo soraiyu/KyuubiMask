@@ -49,8 +49,8 @@ class NotificationMaskStrategyTest {
 
     @Test
     fun `DiscordMaskStrategy canHandle returns false for other packages`() {
-        assertFalse(DiscordMaskStrategy().canHandle("com.Slack"))
-        assertFalse(DiscordMaskStrategy().canHandle("com.whatsapp"))
+        assertFalse(DiscordMaskStrategy().canHandle(SlackMaskStrategy.SLACK_PACKAGE))
+        assertFalse(DiscordMaskStrategy().canHandle(WhatsAppMaskStrategy.WHATSAPP_PACKAGE))
         assertFalse(DiscordMaskStrategy().canHandle("com.unknown.app"))
     }
 
