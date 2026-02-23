@@ -159,7 +159,7 @@ GitHub Actions でビルドされた APK をローカルにインストール済
 1. GitHub リポジトリの **Settings > Secrets and variables > Actions** を開く
 2. **New repository secret** をクリック
 3. 名前: `ANDROID_DEBUG_KEYSTORE_BASE64`
-4. 値: `/tmp/debug_keystore_base64.txt` の内容を貼り付け
+4. 値: /tmp/debug_keystore_base64.txt の内容を貼り付け（改行が含まれないよう注意）
 5. **Add secret** をクリック
 
 > **セキュリティ**: キーストアファイル自体はリポジトリにコミットしないでください。シークレット経由でのみ渡してください。
