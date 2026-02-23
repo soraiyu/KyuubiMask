@@ -16,11 +16,8 @@
 package com.rtneg.kyuubimask
 
 import com.rtneg.kyuubimask.strategy.DiscordMaskStrategy
-import com.rtneg.kyuubimask.strategy.GmailMaskStrategy
 import com.rtneg.kyuubimask.strategy.LineMaskStrategy
-import com.rtneg.kyuubimask.strategy.SignalMaskStrategy
 import com.rtneg.kyuubimask.strategy.SlackMaskStrategy
-import com.rtneg.kyuubimask.strategy.TelegramMaskStrategy
 import com.rtneg.kyuubimask.strategy.WhatsAppMaskStrategy
 
 /**
@@ -43,9 +40,6 @@ object NotificationMaskStrategyRegistry {
         register(DiscordMaskStrategy())
         register(WhatsAppMaskStrategy())
         register(LineMaskStrategy())
-        register(TelegramMaskStrategy())
-        register(SignalMaskStrategy())
-        register(GmailMaskStrategy())
     }
 
     /**
