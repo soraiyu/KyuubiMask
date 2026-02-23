@@ -23,7 +23,7 @@ KyuubiMask protects your privacy in everyday situations—on trains, at work, ar
 - 📸 **Prevents Screenshot Leaks** - Masked notifications won't expose sensitive data in screenshots
 - 🦊 **Smart Notification Masking** - Replace sensitive content with generic text automatically
 - 🚀 **Always-On Optimization** - Reduced memory usage, resistant to being killed by Android OS
-- 🎯 **Slack Supported** - More apps planned
+- 🎯 **Multiple Apps Supported** - Slack, Discord, WhatsApp, LINE, Telegram, Signal, Gmail
 - 🌍 **F-Droid Ready** - Open source, no tracking
 - ⚡ **Lightweight** - Minimal memory footprint and battery impact
 - 🔋 **Battery Efficient** - Optimized for continuous background operation
@@ -33,7 +33,15 @@ KyuubiMask protects your privacy in everyday situations—on trains, at work, ar
 **Business Apps**
 - Slack
 
-Support for additional apps (WhatsApp, Telegram, LINE, Signal, Discord, Gmail, and more) is planned for future releases.
+**Messaging Apps**
+- Discord
+- WhatsApp
+- LINE
+- Telegram
+- Signal
+
+**Email Apps**
+- Gmail
 
 ### Privacy Statement
 
@@ -161,7 +169,7 @@ KyuubiMaskは、電車の中、職場、家族や友人の近く、カフェな�
 - 📸 **スクリーンショット漏洩防止** - マスクされた通知は画面キャプチャでも安全
 - 🦊 **スマート通知マスキング** - 機密情報を自動的に一般的なテキストに置き換え
 - 🚀 **常時起動最適化** - メモリ使用量を削減し、終了されにくい設計
-- 🎯 **Slackに対応** - 今後さらに対応予定
+- 🎯 **複数アプリ対応** - Slack、Discord、WhatsApp、LINE、Telegram、Signal、Gmail
 - 🌍 **F-Droid準拠** - オープンソース、トラッキングなし
 - ⚡ **軽量** - 最小限のメモリフットプリントとバッテリー影響
 - 🔋 **バッテリー効率** - 継続的なバックグラウンド動作に最適化
@@ -171,7 +179,15 @@ KyuubiMaskは、電車の中、職場、家族や友人の近く、カフェな�
 **ビジネスアプリ**
 - Slack
 
-WhatsApp、Telegram、LINE、Signal、Discord、Gmailなど、追加アプリへの対応は今後リリースで予定されています。
+**メッセージアプリ**
+- Discord
+- WhatsApp
+- LINE
+- Telegram
+- Signal
+
+**メールアプリ**
+- Gmail
 
 ### プライバシーステートメント
 
