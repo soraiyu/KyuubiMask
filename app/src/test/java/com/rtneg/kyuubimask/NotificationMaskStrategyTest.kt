@@ -90,7 +90,7 @@ class NotificationMaskStrategyTest {
     @Test
     fun `registry returns DiscordMaskStrategy for Discord package`() {
         val strategy = NotificationMaskStrategyRegistry.findStrategy(DiscordMaskStrategy.DISCORD_PACKAGE)
-        val strategy = NotificationMaskStrategyRegistry.findStrategy(DiscordMaskStrategy.DISCORD_PACKAGE)
+        assertNotNull(strategy)
         assertTrue(strategy is DiscordMaskStrategy)
     }
 

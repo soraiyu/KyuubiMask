@@ -33,6 +33,10 @@ import androidx.core.content.ContextCompat
 import com.rtneg.kyuubimask.data.DebugLogRepository
 import com.rtneg.kyuubimask.data.PreferencesRepository
 import com.rtneg.kyuubimask.databinding.ActivitySettingsBinding
+import com.rtneg.kyuubimask.strategy.DiscordMaskStrategy
+import com.rtneg.kyuubimask.strategy.LineMaskStrategy
+import com.rtneg.kyuubimask.strategy.SlackMaskStrategy
+import com.rtneg.kyuubimask.strategy.WhatsAppMaskStrategy
 
 /**
  * SettingsActivity - Main UI for configuring KyuubiMask
@@ -163,6 +167,27 @@ class SettingsActivity : AppCompatActivity() {
         binding.switchVibrate.isChecked = prefsRepository.notificationVibrate
         binding.switchVibrate.setOnCheckedChangeListener { _, isChecked ->
             prefsRepository.notificationVibrate = isChecked
+        }
+
+        // Apps to Mask toggles
+        binding.switchSlack.isChecked = prefsRepository.isAppEnabled(SlackMaskStrategy.SLACK_PACKAGE)
+        binding.switchSlack.setOnCheckedChangeListener { _, isChecked ->
+            prefsRepository.setAppEnabled(SlackMaskStrategy.SLACK_PACKAGE, isChecked)
+        }
+
+        binding.switchDiscord.isChecked = prefsRepository.isAppEnabled(DiscordMaskStrategy.DISCORD_PACKAGE)
+        binding.switchDiscord.setOnCheckedChangeListener { _, isChecked ->
+            prefsRepository.setAppEnabled(DiscordMaskStrategy.DISCORD_PACKAGE, isChecked)
+        }
+
+        binding.switchWhatsApp.isChecked = prefsRepository.isAppEnabled(WhatsAppMaskStrategy.WHATSAPP_PACKAGE)
+        binding.switchWhatsApp.setOnCheckedChangeListener { _, isChecked ->
+            prefsRepository.setAppEnabled(WhatsAppMaskStrategy.WHATSAPP_PACKAGE, isChecked)
+        }
+
+        binding.switchLine.isChecked = prefsRepository.isAppEnabled(LineMaskStrategy.LINE_PACKAGE)
+        binding.switchLine.setOnCheckedChangeListener { _, isChecked ->
+            prefsRepository.setAppEnabled(LineMaskStrategy.LINE_PACKAGE, isChecked)
         }
 
         // Permission button

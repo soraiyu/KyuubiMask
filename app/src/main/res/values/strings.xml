@@ -16,6 +16,10 @@
     <string name="btn_grant_permission">Grant Notification Access</string>
     <string name="btn_grant_post_notification">Grant Post Notification Permission</string>
     <string name="label_apps_to_mask">Apps to Mask</string>
+    <string name="label_app_slack">Slack</string>
+    <string name="label_app_discord">Discord</string>
+    <string name="label_app_whatsapp">WhatsApp</string>
+    <string name="label_app_line">LINE</string>
     
     <!-- Notification Settings -->
     <string name="label_notification_settings">Notification Settings</string>
