@@ -8,7 +8,7 @@
 
 ## Absolute Rules (Never Break These)
 
-### Privacy & Security (最重要)
+### Privacy & Security (Critical)
 - **Privacy First**: Never save, log, cache, or send any part of the original notification content (title, text, bigText, extras, etc.).
 - **No INTERNET permission**: No analytics, no Firebase, no Room, no network calls.
 - **Debug builds**: DebugLogRepository or any logging that stores notification content is FORBIDDEN in release builds. Use `BuildConfig.DEBUG` guards, but ensure NO user data leaks in production.
