@@ -25,7 +25,7 @@ package com.rtneg.kyuubimask.strategy
 class DiscordMaskStrategy : AbstractMaskStrategy() {
 
     override fun canHandle(packageName: String): Boolean =
-        packageName == DISCORD_PACKAGE
+        packageName.equals(DISCORD_PACKAGE, ignoreCase = true)
 
     companion object {
         const val DISCORD_PACKAGE = "com.discord"
