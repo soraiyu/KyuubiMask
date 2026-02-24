@@ -161,6 +161,12 @@ Release ビルドではこのパネルは表示されません。
 
 ## トラブルシューティング
 
+### 問題: CI (GitHub Actions) の APK を上書きインストールすると署名エラーが起きる
+
+`INSTALL_FAILED_UPDATE_INCOMPATIBLE` や署名不一致エラーが出る場合は、CI で使われる `debug.keystore` とローカルの `debug.keystore` が異なります。
+
+**解決策**: [CI_CD.md の「Debug APK の署名キー設定」](CI_CD.md#debug-apk-の署名キー設定ci-と-ローカルを一致させる) を参照して、ローカルのキーストアを GitHub Secrets に設定してください。
+
 ### 問題: ビルドが失敗する
 
 **解決策**:

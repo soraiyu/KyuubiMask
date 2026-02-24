@@ -141,6 +141,39 @@ git push origin v1.0.1
 - GitHub Release が作成される
 - APK がリリースページに添付される
 
+## Debug APK の署名キー設定（CI と ローカルを一致させる）
+
+GitHub Actions でビルドされた APK をローカルにインストール済みのアプリに上書きインストール（`adb install -r`）しようとすると、署名が違うために `INSTALL_FAILED_UPDATE_INCOMPATIBLE` が発生することがあります。
+これを防ぐために、ローカルの `debug.keystore` を CI に共有します。
+
+### 手順
+
+**1. ローカルの debug.keystore を Base64 エンコード**
+
+```bash
+# macOS: base64 ~/.android/debug.keystore\nbase64 -w 0 ~/.android/debug.keystore > /tmp/debug_keystore_base64.txt
+```
+
+**2. GitHub リポジトリのシークレットに追加**
+
+1. GitHub リポジトリの **Settings > Secrets and variables > Actions** を開く
+2. **New repository secret** をクリック
+3. 名前: `ANDROID_DEBUG_KEYSTORE_BASE64`
+4. 値: /tmp/debug_keystore_base64.txt の内容を貼り付け（改行が含まれないよう注意）
+5. **Add secret** をクリック
+
+> **セキュリティ**: キーストアファイル自体はリポジトリにコミットしないでください。シークレット経由でのみ渡してください。
+
+**3. 動作確認**
+
+次の Actions 実行後、ワークフローログで以下を確認できます:
+- `Verify debug keystore (SHA-256)` ステップ: キーストアの SHA-256 フィンガープリント
+- `Verify APK signing certificate` ステップ: APK に使われた証明書の SHA-256
+
+両ステップの `SHA-256` が一致していれば、CI の APK はローカルと同じ署名になっています。
+
+---
+
 ## トラブルシューティング
 
 ### ビルドが失敗する場合
