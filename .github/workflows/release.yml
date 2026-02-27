@@ -54,24 +54,29 @@ jobs:
       id: get_version
       run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
       if: startsWith(github.ref, 'refs/tags/')
-      
+    - name: Rename APK for clarity
+      run: |
+        mv app/build/outputs/apk/release/app-release-unsigned.apk \
+        app/build/outputs/apk/release/KyuubiMask-${{ steps.get_version.outputs.VERSION }}-unsigned.apk
     - name: Create Release
       if: startsWith(github.ref, 'refs/tags/')
-      uses: softprops/action-gh-release@v1
+      uses: softprops/action-gh-release@v2   # ← v1 → v2
       with:
-        files: app/build/outputs/apk/release/app-release-unsigned.apk
+        files: app/build/outputs/apk/release/KyuubiMask-${{ steps.get_version.outputs.VERSION }}-unsigned.apk
+        generate_release_notes: true         # ← これを追加！ PR/コミットから自動生成
         body: |
           ## KyuubiMask ${{ steps.get_version.outputs.VERSION }}
-          
+      
           ### 📱 Download
-          - APK (unsigned): See assets below
-          
+          - **Unsigned APK**: See assets below (for sideloading / testing)
+      
           ### 📝 Changes
-          See [CHANGELOG.md](CHANGELOG.md) for details.
-          
-          ### ⚠️ Note
-          This is an unsigned release APK. For production use, you need to sign it.
+          (auto-generated above)
+      
+          ### ⚠️ Important
+          This is an **unsigned** APK. For security/production, sign it yourself or wait for signed version (F-Droid prep in progress).
         draft: false
         prerelease: false
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    
