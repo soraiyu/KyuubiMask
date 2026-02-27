@@ -10,73 +10,90 @@ jobs:
   release:
     name: Build Release APK
     runs-on: ubuntu-latest
-    
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-      
+
     - name: Set up JDK 17
       uses: actions/setup-java@v4
       with:
         java-version: '17'
         distribution: 'temurin'
         cache: gradle
-        
+
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
-      
+
     - name: Run tests
       run: ./gradlew test --stacktrace
-      
-    - name: Build Release APK (unsigned)
+
+    - name: Validate signing secrets
+      run: |
+        test -n "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" || (echo "Missing secret: ANDROID_KEYSTORE_BASE64" && exit 1)
+        test -n "${{ secrets.ANDROID_KEYSTORE_PASSWORD }}" || (echo "Missing secret: ANDROID_KEYSTORE_PASSWORD" && exit 1)
+        test -n "${{ secrets.ANDROID_KEY_ALIAS }}" || (echo "Missing secret: ANDROID_KEY_ALIAS" && exit 1)
+        test -n "${{ secrets.ANDROID_KEY_PASSWORD }}" || (echo "Missing secret: ANDROID_KEY_PASSWORD" && exit 1)
+
+    - name: Decode signing keystore
+      run: |
+        echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > kyuubimask-release.jks
+        ls -lh kyuubimask-release.jks
+
+    - name: Build Release APK (signed)
+      env:
+        ANDROID_KEYSTORE_PATH: ${{ github.workspace }}/kyuubimask-release.jks
+        ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+        ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+        ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
       run: ./gradlew assembleRelease --stacktrace
-      
+
     - name: Verify APK was built
       run: |
-        if [ -f app/build/outputs/apk/release/app-release-unsigned.apk ]; then
+        if [ -f app/build/outputs/apk/release/app-release.apk ]; then
           echo "✅ APK built successfully"
-          ls -lh app/build/outputs/apk/release/app-release-unsigned.apk
+          ls -lh app/build/outputs/apk/release/app-release.apk
         else
           echo "❌ APK not found at expected location"
           echo "Contents of release directory:"
           ls -la app/build/outputs/apk/release/ || echo "Release directory not found"
           exit 1
         fi
-      
+
     - name: Upload Release APK
       uses: actions/upload-artifact@v4
       with:
-        name: app-release-unsigned
-        path: app/build/outputs/apk/release/app-release-unsigned.apk
+        name: app-release-signed
+        path: app/build/outputs/apk/release/app-release.apk
         retention-days: 90
-        
+
     - name: Get version from tag
       id: get_version
       run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
       if: startsWith(github.ref, 'refs/tags/')
-    - name: Rename APK for clarity
-      run: |
-        mv app/build/outputs/apk/release/app-release-unsigned.apk \
-        app/build/outputs/apk/release/KyuubiMask-${{ steps.get_version.outputs.VERSION }}-unsigned.apk
+
     - name: Create Release
       if: startsWith(github.ref, 'refs/tags/')
-      uses: softprops/action-gh-release@v2   # ← v1 → v2
+      uses: softprops/action-gh-release@v1
       with:
-        files: app/build/outputs/apk/release/KyuubiMask-${{ steps.get_version.outputs.VERSION }}-unsigned.apk
-        generate_release_notes: true         # ← これを追加！ PR/コミットから自動生成
+        files: app/build/outputs/apk/release/app-release.apk
         body: |
           ## KyuubiMask ${{ steps.get_version.outputs.VERSION }}
-      
+
           ### 📱 Download
-          - **Unsigned APK**: See assets below (for sideloading / testing)
-      
+          - APK (signed): See assets below
+
           ### 📝 Changes
-          (auto-generated above)
-      
-          ### ⚠️ Important
-          This is an **unsigned** APK. For security/production, sign it yourself or wait for signed version (F-Droid prep in progress).
+          See [CHANGELOG.md](CHANGELOG.md) for details.
+
+          ### ✅ Note
+          This APK is signed and ready for installation.
         draft: false
         prerelease: false
-    env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Cleanup signing keystore
+      if: always()
+      run: rm -f kyuubimask-release.jks
     

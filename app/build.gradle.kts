@@ -7,16 +7,35 @@ android {
     namespace = "com.rtneg.kyuubimask"
     compileSdk = 35
 
+    val signingKeystorePath = System.getenv("ANDROID_KEYSTORE_PATH")
+    val signingStorePassword = System.getenv("ANDROID_KEYSTORE_PASSWORD")
+    val signingKeyAlias = System.getenv("ANDROID_KEY_ALIAS")
+    val signingKeyPassword = System.getenv("ANDROID_KEY_PASSWORD")
+
     defaultConfig {
         applicationId = "com.rtneg.kyuubimask"
         minSdk = 26
         targetSdk = 35
-        versionCode = 3
-        versionName = "1.2.0"
+        versionCode = 4
+        versionName = "1.2.1"
     }
 
     buildTypes {
         release {
+            if (
+                !signingKeystorePath.isNullOrBlank() &&
+                !signingStorePassword.isNullOrBlank() &&
+                !signingKeyAlias.isNullOrBlank() &&
+                !signingKeyPassword.isNullOrBlank()
+            ) {
+                signingConfig = signingConfigs.create("release") {
+                    storeFile = file(signingKeystorePath)
+                    storePassword = signingStorePassword
+                    keyAlias = signingKeyAlias
+                    keyPassword = signingKeyPassword
+                }
+            }
+
             isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),

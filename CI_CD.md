@@ -52,14 +52,21 @@ KyuubiMask には GitHub Actions による自動ビルドシステムが組み�
 1. ✅ コードのチェックアウト
 2. ☕ JDK 17 のセットアップ
 3. 🧪 テストの実行 (`./gradlew test`)
-4. 🔨 Release APK のビルド (`./gradlew assembleRelease`)
-5. ✔️ APK が正しくビルドされたか確認
-6. 📦 APK を Artifacts にアップロード (90日間保存)
-7. 🎉 GitHub Release の作成（タグの場合のみ）
+4. 🔐 署名用 Secret の検証と keystore 復元
+5. 🔨 Release APK のビルド (`./gradlew assembleRelease`)
+6. ✔️ APK が正しくビルドされたか確認
+7. 📦 APK を Artifacts にアップロード (90日間保存)
+8. 🎉 GitHub Release の作成（タグの場合のみ）
 
 **成果物**:
-- `app-release-unsigned.apk` (署名なし)
+- `app-release.apk` (署名付き)
 - GitHub Release ページからダウンロード可能
+
+**必要な GitHub Secrets**:
+- `ANDROID_KEYSTORE_BASE64`
+- `ANDROID_KEYSTORE_PASSWORD`
+- `ANDROID_KEY_ALIAS`
+- `ANDROID_KEY_PASSWORD`
 
 ## 使い方
 
@@ -82,7 +89,7 @@ KyuubiMask には GitHub Actions による自動ビルドシステムが組み�
 
 1. [Releases ページ](https://github.com/soraiyu/KyuubiMask/releases) にアクセス
 2. 最新のリリースをクリック
-3. Assets から `app-release-unsigned.apk` をダウンロード
+3. Assets から `app-release.apk` をダウンロード
 
 **困ったら**: [DOWNLOAD_APK.md の詳細ガイド](DOWNLOAD_APK.md#方法2-github-releases-からダウンロード)
 
