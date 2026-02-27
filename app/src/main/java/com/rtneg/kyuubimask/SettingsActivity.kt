@@ -151,6 +151,9 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     private fun setupUI() {
+        // Version info
+        binding.tvVersion.text = getString(R.string.label_version, BuildConfig.VERSION_NAME)
+
         // Service enable toggle
         binding.switchEnable.isChecked = prefsRepository.isServiceEnabled
         binding.switchEnable.setOnCheckedChangeListener { _, isChecked ->
