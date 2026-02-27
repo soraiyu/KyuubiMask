@@ -3,7 +3,18 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <!-- PRIVACY: No INTERNET permission - this app works completely offline -->
-    
+
+    <!-- Android 11+ package visibility: declare which apps we query via PackageManager.
+         Without this, getApplicationInfo() and getLaunchIntentForPackage() silently fail
+         for these packages (NameNotFoundException / null), causing the notification title
+         to fall back to "App" and tapping a masked notification to do nothing. -->
+    <queries>
+        <package android:name="com.Slack" />
+        <package android:name="com.discord" />
+        <package android:name="com.whatsapp" />
+        <package android:name="jp.naver.line.android" />
+    </queries>
+
     <!-- Required for notification access -->
     
     <!-- Required to post notifications on Android 13+ (API 33+) -->
