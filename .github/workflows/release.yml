@@ -83,14 +83,45 @@ jobs:
         body: |
           ## KyuubiMask ${{ steps.get_version.outputs.VERSION }}
 
-          ### 📱 Download
-          - APK (signed): See assets below
+          Privacy-first notification masking for everyday use.
 
-          ### 📝 Changes
+          ### 📦 Asset
+          - `app-release.apk` (signed)
+
+          ### ✅ Highlights
+          - Fully offline operation (no internet permission)
+          - Notification content masking for supported apps
+          - Lightweight, always-on optimized behavior
+
+          ### 📝 Changelog
           See [CHANGELOG.md](CHANGELOG.md) for details.
 
-          ### ✅ Note
-          This APK is signed and ready for installation.
+          ### 🔐 Security
+          This build is signed and ready to install.
+
+          ### ⚠️ Install Note
+          Sideload only from this official repository release page.
+
+          ---
+
+          日常で使える、プライバシー重視の通知マスキングアプリです。
+
+          ### 📦 配布ファイル
+          - `app-release.apk`（署名済み）
+
+          ### ✅ 主なポイント
+          - 完全オフライン動作（インターネット権限なし）
+          - 対応アプリの通知内容をマスク
+          - 常時利用向けの軽量設計
+
+          ### 📝 変更内容
+          詳細は [CHANGELOG.md](CHANGELOG.md) を参照してください。
+
+          ### 🔐 セキュリティ
+          このビルドは署名済みで、そのままインストールできます。
+
+          ### ⚠️ インストール時の注意
+          APK は公式リリースページからのみ取得してください。
         draft: false
         prerelease: false
       env:
