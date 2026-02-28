@@ -371,6 +371,17 @@
             app:cornerRadius="8dp"
             android:layout_marginBottom="24dp" />
 
+        <!-- Exit App Button -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnExitApp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/btn_exit_app"
+            android:textColor="@color/text_on_primary"
+            app:backgroundTint="@color/status_inactive"
+            app:cornerRadius="8dp"
+            android:layout_marginBottom="24dp" />
+
         <!-- Debug Log Card (shown only in DEBUG builds, controlled by SettingsActivity) -->
         <androidx.cardview.widget.CardView
             android:id="@+id/cardDebugLog"

@@ -28,6 +28,7 @@ import android.provider.Settings
 import android.view.View
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import kotlin.system.exitProcess
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.rtneg.kyuubimask.data.DebugLogRepository
@@ -182,6 +183,12 @@ class SettingsActivity : AppCompatActivity() {
         // Permission button
         binding.btnPermission.setOnClickListener {
             openNotificationListenerSettings()
+        }
+
+        // Exit app button
+        binding.btnExitApp.setOnClickListener {
+            finishAndRemoveTask()
+            exitProcess(0)
         }
 
         // Debug log panel (DEBUG builds only)
