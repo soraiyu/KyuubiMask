@@ -19,12 +19,18 @@ import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.os.Build
+import com.rtneg.kyuubimask.data.PreferencesRepository
 
 /**
  * KyuubiMask Application class
  * Handles notification channel creation on app startup
  */
 class KyuubiMaskApp : Application() {
+
+    /** Singleton repository shared across all components in this process. */
+    val prefsRepository: PreferencesRepository by lazy {
+        PreferencesRepository(applicationContext)
+    }
 
     companion object {
         const val CHANNEL_ID = "masked_notifications"

@@ -79,7 +79,7 @@ class SettingsActivity : AppCompatActivity() {
         binding = ActivitySettingsBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        prefsRepository = PreferencesRepository(applicationContext)
+        prefsRepository = (applicationContext as KyuubiMaskApp).prefsRepository
         
         setupUI()
         updateServiceStatus()

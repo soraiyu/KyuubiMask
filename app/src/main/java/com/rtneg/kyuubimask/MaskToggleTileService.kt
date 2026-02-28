@@ -38,7 +38,7 @@ class MaskToggleTileService : TileService() {
 
     override fun onCreate() {
         super.onCreate()
-        prefsRepository = PreferencesRepository(applicationContext)
+        prefsRepository = (applicationContext as KyuubiMaskApp).prefsRepository
     }
 
     /** Called when the tile is added to the Quick Settings panel. */

@@ -56,7 +56,7 @@ class NotificationMaskService : NotificationListenerService() {
 
     override fun onCreate() {
         super.onCreate()
-        prefsRepository = PreferencesRepository(applicationContext)
+        prefsRepository = (applicationContext as KyuubiMaskApp).prefsRepository
         if (BuildConfig.DEBUG) {
             Log.d(TAG, "Service created")
             DebugLogRepository.add("Service started")
