@@ -29,6 +29,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -57,9 +58,9 @@ fun MainToggleScreen(
     val hintColor = if (isMaskingEnabled) MaskingOnHint else MaskingOffHint
 
     val statusText = if (isMaskingEnabled) {
-        "マスク有効\n(通知を隠しています)"
+        stringResource(R.string.toggle_status_masking_on)
     } else {
-        "通常表示\n(通知をそのまま表示)"
+        stringResource(R.string.toggle_status_masking_off)
     }
 
     Column(
@@ -87,7 +88,7 @@ fun MainToggleScreen(
         Spacer(modifier = Modifier.height(48.dp))
 
         Text(
-            text = "タップで切り替え",
+            text = stringResource(R.string.toggle_hint),
             style = MaterialTheme.typography.bodySmall,
             color = hintColor,
         )

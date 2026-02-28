@@ -59,4 +59,9 @@
     <!-- Quick Settings Tile -->
     <string name="tile_label_masking_on">マスク中</string>
     <string name="tile_label_masking_off">通常表示</string>
+
+    <!-- Main Toggle Screen -->
+    <string name="toggle_status_masking_on">マスク有効\n(通知を隠しています)</string>
+    <string name="toggle_status_masking_off">通常表示\n(通知をそのまま表示)</string>
+    <string name="toggle_hint">タップで切り替え</string>
 </resources>
