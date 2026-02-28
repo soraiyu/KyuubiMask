@@ -28,19 +28,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
-// Colors used by MainToggleScreen – extracted here for easy theming.
-private val MaskingOnBackground = Color(0xFF1A237E)
-private val MaskingOffBackground = Color(0xFFFFFFFF)
-private val MaskingOnText = Color.White
-private val MaskingOffText = Color(0xFF212121)
-private val MaskingOnHint = Color(0xFFB0BEC5)
-private val MaskingOffHint = Color(0xFF757575)
+// Colors used by MainToggleScreen are defined in res/values/colors.xml.
 
 /**
  * Full-screen toggle composable for enabling / disabling notification masking.
@@ -53,9 +47,12 @@ fun MainToggleScreen(
     isMaskingEnabled: Boolean,
     onToggle: (Boolean) -> Unit,
 ) {
-    val background = if (isMaskingEnabled) MaskingOnBackground else MaskingOffBackground
-    val textColor = if (isMaskingEnabled) MaskingOnText else MaskingOffText
-    val hintColor = if (isMaskingEnabled) MaskingOnHint else MaskingOffHint
+    val backgroundRes = if (isMaskingEnabled) R.color.masking_on_background else R.color.masking_off_background
+    val textColorRes = if (isMaskingEnabled) R.color.masking_on_text else R.color.masking_off_text
+    val hintColorRes = if (isMaskingEnabled) R.color.masking_on_hint else R.color.masking_off_hint
+    val background = colorResource(backgroundRes)
+    val textColor = colorResource(textColorRes)
+    val hintColor = colorResource(hintColorRes)
 
     val statusText = if (isMaskingEnabled) {
         stringResource(R.string.toggle_status_masking_on)
