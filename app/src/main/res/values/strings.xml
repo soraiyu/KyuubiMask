@@ -55,4 +55,8 @@
 
     <!-- Version -->
     <string name="label_version">Version %s</string>
+
+    <!-- Quick Settings Tile -->
+    <string name="tile_label_masking_on">マスク中</string>
+    <string name="tile_label_masking_off">通常表示</string>
 </resources>
