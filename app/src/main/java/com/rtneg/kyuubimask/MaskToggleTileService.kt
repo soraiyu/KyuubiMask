@@ -96,11 +96,7 @@ class MaskToggleTileService : TileService() {
             this,
             if (enabled) R.drawable.ic_mask_on else R.drawable.ic_mask_off
         )
-        tile.label = if (enabled) {
-            getString(R.string.tile_label_masking_on)
-        } else {
-            getString(R.string.tile_label_masking_off)
-        }
+        tile.label = getString(if (enabled) R.string.tile_label_masking_on else R.string.tile_label_masking_off)
         tile.updateTile()
     }
 }

@@ -35,4 +35,7 @@
     <color name="masking_off_text">#212121</color>
     <color name="masking_on_hint">#B0BEC5</color>
     <color name="masking_off_hint">#757575</color>
+
+    <!-- Icon colors -->
+    <color name="mask_off_icon">#9E9E9E</color>
 </resources>

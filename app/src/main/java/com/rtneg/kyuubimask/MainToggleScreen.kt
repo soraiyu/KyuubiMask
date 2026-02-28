@@ -35,6 +35,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
 // Colors used by MainToggleScreen are defined in res/values/colors.xml.
+private const val SWITCH_SCALE = 2.0f
+private val SWITCH_SPACER_HEIGHT = 32.dp
+private val HINT_SPACER_HEIGHT = 48.dp
 
 /**
  * Full-screen toggle composable for enabling / disabling notification masking.
@@ -47,18 +50,10 @@ fun MainToggleScreen(
     isMaskingEnabled: Boolean,
     onToggle: (Boolean) -> Unit,
 ) {
-    val backgroundRes = if (isMaskingEnabled) R.color.masking_on_background else R.color.masking_off_background
-    val textColorRes = if (isMaskingEnabled) R.color.masking_on_text else R.color.masking_off_text
-    val hintColorRes = if (isMaskingEnabled) R.color.masking_on_hint else R.color.masking_off_hint
-    val background = colorResource(backgroundRes)
-    val textColor = colorResource(textColorRes)
-    val hintColor = colorResource(hintColorRes)
-
-    val statusText = if (isMaskingEnabled) {
-        stringResource(R.string.toggle_status_masking_on)
-    } else {
-        stringResource(R.string.toggle_status_masking_off)
-    }
+    val background = colorResource(if (isMaskingEnabled) R.color.masking_on_background else R.color.masking_off_background)
+    val textColor = colorResource(if (isMaskingEnabled) R.color.masking_on_text else R.color.masking_off_text)
+    val hintColor = colorResource(if (isMaskingEnabled) R.color.masking_on_hint else R.color.masking_off_hint)
+    val statusText = stringResource(if (isMaskingEnabled) R.string.toggle_status_masking_on else R.string.toggle_status_masking_off)
 
     Column(
         modifier = Modifier
@@ -74,15 +69,15 @@ fun MainToggleScreen(
             textAlign = TextAlign.Center,
         )
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(SWITCH_SPACER_HEIGHT))
 
         Switch(
             checked = isMaskingEnabled,
             onCheckedChange = onToggle,
-            modifier = Modifier.scale(2.0f),
+            modifier = Modifier.scale(SWITCH_SCALE),
         )
 
-        Spacer(modifier = Modifier.height(48.dp))
+        Spacer(modifier = Modifier.height(HINT_SPACER_HEIGHT))
 
         Text(
             text = stringResource(R.string.toggle_hint),
