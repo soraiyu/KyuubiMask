@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-03-01
+
+### Added
+- Masking ON/OFF toggle via Quick Settings Tile
+- Compose UI for masking toggle on the main screen
+- Vibration pattern selection for masked notifications (short, double, heart, long)
+- Automated APK release signing via GitHub Actions
+
+## [1.2.2] - 2026-02-27
+
+### Fixed
+- Release workflow permissions
+
+## [1.2.1] - 2026-02-27
+
+### Added
+- Signed release workflow setup
+- App version display in settings screen
+- Improved release workflow with APK renaming
+- CI: consistent debug keystore for reproducible builds
+
 ## [1.2.0] - 2026-02-23
 
 ### Added
@@ -50,7 +71,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Real-time debug log viewer
 - Complete offline operation
 
-[Unreleased]: https://github.com/soraiyu/KyuubiMask/compare/v1.2.0...HEAD
+[Unreleased]: https://github.com/soraiyu/KyuubiMask/compare/v1.3.0...HEAD
+[1.3.0]: https://github.com/soraiyu/KyuubiMask/compare/v1.2.2...v1.3.0
+[1.2.2]: https://github.com/soraiyu/KyuubiMask/compare/v1.2.1...v1.2.2
+[1.2.1]: https://github.com/soraiyu/KyuubiMask/compare/v1.2.0...v1.2.1
 [1.2.0]: https://github.com/soraiyu/KyuubiMask/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/soraiyu/KyuubiMask/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/soraiyu/KyuubiMask/releases/tag/v1.0.0
