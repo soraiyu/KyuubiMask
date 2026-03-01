@@ -24,9 +24,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.Build
-import android.os.VibrationEffect
-import android.os.Vibrator
-import android.os.VibratorManager
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import android.util.Log
@@ -196,18 +193,4 @@ class NotificationMaskService : NotificationListenerService() {
         }
     }
 
-    /**
-     * Fires vibration using the given timing array.
-     * Uses VibratorManager on API 31+ and Vibrator on API 26–30.
-     */
-    private fun vibrateWithEffect(timings: LongArray) {
-        val vibrator: Vibrator? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            getSystemService(VibratorManager::class.java)?.defaultVibrator
-        } else {
-            @Suppress("DEPRECATION")
-            getSystemService(Vibrator::class.java)
-        }
-        vibrator ?: return
-        vibrator.vibrate(VibrationEffect.createWaveform(timings, -1))
-    }
 }

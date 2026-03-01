@@ -27,13 +27,13 @@
     <string name="label_notification_sound_description">Play sound when notifications are received</string>
     <string name="label_notification_vibrate">Vibrate</string>
     <string name="label_notification_vibrate_description">Vibrate when notifications are received</string>
-    <string name="label_vibe_pattern">バイブパターン</string>
-    <string name="label_vibe_pattern_short">短め (200ms)</string>
-    <string name="label_vibe_pattern_double">ダブル</string>
-    <string name="label_vibe_pattern_heart">ハートっぽい</string>
-    <string name="label_vibe_pattern_long">長め</string>
-    <string name="btn_vibe_test">テスト</string>
-    <string name="toast_vibe_tested">パターンをテストしました</string>
+    <string name="label_vibe_pattern">Vibration Pattern</string>
+    <string name="label_vibe_pattern_short">Short (200ms)</string>
+    <string name="label_vibe_pattern_double">Double</string>
+    <string name="label_vibe_pattern_heart">Heart-like</string>
+    <string name="label_vibe_pattern_long">Long</string>
+    <string name="btn_vibe_test">Test</string>
+    <string name="toast_vibe_tested">Pattern tested</string>
     
     <!-- Masked notification -->
     <string name="masked_text">New notification</string>

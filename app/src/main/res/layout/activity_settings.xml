@@ -356,7 +356,7 @@
 
                 </LinearLayout>
 
-                <!-- バイブレーションパターン選択（vibrate有効時のみ表示） -->
+                <!-- Vibration pattern selection (visible only when vibrate is enabled) -->
                 <LinearLayout
                     android:id="@+id/layoutVibePattern"
                     android:layout_width="match_parent"

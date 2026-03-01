@@ -24,9 +24,6 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.os.VibrationEffect
-import android.os.Vibrator
-import android.os.VibratorManager
 import android.provider.Settings
 import android.view.View
 import android.widget.ArrayAdapter
@@ -236,12 +233,15 @@ class SettingsActivity : AppCompatActivity() {
      */
     private fun setupVibePatternSpinner() {
         val patternKeys = VibrationPatterns.patterns.keys.toList()
-        val patternLabels = listOf(
-            getString(R.string.label_vibe_pattern_short),
-            getString(R.string.label_vibe_pattern_double),
-            getString(R.string.label_vibe_pattern_heart),
-            getString(R.string.label_vibe_pattern_long),
-        )
+        val patternLabels = patternKeys.map { key ->
+            when (key) {
+                "short"  -> getString(R.string.label_vibe_pattern_short)
+                "double" -> getString(R.string.label_vibe_pattern_double)
+                "heart"  -> getString(R.string.label_vibe_pattern_heart)
+                "long"   -> getString(R.string.label_vibe_pattern_long)
+                else     -> key
+            }
+        }
 
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, patternLabels)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
@@ -263,7 +263,7 @@ class SettingsActivity : AppCompatActivity() {
         binding.btnVibeTest.setOnClickListener {
             val key = patternKeys[binding.spinnerVibePattern.selectedItemPosition]
             val timings = VibrationPatterns.getVibrationTimings(key)
-            vibrateTest(timings)
+            vibrateWithEffect(timings)
             Toast.makeText(this, R.string.toast_vibe_tested, Toast.LENGTH_SHORT).show()
         }
 
@@ -276,19 +276,6 @@ class SettingsActivity : AppCompatActivity() {
      */
     private fun updateVibePatternVisibility(vibrateEnabled: Boolean) {
         binding.layoutVibePattern.visibility = if (vibrateEnabled) View.VISIBLE else View.GONE
-    }
-
-    /**
-     * Fires vibration using the given timing array for test purposes.
-     */
-    private fun vibrateTest(timings: LongArray) {
-        val vibrator: Vibrator? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            getSystemService(VibratorManager::class.java)?.defaultVibrator
-        } else {
-            @Suppress("DEPRECATION")
-            getSystemService(Vibrator::class.java)
-        }
-        vibrator?.vibrate(VibrationEffect.createWaveform(timings, -1))
     }
 
     /**
