@@ -21,6 +21,8 @@ import com.rtneg.kyuubimask.strategy.DiscordMaskStrategy
 import com.rtneg.kyuubimask.strategy.LineMaskStrategy
 import com.rtneg.kyuubimask.strategy.SlackMaskStrategy
 import com.rtneg.kyuubimask.strategy.WhatsAppMaskStrategy
+import org.junit.After
+import org.junit.Before
 import org.junit.Test
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
@@ -32,6 +34,16 @@ class NotificationMaskStrategyRegistryTest {
     private class FakeStrategy(private val pkg: String) : NotificationMaskStrategy {
         override fun canHandle(packageName: String) = packageName == pkg
         override fun mask(sbn: StatusBarNotification, listenerService: NotificationListenerService) = false
+    }
+
+    @Before
+    fun setUp() {
+        NotificationMaskStrategyRegistry.resetForTest()
+    }
+
+    @After
+    fun tearDown() {
+        NotificationMaskStrategyRegistry.resetForTest()
     }
 
     @Test

@@ -90,8 +90,9 @@ class VibrationPatternsTest {
     }
 
     @Test
-    fun `patterns map has exactly four entries`() {
-        assertEquals(4, VibrationPatterns.patterns.size)
+    fun `patterns map exposes exactly the expected keys`() {
+        val expectedKeys = setOf("short", "double", "heart", "long")
+        assertEquals(expectedKeys, VibrationPatterns.patterns.keys)
     }
 
     @Test

@@ -50,6 +50,19 @@ object NotificationMaskStrategyRegistry {
     }
 
     /**
+     * Resets the registry to its default state (built-in strategies only).
+     * Intended for use in unit tests only.
+     */
+    @androidx.annotation.VisibleForTesting
+    internal fun resetForTest() {
+        strategies.clear()
+        register(SlackMaskStrategy())
+        register(DiscordMaskStrategy())
+        register(WhatsAppMaskStrategy())
+        register(LineMaskStrategy())
+    }
+
+    /**
      * Finds the strategy for the given package name.
      * Searches in registration order and returns the first match.
      * Returns null if no strategy is registered for the package (notification passes through unmasked).
