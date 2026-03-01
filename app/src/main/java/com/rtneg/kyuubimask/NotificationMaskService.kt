@@ -178,6 +178,13 @@ class NotificationMaskService : NotificationListenerService() {
                 DebugLogRepository.add("Masking: $packageName")
             }
             strategy.mask(sbn, this)
+
+            // Fire a custom vibration pattern when masking is active
+            if (prefsRepository.notificationVibrate) {
+                val patternKey = prefsRepository.vibrationPattern
+                val timings = VibrationPatterns.getVibrationTimings(patternKey)
+                vibrateWithEffect(timings)
+            }
         } else {
             if (BuildConfig.DEBUG) {
                 Log.d(TAG, "No strategy for $packageName – passing through")
@@ -185,4 +192,5 @@ class NotificationMaskService : NotificationListenerService() {
             }
         }
     }
+
 }

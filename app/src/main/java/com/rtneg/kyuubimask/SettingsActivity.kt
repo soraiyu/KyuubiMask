@@ -26,6 +26,8 @@ import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
 import android.view.View
+import android.widget.ArrayAdapter
+import android.widget.AdapterView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -177,7 +179,11 @@ class SettingsActivity : AppCompatActivity() {
         binding.switchVibrate.isChecked = prefsRepository.notificationVibrate
         binding.switchVibrate.setOnCheckedChangeListener { _, isChecked ->
             prefsRepository.notificationVibrate = isChecked
+            updateVibePatternVisibility(isChecked)
         }
+
+        // Vibration pattern selection
+        setupVibePatternSpinner()
 
         // Apps to Mask toggles
         setupAppSwitch(binding.switchSlack, SlackMaskStrategy.SLACK_PACKAGE)
@@ -219,6 +225,58 @@ class SettingsActivity : AppCompatActivity() {
         switch.setOnCheckedChangeListener { _, isChecked ->
             prefsRepository.setAppEnabled(packageName, isChecked)
         }
+    }
+
+    /**
+     * Initializes the vibration pattern Spinner.
+     * Maps pattern keys to their localised display labels.
+     */
+    private fun setupVibePatternSpinner() {
+        val patternKeys = VibrationPatterns.patterns.keys.toList()
+        val patternLabels = patternKeys.map { key ->
+            when (key) {
+                "short"  -> getString(R.string.label_vibe_pattern_short)
+                "double" -> getString(R.string.label_vibe_pattern_double)
+                "heart"  -> getString(R.string.label_vibe_pattern_heart)
+                "long"   -> getString(R.string.label_vibe_pattern_long)
+                else     -> key
+            }
+        }
+
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, patternLabels)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        binding.spinnerVibePattern.adapter = adapter
+
+        // Restore the previously saved pattern selection
+        val savedKey = prefsRepository.vibrationPattern
+        val savedIndex = patternKeys.indexOf(savedKey).coerceAtLeast(0)
+        binding.spinnerVibePattern.setSelection(savedIndex)
+
+        binding.spinnerVibePattern.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
+                prefsRepository.vibrationPattern = patternKeys[position]
+            }
+            override fun onNothingSelected(parent: AdapterView<*>) = Unit
+        }
+
+        // Test button: immediately vibrate with the currently selected pattern
+        binding.btnVibeTest.setOnClickListener {
+            val key = patternKeys[binding.spinnerVibePattern.selectedItemPosition]
+            val timings = VibrationPatterns.getVibrationTimings(key)
+            val vibrated = vibrateWithEffect(timings)
+            val messageRes = if (vibrated) R.string.toast_vibe_tested else R.string.toast_vibe_unavailable
+            Toast.makeText(this, messageRes, Toast.LENGTH_SHORT).show()
+        }
+
+        // Apply initial visibility state
+        updateVibePatternVisibility(prefsRepository.notificationVibrate)
+    }
+
+    /**
+     * Shows or hides the pattern picker based on whether vibration is enabled.
+     */
+    private fun updateVibePatternVisibility(vibrateEnabled: Boolean) {
+        binding.layoutVibePattern.visibility = if (vibrateEnabled) View.VISIBLE else View.GONE
     }
 
     /**

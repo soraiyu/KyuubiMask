@@ -29,6 +29,7 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import kotlin.test.assertEquals
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [33], manifest = Config.NONE)
@@ -153,5 +154,27 @@ class PreferencesRepositoryTest {
         
         assertFalse(newRepository.notificationSound)
         assertFalse(newRepository.notificationVibrate)
+    }
+
+    @Test
+    fun `default vibration pattern is short`() {
+        assertEquals(com.rtneg.kyuubimask.VibrationPatterns.DEFAULT_VIBE_PATTERN, repository.vibrationPattern)
+    }
+
+    @Test
+    fun `can set and get vibration pattern`() {
+        repository.vibrationPattern = "double"
+        assertEquals("double", repository.vibrationPattern)
+
+        repository.vibrationPattern = "heart"
+        assertEquals("heart", repository.vibrationPattern)
+    }
+
+    @Test
+    fun `vibration pattern persists across repository instances`() {
+        repository.vibrationPattern = "long"
+
+        val newRepository = PreferencesRepository(context)
+        assertEquals("long", newRepository.vibrationPattern)
     }
 }
