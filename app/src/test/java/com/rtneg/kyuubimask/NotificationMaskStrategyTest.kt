@@ -48,6 +48,13 @@ class NotificationMaskStrategyTest {
     }
 
     @Test
+    fun `DiscordMaskStrategy canHandle is case-insensitive`() {
+        assertTrue(DiscordMaskStrategy().canHandle("COM.DISCORD"))
+        assertTrue(DiscordMaskStrategy().canHandle("Com.Discord"))
+        assertTrue(DiscordMaskStrategy().canHandle("COM.discord"))
+    }
+
+    @Test
     fun `DiscordMaskStrategy canHandle returns false for other packages`() {
         assertFalse(DiscordMaskStrategy().canHandle(SlackMaskStrategy.SLACK_PACKAGE))
         assertFalse(DiscordMaskStrategy().canHandle(WhatsAppMaskStrategy.WHATSAPP_PACKAGE))
@@ -120,5 +127,35 @@ class NotificationMaskStrategyTest {
     @Test
     fun `MASKED_TAG constant is non-empty`() {
         assertTrue(NotificationMaskStrategy.MASKED_TAG.isNotEmpty())
+    }
+
+    // --- Package name constant value tests ---
+
+    @Test
+    fun `package name constants have correct values`() {
+        kotlin.test.assertEquals("com.Slack", SlackMaskStrategy.SLACK_PACKAGE)
+        kotlin.test.assertEquals("com.discord", DiscordMaskStrategy.DISCORD_PACKAGE)
+        kotlin.test.assertEquals("com.whatsapp", WhatsAppMaskStrategy.WHATSAPP_PACKAGE)
+        kotlin.test.assertEquals("jp.naver.line.android", LineMaskStrategy.LINE_PACKAGE)
+    }
+
+    // --- Edge case tests ---
+
+    @Test
+    fun `all strategies return false for empty package name`() {
+        val strategies = listOf(
+            SlackMaskStrategy(),
+            DiscordMaskStrategy(),
+            WhatsAppMaskStrategy(),
+            LineMaskStrategy()
+        )
+        strategies.forEach { strategy ->
+            assertFalse(strategy.canHandle(""), "${strategy::class.simpleName} should return false for empty string")
+        }
+    }
+
+    @Test
+    fun `registry returns null for empty string`() {
+        assertNull(NotificationMaskStrategyRegistry.findStrategy(""))
     }
 }

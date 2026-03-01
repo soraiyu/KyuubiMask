@@ -77,4 +77,27 @@ class DebugLogRepositoryTest {
         assertTrue(entries[0].contains("first"))
         assertTrue(entries[1].contains("last"))
     }
+
+    @Test
+    fun `add multiple messages accumulates entries`() {
+        DebugLogRepository.add("msg1")
+        DebugLogRepository.add("msg2")
+        DebugLogRepository.add("msg3")
+        assertEquals(3, DebugLogRepository.entries().size)
+    }
+
+    @Test
+    fun `entries returns a snapshot not the live buffer`() {
+        DebugLogRepository.add("before")
+        val snapshot = DebugLogRepository.entries()
+        DebugLogRepository.add("after")
+        // The snapshot captured before the second add must still have only one entry
+        assertEquals(1, snapshot.size)
+    }
+
+    @Test
+    fun `add empty string is recorded`() {
+        DebugLogRepository.add("")
+        assertEquals(1, DebugLogRepository.entries().size)
+    }
 }

@@ -177,4 +177,37 @@ class PreferencesRepositoryTest {
         val newRepository = PreferencesRepository(context)
         assertEquals("long", newRepository.vibrationPattern)
     }
+
+    @Test
+    fun `prefs name constant is kyuubi_prefs`() {
+        assertEquals("kyuubi_prefs", PreferencesRepository.PREFS_NAME)
+    }
+
+    @Test
+    fun `action mask toggled constant is non-empty`() {
+        assertTrue(PreferencesRepository.ACTION_MASK_TOGGLED.isNotEmpty())
+    }
+
+    @Test
+    fun `extra enabled constant is non-empty`() {
+        assertTrue(PreferencesRepository.EXTRA_ENABLED.isNotEmpty())
+    }
+
+    @Test
+    fun `all app enabled states are independent from service enabled`() {
+        repository.isServiceEnabled = false
+
+        // App-level toggles should remain at their defaults regardless of service toggle
+        assertTrue(repository.isAppEnabled(SlackMaskStrategy.SLACK_PACKAGE))
+        assertTrue(repository.isAppEnabled(DiscordMaskStrategy.DISCORD_PACKAGE))
+    }
+
+    @Test
+    fun `setting all apps disabled leaves service enabled state unchanged`() {
+        repository.setAppEnabled(SlackMaskStrategy.SLACK_PACKAGE, false)
+        repository.setAppEnabled(DiscordMaskStrategy.DISCORD_PACKAGE, false)
+
+        // Service-level toggle must be unaffected
+        assertTrue(repository.isServiceEnabled)
+    }
 }
