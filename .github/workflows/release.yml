@@ -5,6 +5,11 @@ on:
     tags:
       - 'v*'
   workflow_dispatch:
+    inputs:
+      tag_name:
+        description: 'Tag name to release (e.g. v1.3.0). Required when dispatching manually.'
+        required: false
+        default: ''
 
 permissions:
   contents: write
@@ -15,8 +20,23 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    - name: Validate workflow_dispatch inputs
+      if: github.event_name == 'workflow_dispatch'
+      run: |
+        TAG="${{ inputs.tag_name }}"
+        if [ -z "$TAG" ]; then
+          echo "❌ tag_name is required when running workflow_dispatch. Provide a value such as 'v1.3.0'."
+          exit 1
+        fi
+        if ! echo "$TAG" | grep -qE '^v[0-9]+\.[0-9]+\.[0-9]+$'; then
+          echo "❌ tag_name '${TAG}' is not a valid version tag. Expected format: v<major>.<minor>.<patch> (e.g. v1.3.0)."
+          exit 1
+        fi
+
     - name: Checkout code
       uses: actions/checkout@v4
+      with:
+        ref: ${{ inputs.tag_name != '' && inputs.tag_name || github.ref }}
 
     - name: Set up JDK 17
       uses: actions/setup-java@v4
@@ -72,13 +92,21 @@ jobs:
 
     - name: Get version from tag
       id: get_version
-      run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
-      if: startsWith(github.ref, 'refs/tags/')
+      if: startsWith(github.ref, 'refs/tags/') || inputs.tag_name != ''
+      env:
+        INPUT_TAG: ${{ inputs.tag_name }}
+      run: |
+        if [ -n "$INPUT_TAG" ]; then
+          echo "VERSION=$INPUT_TAG" >> $GITHUB_OUTPUT
+        else
+          echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+        fi
 
     - name: Create Release
-      if: startsWith(github.ref, 'refs/tags/')
+      if: startsWith(github.ref, 'refs/tags/') || inputs.tag_name != ''
       uses: softprops/action-gh-release@v1
       with:
+        tag_name: ${{ steps.get_version.outputs.VERSION }}
         files: app/build/outputs/apk/release/app-release.apk
         body: |
           ## KyuubiMask ${{ steps.get_version.outputs.VERSION }}
