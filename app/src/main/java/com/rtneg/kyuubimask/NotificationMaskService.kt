@@ -19,12 +19,16 @@ import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.os.Build
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import android.util.Log
 import androidx.core.app.NotificationCompat
+import androidx.core.content.ContextCompat
 import com.rtneg.kyuubimask.data.DebugLogRepository
 import com.rtneg.kyuubimask.data.PreferencesRepository
 
@@ -47,6 +51,15 @@ class NotificationMaskService : NotificationListenerService() {
 
     private lateinit var prefsRepository: PreferencesRepository
 
+    /** Receives toggle broadcasts from the Quick Settings tile and Settings UI. */
+    private val toggleReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            if (intent.action == PreferencesRepository.ACTION_MASK_TOGGLED) {
+                updateForegroundNotification()
+            }
+        }
+    }
+
     companion object {
         // Foreground service notification channel and ID
         private const val FOREGROUND_CHANNEL_ID = "kyuubimask_service"
@@ -56,7 +69,13 @@ class NotificationMaskService : NotificationListenerService() {
 
     override fun onCreate() {
         super.onCreate()
-        prefsRepository = PreferencesRepository(applicationContext)
+        prefsRepository = (applicationContext as KyuubiMaskApp).prefsRepository
+        ContextCompat.registerReceiver(
+            this,
+            toggleReceiver,
+            IntentFilter(PreferencesRepository.ACTION_MASK_TOGGLED),
+            ContextCompat.RECEIVER_NOT_EXPORTED,
+        )
         if (BuildConfig.DEBUG) {
             Log.d(TAG, "Service created")
             DebugLogRepository.add("Service started")
@@ -68,6 +87,7 @@ class NotificationMaskService : NotificationListenerService() {
     
     override fun onDestroy() {
         super.onDestroy()
+        unregisterReceiver(toggleReceiver)
         // Stop foreground service
         stopForeground(STOP_FOREGROUND_REMOVE)
     }
@@ -104,16 +124,25 @@ class NotificationMaskService : NotificationListenerService() {
                 PendingIntent.FLAG_UPDATE_CURRENT
             }
         )
-        
+
+        val enabled = prefsRepository.isServiceEnabled
+        val title = getString(if (enabled) R.string.service_running_title else R.string.service_paused_title)
+        val text = getString(if (enabled) R.string.service_running_text else R.string.service_paused_text)
         return androidx.core.app.NotificationCompat.Builder(this, FOREGROUND_CHANNEL_ID)
-            .setContentTitle(getString(R.string.service_running_title))
-            .setContentText(getString(R.string.service_running_text))
+            .setContentTitle(title)
+            .setContentText(text)
             .setSmallIcon(R.drawable.ic_mask)
             .setContentIntent(pendingIntent)
             .setPriority(NotificationCompat.PRIORITY_LOW)
             .setOngoing(true) // Cannot be dismissed by user
             .setShowWhen(false)
             .build()
+    }
+
+    /** Re-posts the foreground notification to reflect the current masking state. */
+    private fun updateForegroundNotification() {
+        val notificationManager = getSystemService(NotificationManager::class.java)
+        notificationManager.notify(FOREGROUND_NOTIFICATION_ID, createForegroundNotification())
     }
 
     /**

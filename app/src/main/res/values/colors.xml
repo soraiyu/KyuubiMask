@@ -27,4 +27,15 @@
     
     <!-- Chip colors -->
     <color name="chip_background">#333333</color>
+
+    <!-- MainToggleScreen colors -->
+    <color name="masking_on_background">#1A237E</color>
+    <color name="masking_off_background">#FFFFFF</color>
+    <color name="masking_on_text">#FFFFFF</color>
+    <color name="masking_off_text">#212121</color>
+    <color name="masking_on_hint">#B0BEC5</color>
+    <color name="masking_off_hint">#757575</color>
+
+    <!-- Icon colors -->
+    <color name="mask_off_icon">#9E9E9E</color>
 </resources>
