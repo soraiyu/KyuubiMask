@@ -36,6 +36,8 @@
     <string name="service_channel_description">Keeps the notification masking service running</string>
     <string name="service_running_title">KyuubiMask Active</string>
     <string name="service_running_text">Protecting your notification privacy</string>
+    <string name="service_paused_title">KyuubiMask Paused</string>
+    <string name="service_paused_text">Masking is disabled</string>
     
     <!-- Privacy -->
     <string name="privacy_notice">No data is stored or transmitted. Your notifications stay private.</string>
