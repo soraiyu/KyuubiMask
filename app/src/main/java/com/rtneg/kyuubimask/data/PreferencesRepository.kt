@@ -79,7 +79,7 @@ class PreferencesRepository(context: Context) {
         }
 
     /**
-     * 選択中のバイブレーションパターンキー
+     * Currently selected vibration pattern key.
      */
     var vibrationPattern: String
         get() = preferences.getString(KEY_VIBE_PATTERN, VibrationPatterns.DEFAULT_VIBE_PATTERN)

@@ -182,7 +182,7 @@ class NotificationMaskService : NotificationListenerService() {
             }
             strategy.mask(sbn, this)
 
-            // マスキング有効時のみ独自バイブレーションを鳴らす
+            // Fire a custom vibration pattern when masking is active
             if (prefsRepository.notificationVibrate) {
                 val patternKey = prefsRepository.vibrationPattern
                 val timings = VibrationPatterns.getVibrationTimings(patternKey)
@@ -197,8 +197,8 @@ class NotificationMaskService : NotificationListenerService() {
     }
 
     /**
-     * 指定されたタイミング配列でバイブレーションを実行する。
-     * Android 12+ (S) では VibratorManager、それ以前は Vibrator を使用する。
+     * Fires vibration using the given timing array.
+     * Uses VibratorManager on API 31+ and Vibrator on API 26–30.
      */
     private fun vibrateWithEffect(timings: LongArray) {
         val vibrator: Vibrator? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {

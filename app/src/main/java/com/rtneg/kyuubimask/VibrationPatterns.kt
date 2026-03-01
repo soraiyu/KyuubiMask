@@ -16,19 +16,19 @@
 package com.rtneg.kyuubimask
 
 /**
- * 通知バイブレーションパターンの定義。
- * 各パターンは VibrationEffect.createWaveform に渡すタイミング配列 (ms) で表現される。
- * インデックス 0 = 振動前の待機時間、以降は振動・停止を交互に繰り返す。
+ * Defines the available notification vibration patterns.
+ * Each pattern is expressed as a timing array (ms) passed to VibrationEffect.createWaveform.
+ * Index 0 = initial wait before vibration; subsequent values alternate between vibrate and pause.
  */
 object VibrationPatterns {
 
-    /** SharedPreferences キー */
+    /** SharedPreferences key for the selected vibration pattern */
     const val PREF_KEY_VIBE_PATTERN = "vibe_pattern"
 
-    /** デフォルトパターン */
+    /** Default vibration pattern key */
     const val DEFAULT_VIBE_PATTERN = "short"
 
-    /** パターンキー一覧（UI での表示順を保持するため LinkedHashMap） */
+    /** Available patterns keyed by name; insertion order determines display order in the UI. */
     val patterns: Map<String, LongArray> = linkedMapOf(
         "short"  to longArrayOf(0, 200),
         "double" to longArrayOf(0, 150, 100, 150),
@@ -37,8 +37,8 @@ object VibrationPatterns {
     )
 
     /**
-     * キーに対応するバイブレーションタイミングを返す。
-     * 未知のキーの場合はデフォルト (short) を返す。
+     * Returns the vibration timing array for the given pattern key.
+     * Falls back to the default pattern ("short") for unknown keys.
      */
     fun getVibrationTimings(key: String): LongArray =
         patterns[key] ?: patterns[DEFAULT_VIBE_PATTERN]!!

@@ -185,7 +185,7 @@ class SettingsActivity : AppCompatActivity() {
             updateVibePatternVisibility(isChecked)
         }
 
-        // バイブレーションパターン選択
+        // Vibration pattern selection
         setupVibePatternSpinner()
 
         // Apps to Mask toggles
@@ -231,8 +231,8 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     /**
-     * バイブレーションパターン Spinner の初期化。
-     * パターンキーのリストと日本語ラベルを対応付けて設定する。
+     * Initializes the vibration pattern Spinner.
+     * Maps pattern keys to their localised display labels.
      */
     private fun setupVibePatternSpinner() {
         val patternKeys = VibrationPatterns.patterns.keys.toList()
@@ -247,7 +247,7 @@ class SettingsActivity : AppCompatActivity() {
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         binding.spinnerVibePattern.adapter = adapter
 
-        // 保存済みのパターンを選択状態にする
+        // Restore the previously saved pattern selection
         val savedKey = prefsRepository.vibrationPattern
         val savedIndex = patternKeys.indexOf(savedKey).coerceAtLeast(0)
         binding.spinnerVibePattern.setSelection(savedIndex)
@@ -259,7 +259,7 @@ class SettingsActivity : AppCompatActivity() {
             override fun onNothingSelected(parent: AdapterView<*>) = Unit
         }
 
-        // テストボタン: 現在選択中のパターンで即バイブ
+        // Test button: immediately vibrate with the currently selected pattern
         binding.btnVibeTest.setOnClickListener {
             val key = patternKeys[binding.spinnerVibePattern.selectedItemPosition]
             val timings = VibrationPatterns.getVibrationTimings(key)
@@ -267,19 +267,19 @@ class SettingsActivity : AppCompatActivity() {
             Toast.makeText(this, R.string.toast_vibe_tested, Toast.LENGTH_SHORT).show()
         }
 
-        // 初期表示状態を反映
+        // Apply initial visibility state
         updateVibePatternVisibility(prefsRepository.notificationVibrate)
     }
 
     /**
-     * バイブ有効状態に応じてパターン選択 UI の表示/非表示を切り替える。
+     * Shows or hides the pattern picker based on whether vibration is enabled.
      */
     private fun updateVibePatternVisibility(vibrateEnabled: Boolean) {
         binding.layoutVibePattern.visibility = if (vibrateEnabled) View.VISIBLE else View.GONE
     }
 
     /**
-     * テスト用にバイブレーションを実行する。
+     * Fires vibration using the given timing array for test purposes.
      */
     private fun vibrateTest(timings: LongArray) {
         val vibrator: Vibrator? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
