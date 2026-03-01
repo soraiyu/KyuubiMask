@@ -48,6 +48,13 @@ class NotificationMaskStrategyTest {
     }
 
     @Test
+    fun `DiscordMaskStrategy canHandle is case-insensitive`() {
+        assertTrue(DiscordMaskStrategy().canHandle("COM.DISCORD"))
+        assertTrue(DiscordMaskStrategy().canHandle("Com.Discord"))
+        assertTrue(DiscordMaskStrategy().canHandle("COM.discord"))
+    }
+
+    @Test
     fun `DiscordMaskStrategy canHandle returns false for other packages`() {
         assertFalse(DiscordMaskStrategy().canHandle(SlackMaskStrategy.SLACK_PACKAGE))
         assertFalse(DiscordMaskStrategy().canHandle(WhatsAppMaskStrategy.WHATSAPP_PACKAGE))
@@ -120,5 +127,54 @@ class NotificationMaskStrategyTest {
     @Test
     fun `MASKED_TAG constant is non-empty`() {
         assertTrue(NotificationMaskStrategy.MASKED_TAG.isNotEmpty())
+    }
+
+    // --- Package name constant value tests ---
+
+    @Test
+    fun `SlackMaskStrategy package constant value`() {
+        kotlin.test.assertEquals("com.Slack", SlackMaskStrategy.SLACK_PACKAGE)
+    }
+
+    @Test
+    fun `DiscordMaskStrategy package constant value`() {
+        kotlin.test.assertEquals("com.discord", DiscordMaskStrategy.DISCORD_PACKAGE)
+    }
+
+    @Test
+    fun `WhatsAppMaskStrategy package constant value`() {
+        kotlin.test.assertEquals("com.whatsapp", WhatsAppMaskStrategy.WHATSAPP_PACKAGE)
+    }
+
+    @Test
+    fun `LineMaskStrategy package constant value`() {
+        kotlin.test.assertEquals("jp.naver.line.android", LineMaskStrategy.LINE_PACKAGE)
+    }
+
+    // --- Edge case tests ---
+
+    @Test
+    fun `SlackMaskStrategy canHandle returns false for empty string`() {
+        assertFalse(SlackMaskStrategy().canHandle(""))
+    }
+
+    @Test
+    fun `DiscordMaskStrategy canHandle returns false for empty string`() {
+        assertFalse(DiscordMaskStrategy().canHandle(""))
+    }
+
+    @Test
+    fun `WhatsAppMaskStrategy canHandle returns false for empty string`() {
+        assertFalse(WhatsAppMaskStrategy().canHandle(""))
+    }
+
+    @Test
+    fun `LineMaskStrategy canHandle returns false for empty string`() {
+        assertFalse(LineMaskStrategy().canHandle(""))
+    }
+
+    @Test
+    fun `registry returns null for empty string`() {
+        assertNull(NotificationMaskStrategyRegistry.findStrategy(""))
     }
 }

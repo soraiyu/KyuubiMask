@@ -88,4 +88,22 @@ class VibrationPatternsTest {
             assertEquals(0L, timings[0], "Pattern '$key' must start with 0ms wait")
         }
     }
+
+    @Test
+    fun `patterns map has exactly four entries`() {
+        assertEquals(4, VibrationPatterns.patterns.size)
+    }
+
+    @Test
+    fun `getVibrationTimings for each key returns non-empty array`() {
+        VibrationPatterns.patterns.keys.forEach { key ->
+            val timings = VibrationPatterns.getVibrationTimings(key)
+            assertTrue(timings.isNotEmpty(), "Timings for '$key' must not be empty")
+        }
+    }
+
+    @Test
+    fun `patterns map preserves insertion order - short is first`() {
+        assertEquals("short", VibrationPatterns.patterns.keys.first())
+    }
 }
