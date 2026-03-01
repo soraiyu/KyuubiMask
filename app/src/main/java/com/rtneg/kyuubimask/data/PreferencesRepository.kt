@@ -17,6 +17,7 @@ package com.rtneg.kyuubimask.data
 
 import android.content.Context
 import android.content.SharedPreferences
+import com.rtneg.kyuubimask.VibrationPatterns
 
 /**
  * Repository for managing app preferences
@@ -34,6 +35,7 @@ class PreferencesRepository(context: Context) {
         private const val KEY_SERVICE_ENABLED = "service_enabled"
         private const val KEY_NOTIFICATION_SOUND = "notification_sound"
         private const val KEY_NOTIFICATION_VIBRATE = "notification_vibrate"
+        private const val KEY_VIBE_PATTERN = VibrationPatterns.PREF_KEY_VIBE_PATTERN
         private const val KEY_APP_ENABLED_PREFIX = "app_enabled_"
 
         /** Broadcast action sent when masking is toggled (e.g. from Quick Settings tile). */
@@ -73,6 +75,18 @@ class PreferencesRepository(context: Context) {
         set(value) {
             preferences.edit()
                 .putBoolean(KEY_NOTIFICATION_VIBRATE, value)
+                .apply()
+        }
+
+    /**
+     * Currently selected vibration pattern key.
+     */
+    var vibrationPattern: String
+        get() = preferences.getString(KEY_VIBE_PATTERN, VibrationPatterns.DEFAULT_VIBE_PATTERN)
+            ?: VibrationPatterns.DEFAULT_VIBE_PATTERN
+        set(value) {
+            preferences.edit()
+                .putString(KEY_VIBE_PATTERN, value)
                 .apply()
         }
 
