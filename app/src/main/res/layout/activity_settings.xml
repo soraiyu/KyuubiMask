@@ -366,12 +366,14 @@
                     android:visibility="gone">
 
                     <TextView
+                        android:id="@+id/tvVibePatternLabel"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/label_vibe_pattern"
                         android:textColor="@color/text_primary"
                         android:textSize="14sp"
-                        android:layout_marginBottom="4dp" />
+                        android:layout_marginBottom="4dp"
+                        android:labelFor="@id/spinnerVibePattern" />
 
                     <LinearLayout
                         android:layout_width="match_parent"

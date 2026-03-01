@@ -34,6 +34,7 @@
     <string name="label_vibe_pattern_long">Long</string>
     <string name="btn_vibe_test">Test</string>
     <string name="toast_vibe_tested">Pattern tested</string>
+    <string name="toast_vibe_unavailable">No vibrator available on this device</string>
     
     <!-- Masked notification -->
     <string name="masked_text">New notification</string>

@@ -263,8 +263,9 @@ class SettingsActivity : AppCompatActivity() {
         binding.btnVibeTest.setOnClickListener {
             val key = patternKeys[binding.spinnerVibePattern.selectedItemPosition]
             val timings = VibrationPatterns.getVibrationTimings(key)
-            vibrateWithEffect(timings)
-            Toast.makeText(this, R.string.toast_vibe_tested, Toast.LENGTH_SHORT).show()
+            val vibrated = vibrateWithEffect(timings)
+            val messageRes = if (vibrated) R.string.toast_vibe_tested else R.string.toast_vibe_unavailable
+            Toast.makeText(this, messageRes, Toast.LENGTH_SHORT).show()
         }
 
         // Apply initial visibility state

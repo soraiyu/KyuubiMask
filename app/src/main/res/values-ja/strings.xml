@@ -7,4 +7,5 @@
     <string name="label_vibe_pattern_long">長め</string>
     <string name="btn_vibe_test">テスト</string>
     <string name="toast_vibe_tested">パターンをテストしました</string>
+    <string name="toast_vibe_unavailable">このデバイスにはバイブレーターがありません</string>
 </resources>

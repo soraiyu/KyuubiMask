@@ -39,7 +39,8 @@ object VibrationPatterns {
     /**
      * Returns the vibration timing array for the given pattern key.
      * Falls back to the default pattern ("short") for unknown keys.
+     * A defensive copy is returned to prevent callers from mutating the internal pattern.
      */
     fun getVibrationTimings(key: String): LongArray =
-        patterns[key] ?: patterns[DEFAULT_VIBE_PATTERN]!!
+        (patterns[key] ?: patterns[DEFAULT_VIBE_PATTERN]!!).copyOf()
 }

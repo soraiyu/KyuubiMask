@@ -68,6 +68,14 @@ class VibrationPatternsTest {
     }
 
     @Test
+    fun `getVibrationTimings returns a defensive copy`() {
+        val timings = VibrationPatterns.getVibrationTimings("short")
+        timings[0] = 999L
+        // The mutation should not affect subsequent calls
+        assertContentEquals(longArrayOf(0, 200), VibrationPatterns.getVibrationTimings("short"))
+    }
+
+    @Test
     fun `all patterns have at least two elements (wait + vibrate)`() {
         VibrationPatterns.patterns.forEach { (key, timings) ->
             assertTrue(timings.size >= 2, "Pattern '$key' must have at least 2 timing values")
