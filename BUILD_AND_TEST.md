@@ -258,9 +258,13 @@ adb shell dumpsys package com.kyuubimask | grep permission
 
 ```bash
 # キーストアの作成（初回のみ）
-keytool -genkey -v -keystore kyuubimask.keystore -alias kyuubimask -keyalg RSA -keysize 2048 -validity 10000
+keytool -genkeypair -v -keystore kyuubimask-release.jks -alias kyuubimask -keyalg RSA -keysize 2048 -validity 10000
 
 # リリースビルド（署名が必要）
+export ANDROID_KEYSTORE_PATH="$PWD/kyuubimask-release.jks"
+export ANDROID_KEYSTORE_PASSWORD='your_store_password'
+export ANDROID_KEY_ALIAS='kyuubimask'
+export ANDROID_KEY_PASSWORD='your_key_password'
 ./gradlew assembleRelease
 ```
 

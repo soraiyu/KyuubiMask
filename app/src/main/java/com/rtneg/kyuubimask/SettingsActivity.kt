@@ -79,7 +79,7 @@ class SettingsActivity : AppCompatActivity() {
         binding = ActivitySettingsBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        prefsRepository = PreferencesRepository(applicationContext)
+        prefsRepository = (applicationContext as KyuubiMaskApp).prefsRepository
         
         setupUI()
         updateServiceStatus()
@@ -158,6 +158,12 @@ class SettingsActivity : AppCompatActivity() {
         binding.switchEnable.isChecked = prefsRepository.isServiceEnabled
         binding.switchEnable.setOnCheckedChangeListener { _, isChecked ->
             prefsRepository.isServiceEnabled = isChecked
+            // Notify the foreground service so it can update its notification.
+            val intent = Intent(PreferencesRepository.ACTION_MASK_TOGGLED).apply {
+                putExtra(PreferencesRepository.EXTRA_ENABLED, isChecked)
+                setPackage(packageName)
+            }
+            sendBroadcast(intent)
             updateServiceStatus()
         }
         

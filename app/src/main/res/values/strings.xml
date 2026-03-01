@@ -36,6 +36,8 @@
     <string name="service_channel_description">Keeps the notification masking service running</string>
     <string name="service_running_title">KyuubiMask Active</string>
     <string name="service_running_text">Protecting your notification privacy</string>
+    <string name="service_paused_title">KyuubiMask Paused</string>
+    <string name="service_paused_text">Masking is disabled</string>
     
     <!-- Privacy -->
     <string name="privacy_notice">No data is stored or transmitted. Your notifications stay private.</string>
@@ -55,4 +57,13 @@
 
     <!-- Version -->
     <string name="label_version">Version %s</string>
+
+    <!-- Quick Settings Tile -->
+    <string name="tile_label_masking_on">マスク中</string>
+    <string name="tile_label_masking_off">通常表示</string>
+
+    <!-- Main Toggle Screen -->
+    <string name="toggle_status_masking_on">マスク有効\n(通知を隠しています)</string>
+    <string name="toggle_status_masking_off">通常表示\n(通知をそのまま表示)</string>
+    <string name="toggle_hint">タップで切り替え</string>
 </resources>

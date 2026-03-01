@@ -83,10 +83,16 @@ cd KyuubiMask
 ./gradlew assembleDebug
 
 # Release APK (requires signing)
+export ANDROID_KEYSTORE_PATH="$PWD/kyuubimask-release.jks"
+export ANDROID_KEYSTORE_PASSWORD='your_store_password'
+export ANDROID_KEY_ALIAS='kyuubimask'
+export ANDROID_KEY_PASSWORD='your_key_password'
 ./gradlew assembleRelease
 ```
 
 The APK will be generated at `app/build/outputs/apk/debug/app-debug.apk`.
+
+Release signing passwords are used when `assembleRelease` runs (Gradle reads the environment variables above).
 
 #### CI/CD Automatic Builds
 
@@ -224,10 +230,16 @@ cd KyuubiMask
 ./gradlew assembleDebug
 
 # Release APK (署名が必要)
+export ANDROID_KEYSTORE_PATH="$PWD/kyuubimask-release.jks"
+export ANDROID_KEYSTORE_PASSWORD='your_store_password'
+export ANDROID_KEY_ALIAS='kyuubimask'
+export ANDROID_KEY_PASSWORD='your_key_password'
 ./gradlew assembleRelease
 ```
 
 APKは `app/build/outputs/apk/debug/app-debug.apk` に生成されます。
+
+署名用パスワードは `assembleRelease` 実行時にのみ使われます（上記環境変数をGradleが参照）。
 
 #### CI/CD 自動ビルド
 

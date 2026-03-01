@@ -35,6 +35,12 @@ class PreferencesRepository(context: Context) {
         private const val KEY_NOTIFICATION_SOUND = "notification_sound"
         private const val KEY_NOTIFICATION_VIBRATE = "notification_vibrate"
         private const val KEY_APP_ENABLED_PREFIX = "app_enabled_"
+
+        /** Broadcast action sent when masking is toggled (e.g. from Quick Settings tile). */
+        const val ACTION_MASK_TOGGLED = "com.rtneg.kyuubimask.ACTION_MASK_TOGGLED"
+
+        /** Broadcast extra – Boolean, the new masking-enabled state. */
+        const val EXTRA_ENABLED = "enabled"
     }
     
     /**
