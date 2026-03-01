@@ -24,8 +24,13 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.os.VibrationEffect
+import android.os.Vibrator
+import android.os.VibratorManager
 import android.provider.Settings
 import android.view.View
+import android.widget.ArrayAdapter
+import android.widget.AdapterView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -177,7 +182,11 @@ class SettingsActivity : AppCompatActivity() {
         binding.switchVibrate.isChecked = prefsRepository.notificationVibrate
         binding.switchVibrate.setOnCheckedChangeListener { _, isChecked ->
             prefsRepository.notificationVibrate = isChecked
+            updateVibePatternVisibility(isChecked)
         }
+
+        // バイブレーションパターン選択
+        setupVibePatternSpinner()
 
         // Apps to Mask toggles
         setupAppSwitch(binding.switchSlack, SlackMaskStrategy.SLACK_PACKAGE)
@@ -219,6 +228,67 @@ class SettingsActivity : AppCompatActivity() {
         switch.setOnCheckedChangeListener { _, isChecked ->
             prefsRepository.setAppEnabled(packageName, isChecked)
         }
+    }
+
+    /**
+     * バイブレーションパターン Spinner の初期化。
+     * パターンキーのリストと日本語ラベルを対応付けて設定する。
+     */
+    private fun setupVibePatternSpinner() {
+        val patternKeys = VibrationPatterns.patterns.keys.toList()
+        val patternLabels = listOf(
+            getString(R.string.label_vibe_pattern_short),
+            getString(R.string.label_vibe_pattern_double),
+            getString(R.string.label_vibe_pattern_heart),
+            getString(R.string.label_vibe_pattern_long),
+        )
+
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, patternLabels)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        binding.spinnerVibePattern.adapter = adapter
+
+        // 保存済みのパターンを選択状態にする
+        val savedKey = prefsRepository.vibrationPattern
+        val savedIndex = patternKeys.indexOf(savedKey).coerceAtLeast(0)
+        binding.spinnerVibePattern.setSelection(savedIndex)
+
+        binding.spinnerVibePattern.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
+                prefsRepository.vibrationPattern = patternKeys[position]
+            }
+            override fun onNothingSelected(parent: AdapterView<*>) = Unit
+        }
+
+        // テストボタン: 現在選択中のパターンで即バイブ
+        binding.btnVibeTest.setOnClickListener {
+            val key = patternKeys[binding.spinnerVibePattern.selectedItemPosition]
+            val timings = VibrationPatterns.getVibrationTimings(key)
+            vibrateTest(timings)
+            Toast.makeText(this, R.string.toast_vibe_tested, Toast.LENGTH_SHORT).show()
+        }
+
+        // 初期表示状態を反映
+        updateVibePatternVisibility(prefsRepository.notificationVibrate)
+    }
+
+    /**
+     * バイブ有効状態に応じてパターン選択 UI の表示/非表示を切り替える。
+     */
+    private fun updateVibePatternVisibility(vibrateEnabled: Boolean) {
+        binding.layoutVibePattern.visibility = if (vibrateEnabled) View.VISIBLE else View.GONE
+    }
+
+    /**
+     * テスト用にバイブレーションを実行する。
+     */
+    private fun vibrateTest(timings: LongArray) {
+        val vibrator: Vibrator? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            getSystemService(VibratorManager::class.java)?.defaultVibrator
+        } else {
+            @Suppress("DEPRECATION")
+            getSystemService(Vibrator::class.java)
+        }
+        vibrator?.vibrate(VibrationEffect.createWaveform(timings, -1))
     }
 
     /**

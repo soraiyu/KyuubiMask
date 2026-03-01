@@ -24,6 +24,9 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.Build
+import android.os.VibrationEffect
+import android.os.Vibrator
+import android.os.VibratorManager
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 import android.util.Log
@@ -178,11 +181,33 @@ class NotificationMaskService : NotificationListenerService() {
                 DebugLogRepository.add("Masking: $packageName")
             }
             strategy.mask(sbn, this)
+
+            // マスキング有効時のみ独自バイブレーションを鳴らす
+            if (prefsRepository.notificationVibrate) {
+                val patternKey = prefsRepository.vibrationPattern
+                val timings = VibrationPatterns.getVibrationTimings(patternKey)
+                vibrateWithEffect(timings)
+            }
         } else {
             if (BuildConfig.DEBUG) {
                 Log.d(TAG, "No strategy for $packageName – passing through")
                 DebugLogRepository.add("Pass-through: $packageName")
             }
         }
+    }
+
+    /**
+     * 指定されたタイミング配列でバイブレーションを実行する。
+     * Android 12+ (S) では VibratorManager、それ以前は Vibrator を使用する。
+     */
+    private fun vibrateWithEffect(timings: LongArray) {
+        val vibrator: Vibrator? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            getSystemService(VibratorManager::class.java)?.defaultVibrator
+        } else {
+            @Suppress("DEPRECATION")
+            getSystemService(Vibrator::class.java)
+        }
+        vibrator ?: return
+        vibrator.vibrate(VibrationEffect.createWaveform(timings, -1))
     }
 }
