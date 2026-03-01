@@ -132,45 +132,26 @@ class NotificationMaskStrategyTest {
     // --- Package name constant value tests ---
 
     @Test
-    fun `SlackMaskStrategy package constant value`() {
+    fun `package name constants have correct values`() {
         kotlin.test.assertEquals("com.Slack", SlackMaskStrategy.SLACK_PACKAGE)
-    }
-
-    @Test
-    fun `DiscordMaskStrategy package constant value`() {
         kotlin.test.assertEquals("com.discord", DiscordMaskStrategy.DISCORD_PACKAGE)
-    }
-
-    @Test
-    fun `WhatsAppMaskStrategy package constant value`() {
         kotlin.test.assertEquals("com.whatsapp", WhatsAppMaskStrategy.WHATSAPP_PACKAGE)
-    }
-
-    @Test
-    fun `LineMaskStrategy package constant value`() {
         kotlin.test.assertEquals("jp.naver.line.android", LineMaskStrategy.LINE_PACKAGE)
     }
 
     // --- Edge case tests ---
 
     @Test
-    fun `SlackMaskStrategy canHandle returns false for empty string`() {
-        assertFalse(SlackMaskStrategy().canHandle(""))
-    }
-
-    @Test
-    fun `DiscordMaskStrategy canHandle returns false for empty string`() {
-        assertFalse(DiscordMaskStrategy().canHandle(""))
-    }
-
-    @Test
-    fun `WhatsAppMaskStrategy canHandle returns false for empty string`() {
-        assertFalse(WhatsAppMaskStrategy().canHandle(""))
-    }
-
-    @Test
-    fun `LineMaskStrategy canHandle returns false for empty string`() {
-        assertFalse(LineMaskStrategy().canHandle(""))
+    fun `all strategies return false for empty package name`() {
+        val strategies = listOf(
+            SlackMaskStrategy(),
+            DiscordMaskStrategy(),
+            WhatsAppMaskStrategy(),
+            LineMaskStrategy()
+        )
+        strategies.forEach { strategy ->
+            assertFalse(strategy.canHandle(""), "${strategy::class.simpleName} should return false for empty string")
+        }
     }
 
     @Test

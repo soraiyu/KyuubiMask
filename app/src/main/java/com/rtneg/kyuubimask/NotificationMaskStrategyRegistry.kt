@@ -35,6 +35,10 @@ object NotificationMaskStrategyRegistry {
     private val strategies = java.util.concurrent.CopyOnWriteArrayList<NotificationMaskStrategy>()
 
     init {
+        registerDefaults()
+    }
+
+    private fun registerDefaults() {
         // Register strategies for supported apps (just append register() calls here to add more)
         register(SlackMaskStrategy())
         register(DiscordMaskStrategy())
@@ -56,10 +60,7 @@ object NotificationMaskStrategyRegistry {
     @androidx.annotation.VisibleForTesting
     internal fun resetForTest() {
         strategies.clear()
-        register(SlackMaskStrategy())
-        register(DiscordMaskStrategy())
-        register(WhatsAppMaskStrategy())
-        register(LineMaskStrategy())
+        registerDefaults()
     }
 
     /**

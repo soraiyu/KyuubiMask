@@ -73,30 +73,18 @@ class NotificationMaskStrategyRegistryTest {
     }
 
     @Test
-    fun `built-in Slack strategy is registered`() {
-        val strategy = NotificationMaskStrategyRegistry.findStrategy(SlackMaskStrategy.SLACK_PACKAGE)
-        assertNotNull(strategy)
-        assertTrue(strategy is SlackMaskStrategy)
-    }
+    fun `built-in strategies are registered correctly`() {
+        val strategiesToTest = mapOf(
+            SlackMaskStrategy.SLACK_PACKAGE to SlackMaskStrategy::class,
+            DiscordMaskStrategy.DISCORD_PACKAGE to DiscordMaskStrategy::class,
+            WhatsAppMaskStrategy.WHATSAPP_PACKAGE to WhatsAppMaskStrategy::class,
+            LineMaskStrategy.LINE_PACKAGE to LineMaskStrategy::class
+        )
 
-    @Test
-    fun `built-in Discord strategy is registered`() {
-        val strategy = NotificationMaskStrategyRegistry.findStrategy(DiscordMaskStrategy.DISCORD_PACKAGE)
-        assertNotNull(strategy)
-        assertTrue(strategy is DiscordMaskStrategy)
-    }
-
-    @Test
-    fun `built-in WhatsApp strategy is registered`() {
-        val strategy = NotificationMaskStrategyRegistry.findStrategy(WhatsAppMaskStrategy.WHATSAPP_PACKAGE)
-        assertNotNull(strategy)
-        assertTrue(strategy is WhatsAppMaskStrategy)
-    }
-
-    @Test
-    fun `built-in LINE strategy is registered`() {
-        val strategy = NotificationMaskStrategyRegistry.findStrategy(LineMaskStrategy.LINE_PACKAGE)
-        assertNotNull(strategy)
-        assertTrue(strategy is LineMaskStrategy)
+        strategiesToTest.forEach { (pkg, clazz) ->
+            val strategy = NotificationMaskStrategyRegistry.findStrategy(pkg)
+            assertNotNull(strategy, "Strategy for package '$pkg' should be registered.")
+            assertTrue(clazz.isInstance(strategy), "Strategy for package '$pkg' should be of type '${clazz.simpleName}'.")
+        }
     }
 }
