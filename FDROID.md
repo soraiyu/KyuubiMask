@@ -56,8 +56,9 @@ F-Droid reviewers may flag the following:
 - [x] Metadata file created and version numbers correct
 - [x] Fastlane structure prepared
 - [x] English default strings in values/strings.xml
-- [ ] Screenshots added (optional)
-- [ ] Feature graphic added (optional)
+- [ ] **Screenshots for F-Droid** — place PNG/JPEG files in `fastlane/metadata/android/en-US/images/phoneScreenshots/` (and optionally `ja-JP/images/phoneScreenshots/` for Japanese). Recommended size: 1080×1920. This is what F-Droid displays on the app page.
+- [ ] **Screenshots for README.md** — place images in `docs/screenshots/` (or any directory) and reference them from `README.md` with relative paths. These appear on the GitHub repository page only and are independent from F-Droid.
+- [ ] Feature graphic — place as `fastlane/metadata/android/en-US/images/featureGraphic.png` (1024×500 px). Optional.
 - [ ] Submit to F-Droid repository
 
 ## How to Submit
