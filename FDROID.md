@@ -23,10 +23,11 @@ This document outlines KyuubiMask's readiness for F-Droid distribution.
 ### Build Configuration
 - **Status**: ✅ Reproducible builds supported
 - **Build tool**: Gradle with Kotlin DSL
+- **Signing**: Release signing is applied only when environment variables are set; F-Droid will build and sign without them
 - **Configuration**: [app/build.gradle.kts](app/build.gradle.kts)
 
 ### Metadata
-- **Status**: ✅ Complete
+- **Status**: ✅ Complete and up-to-date (v1.4.0 / versionCode 7)
 - **Location**: [metadata/com.rtneg.kyuubimask.yml](metadata/com.rtneg.kyuubimask.yml)
 - **Fastlane**: [fastlane/metadata/android/](fastlane/metadata/android/)
 
@@ -35,6 +36,16 @@ This document outlines KyuubiMask's readiness for F-Droid distribution.
 - **Repository**: https://github.com/soraiyu/KyuubiMask
 - **Issue Tracker**: https://github.com/soraiyu/KyuubiMask/issues
 
+## Potential Anti-Features
+
+F-Droid reviewers may flag the following:
+
+- **NonFreeNet**: The app is designed to work with Slack, Discord, WhatsApp, and LINE — all proprietary (non-free) network services. F-Droid may require an `AntiFeatures: NonFreeNet` declaration in the metadata, even though the app itself is fully free software. If requested, add the following to `metadata/com.rtneg.kyuubimask.yml`:
+  ```yaml
+  AntiFeatures:
+    - NonFreeNet
+  ```
+
 ## F-Droid Submission Checklist
 
 - [x] Apache 2.0 license
@@ -42,8 +53,9 @@ This document outlines KyuubiMask's readiness for F-Droid distribution.
 - [x] No tracking or analytics
 - [x] No internet permission
 - [x] Source code publicly available
-- [x] Metadata file created
+- [x] Metadata file created and version numbers correct
 - [x] Fastlane structure prepared
+- [x] English default strings in values/strings.xml
 - [ ] Screenshots added (optional)
 - [ ] Feature graphic added (optional)
 - [ ] Submit to F-Droid repository
@@ -59,3 +71,5 @@ This document outlines KyuubiMask's readiness for F-Droid distribution.
 
 - [F-Droid Inclusion Guide](https://f-droid.org/docs/Inclusion_Policy/)
 - [F-Droid Build Metadata Reference](https://f-droid.org/docs/Build_Metadata_Reference/)
+- [F-Droid Anti-Features](https://f-droid.org/docs/Anti-Features/)
+

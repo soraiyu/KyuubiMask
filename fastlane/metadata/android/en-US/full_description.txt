@@ -8,14 +8,16 @@ KyuubiMask is a privacy-first notification masking tool that protects your sensi
 • Open source with Apache 2.0 license
 
 ✨ FEATURES
-• Masks Slack notifications with generic text
+• Masks notifications from Slack, Discord, WhatsApp, and LINE with generic text
+• Per-app toggle to choose which apps to mask
+• Quick Settings tile for one-tap masking toggle
 • Simple on/off toggle to enable or disable the service
 • Works in the background
 • Minimal permissions required
 • Lightweight and efficient
 
 📱 SUPPORTED APPS
-Currently supports Slack. Support for additional apps is planned for future releases.
+Currently supports Slack, Discord, WhatsApp, and LINE.
 
 🎯 PERFECT FOR
 • Screen sharing during video calls
