@@ -52,6 +52,9 @@ class NotificationMaskService : NotificationListenerService() {
 
     private lateinit var prefsRepository: PreferencesRepository
 
+    /** Cache to avoid creating a new GenericMaskStrategy instance per notification. */
+    private val genericStrategyCache = HashMap<String, GenericMaskStrategy>()
+
     /** Receives toggle broadcasts from the Quick Settings tile and Settings UI. */
     private val toggleReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
@@ -176,7 +179,7 @@ class NotificationMaskService : NotificationListenerService() {
             ?: if (prefsRepository.getUserSelectedPackages().contains(packageName)) {
                 // getUserSelectedPackages() is backed by SharedPreferences which caches
                 // values in memory after the first disk read, so this is inexpensive.
-                GenericMaskStrategy(packageName)
+                genericStrategyCache.getOrPut(packageName) { GenericMaskStrategy(packageName) }
             } else {
                 null
             }

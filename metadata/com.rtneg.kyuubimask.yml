@@ -30,7 +30,8 @@ Description: |-
   * Works completely offline
   * No Google Play Services or third-party SDKs
 
-  Currently supports Slack, Discord, WhatsApp, and LINE.
+  Works with any installed app — select targets via "Add custom apps…" in Settings.
+  Slack, Discord, WhatsApp, and LINE are available as built-in presets.
   The service can be enabled or disabled in the settings or via the Quick Settings tile.
   
   Perfect for:

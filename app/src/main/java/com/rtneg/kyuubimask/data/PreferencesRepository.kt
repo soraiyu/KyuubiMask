@@ -125,23 +125,23 @@ class PreferencesRepository(context: Context) {
      * These are additional apps beyond the built-in presets.
      */
     fun getUserSelectedPackages(): Set<String> =
-        preferences.getStringSet(KEY_USER_SELECTED_PACKAGES, emptySet()) ?: emptySet()
+        preferences.getStringSet(KEY_USER_SELECTED_PACKAGES, emptySet())?.toSet() ?: emptySet()
 
     /**
-     * Adds a package to the user-selected set.
+     * Adds a package to the user-selected set. No-op if already present.
      */
     fun addUserSelectedPackage(packageName: String) {
-        val current = getUserSelectedPackages().toMutableSet()
-        current.add(packageName)
-        preferences.edit().putStringSet(KEY_USER_SELECTED_PACKAGES, current).apply()
+        val current = getUserSelectedPackages()
+        if (packageName in current) return
+        preferences.edit().putStringSet(KEY_USER_SELECTED_PACKAGES, current + packageName).apply()
     }
 
     /**
-     * Removes a package from the user-selected set.
+     * Removes a package from the user-selected set. No-op if not present.
      */
     fun removeUserSelectedPackage(packageName: String) {
-        val current = getUserSelectedPackages().toMutableSet()
-        current.remove(packageName)
-        preferences.edit().putStringSet(KEY_USER_SELECTED_PACKAGES, current).apply()
+        val current = getUserSelectedPackages()
+        if (packageName !in current) return
+        preferences.edit().putStringSet(KEY_USER_SELECTED_PACKAGES, current - packageName).apply()
     }
 }

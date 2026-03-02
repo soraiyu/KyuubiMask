@@ -122,10 +122,11 @@ class SelectAppsActivity : AppCompatActivity() {
     }
 
     private class AppListAdapter(
-        private val items: List<AppItem>,
+        items: List<AppItem>,
         private val onToggle: (AppItem, Boolean) -> Unit,
     ) : RecyclerView.Adapter<AppListAdapter.ViewHolder>() {
 
+        private val mutableItems: MutableList<AppItem> = items.toMutableList()
         private val selectedPackages: MutableSet<String> =
             items.filter { it.isSelected }.map { it.packageName }.toMutableSet()
 
@@ -141,12 +142,13 @@ class SelectAppsActivity : AppCompatActivity() {
                     .inflate(R.layout.item_app, parent, false)
             )
 
-        override fun getItemCount(): Int = items.size
+        override fun getItemCount(): Int = mutableItems.size
 
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-            val item = items[position]
+            val item = mutableItems[position]
             holder.tvLabel.text = item.label
             holder.tvPackage.text = item.packageName
+            holder.checkBox.contentDescription = item.label
             holder.checkBox.setOnCheckedChangeListener(null)
             holder.checkBox.isChecked = item.packageName in selectedPackages
             holder.checkBox.setOnCheckedChangeListener { _, isChecked ->
@@ -156,6 +158,11 @@ class SelectAppsActivity : AppCompatActivity() {
                     selectedPackages.remove(item.packageName)
                 }
                 onToggle(item, isChecked)
+                // Re-sort to keep selected apps at the top
+                mutableItems.sortWith(
+                    compareByDescending<AppItem> { it.packageName in selectedPackages }.thenBy { it.label }
+                )
+                notifyDataSetChanged()
             }
             holder.itemView.setOnClickListener {
                 holder.checkBox.toggle()
