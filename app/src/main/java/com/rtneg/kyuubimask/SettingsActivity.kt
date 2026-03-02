@@ -115,7 +115,8 @@ class SettingsActivity : AppCompatActivity() {
     
     /**
      * Shows the privacy information dialog on the first app launch.
-     * Marks the first launch flag as false once the user dismisses it.
+     * Marks the first launch flag as false once the user acknowledges it
+     * by pressing the OK button.
      */
     private fun showPrivacyDialog() {
         AlertDialog.Builder(this)
