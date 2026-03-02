@@ -24,6 +24,7 @@ import android.view.ViewGroup
 import android.widget.CheckBox
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.rtneg.kyuubimask.data.PreferencesRepository
@@ -31,6 +32,9 @@ import com.rtneg.kyuubimask.strategy.DiscordMaskStrategy
 import com.rtneg.kyuubimask.strategy.LineMaskStrategy
 import com.rtneg.kyuubimask.strategy.SlackMaskStrategy
 import com.rtneg.kyuubimask.strategy.WhatsAppMaskStrategy
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
  * SelectAppsActivity – lets the user choose any installed app for notification masking.
@@ -55,7 +59,7 @@ class SelectAppsActivity : AppCompatActivity() {
     data class AppItem(
         val label: String,
         val packageName: String,
-        var isSelected: Boolean,
+        val isSelected: Boolean,
     )
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -72,12 +76,14 @@ class SelectAppsActivity : AppCompatActivity() {
         val recyclerView = findViewById<RecyclerView>(R.id.recyclerViewApps)
         recyclerView.layoutManager = LinearLayoutManager(this)
 
-        val items = loadAppItems()
-        recyclerView.adapter = AppListAdapter(items) { item, checked ->
-            if (checked) {
-                prefsRepository.addUserSelectedPackage(item.packageName)
-            } else {
-                prefsRepository.removeUserSelectedPackage(item.packageName)
+        lifecycleScope.launch {
+            val items = loadAppItems()
+            recyclerView.adapter = AppListAdapter(items) { item, checked ->
+                if (checked) {
+                    prefsRepository.addUserSelectedPackage(item.packageName)
+                } else {
+                    prefsRepository.removeUserSelectedPackage(item.packageName)
+                }
             }
         }
     }
@@ -87,12 +93,12 @@ class SelectAppsActivity : AppCompatActivity() {
         return true
     }
 
-    private fun loadAppItems(): List<AppItem> {
+    private suspend fun loadAppItems(): List<AppItem> = withContext(Dispatchers.IO) {
         val userSelected = prefsRepository.getUserSelectedPackages()
         val launcherIntent = Intent(Intent.ACTION_MAIN).apply {
             addCategory(Intent.CATEGORY_LAUNCHER)
         }
-        return packageManager
+        return@withContext packageManager
             .queryIntentActivities(launcherIntent, PackageManager.MATCH_DEFAULT_ONLY)
             .map { it.activityInfo.packageName }
             .toSet()
@@ -120,6 +126,9 @@ class SelectAppsActivity : AppCompatActivity() {
         private val onToggle: (AppItem, Boolean) -> Unit,
     ) : RecyclerView.Adapter<AppListAdapter.ViewHolder>() {
 
+        private val selectedPackages: MutableSet<String> =
+            items.filter { it.isSelected }.map { it.packageName }.toMutableSet()
+
         class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
             val tvLabel: TextView = view.findViewById(R.id.tvAppLabel)
             val tvPackage: TextView = view.findViewById(R.id.tvAppPackage)
@@ -139,9 +148,13 @@ class SelectAppsActivity : AppCompatActivity() {
             holder.tvLabel.text = item.label
             holder.tvPackage.text = item.packageName
             holder.checkBox.setOnCheckedChangeListener(null)
-            holder.checkBox.isChecked = item.isSelected
+            holder.checkBox.isChecked = item.packageName in selectedPackages
             holder.checkBox.setOnCheckedChangeListener { _, isChecked ->
-                item.isSelected = isChecked
+                if (isChecked) {
+                    selectedPackages.add(item.packageName)
+                } else {
+                    selectedPackages.remove(item.packageName)
+                }
                 onToggle(item, isChecked)
             }
             holder.itemView.setOnClickListener {
