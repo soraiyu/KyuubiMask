@@ -48,7 +48,7 @@
     <string name="service_paused_text">Masking is disabled</string>
     
     <!-- Privacy -->
-    <string name="privacy_notice">No data is stored or transmitted. Your notifications stay private.</string>
+    <string name="privacy_notice">Notification content is never stored or transmitted. Only settings (such as service state and vibration) are saved locally on your device.</string>
     
     <!-- Permissions -->
     <string name="post_notification_permission_required">Notification permission required for Android 13+</string>

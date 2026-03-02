@@ -48,7 +48,7 @@
     <string name="service_paused_text">マスク機能は無効です</string>
 
     <!-- Privacy -->
-    <string name="privacy_notice">データの保存・送信は一切行いません。お客様の通知は端末内で安全に保護されます。</string>
+    <string name="privacy_notice">通知の内容は端末外へ保存・送信しません。サービス状態やバイブレーションなどの設定のみ端末内に保存します。</string>
 
     <!-- Permissions -->
     <string name="post_notification_permission_required">Android 13以降では通知の送信権限が必要です</string>
