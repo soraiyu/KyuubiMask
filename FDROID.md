@@ -38,13 +38,7 @@ This document outlines KyuubiMask's readiness for F-Droid distribution.
 
 ## Potential Anti-Features
 
-F-Droid reviewers may flag the following:
-
-- **NonFreeNet**: The app is designed to work with Slack, Discord, WhatsApp, and LINE — all proprietary (non-free) network services. F-Droid may require an `AntiFeatures: NonFreeNet` declaration in the metadata, even though the app itself is fully free software. If requested, add the following to `metadata/com.rtneg.kyuubimask.yml`:
-  ```yaml
-  AntiFeatures:
-    - NonFreeNet
-  ```
+- **NonFreeNet**: Previously, KyuubiMask was hardcoded to work only with Slack, Discord, WhatsApp, and LINE. Since v1.5.0, users can select **any installed app** as a masking target via the "Add custom apps…" button. KyuubiMask is now a general-purpose notification masker and the `NonFreeNet` anti-feature no longer applies. The built-in presets for Slack, Discord, WhatsApp, and LINE are offered purely as convenience defaults; they impose no dependency on those services.
 
 ## F-Droid Submission Checklist
 

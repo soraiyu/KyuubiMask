@@ -229,4 +229,52 @@ class PreferencesRepositoryTest {
         // Service-level toggle must be unaffected
         assertTrue(repository.isServiceEnabled)
     }
+
+    // --- userSelectedPackages ---
+
+    @Test
+    fun `default user selected packages is empty`() {
+        assertTrue(repository.getUserSelectedPackages().isEmpty())
+    }
+
+    @Test
+    fun `addUserSelectedPackage stores the package`() {
+        repository.addUserSelectedPackage("com.example.testapp")
+        assertTrue(repository.getUserSelectedPackages().contains("com.example.testapp"))
+    }
+
+    @Test
+    fun `removeUserSelectedPackage removes only the specified package`() {
+        repository.addUserSelectedPackage("com.example.app1")
+        repository.addUserSelectedPackage("com.example.app2")
+        repository.removeUserSelectedPackage("com.example.app1")
+
+        val pkgs = repository.getUserSelectedPackages()
+        assertFalse(pkgs.contains("com.example.app1"))
+        assertTrue(pkgs.contains("com.example.app2"))
+    }
+
+    @Test
+    fun `user selected packages persist across repository instances`() {
+        repository.addUserSelectedPackage("com.example.persistent")
+
+        val newRepository = PreferencesRepository(context)
+        assertTrue(newRepository.getUserSelectedPackages().contains("com.example.persistent"))
+    }
+
+    @Test
+    fun `adding the same package twice does not duplicate it`() {
+        repository.addUserSelectedPackage("com.example.dup")
+        repository.addUserSelectedPackage("com.example.dup")
+
+        assertEquals(1, repository.getUserSelectedPackages().count { it == "com.example.dup" })
+    }
+
+    @Test
+    fun `removing a package not in the set is a no-op`() {
+        repository.addUserSelectedPackage("com.example.only")
+        repository.removeUserSelectedPackage("com.example.notpresent")
+
+        assertTrue(repository.getUserSelectedPackages().contains("com.example.only"))
+    }
 }

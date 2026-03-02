@@ -212,6 +212,11 @@ class SettingsActivity : AppCompatActivity() {
         setupAppSwitch(binding.switchWhatsApp, WhatsAppMaskStrategy.WHATSAPP_PACKAGE)
         setupAppSwitch(binding.switchLine, LineMaskStrategy.LINE_PACKAGE)
 
+        // Open SelectAppsActivity to let the user pick additional apps to mask
+        binding.btnAddCustomApps.setOnClickListener {
+            startActivity(Intent(this, SelectAppsActivity::class.java))
+        }
+
         // Permission button
         binding.btnPermission.setOnClickListener {
             openNotificationListenerSettings()

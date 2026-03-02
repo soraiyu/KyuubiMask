@@ -249,6 +249,15 @@
 
                 </LinearLayout>
 
+                <!-- Add custom apps button -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnAddCustomApps"
+                    style="@style/Widget.Material3.Button.TextButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/btn_add_custom_apps"
+                    android:layout_marginTop="8dp" />
+
             </LinearLayout>
 
         </androidx.cardview.widget.CardView>
