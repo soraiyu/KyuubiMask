@@ -63,6 +63,11 @@
     <string name="error_open_settings">Cannot open settings</string>
     <string name="error_post_notification_denied">POST_NOTIFICATION permission not granted</string>
 
+    <!-- Privacy Dialog (shown on first launch) -->
+    <string name="privacy_dialog_title">Welcome to KyuubiMask</string>
+    <string name="privacy_dialog_message">• Notification content is never stored or transmitted. It is processed in memory and immediately discarded.\n• There is no internet permission — it is impossible for data to leave your device.\n• Only settings are saved locally (list of masked apps, ON/OFF state, vibration pattern).\n• Notification access permission is used solely to mask content; the content itself is never saved.\n• KyuubiMask is fully open-source (Apache 2.0) — anyone can verify the code.\n• Protect your privacy with peace of mind 🦊</string>
+    <string name="privacy_dialog_button_ok">Got it</string>
+
     <!-- Version -->
     <string name="label_version">Version %s</string>
 
