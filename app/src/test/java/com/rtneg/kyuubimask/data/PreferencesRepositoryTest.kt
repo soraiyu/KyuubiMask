@@ -184,6 +184,25 @@ class PreferencesRepositoryTest {
     }
 
     @Test
+    fun `default isFirstLaunch should be true`() {
+        assertTrue(repository.isFirstLaunch)
+    }
+
+    @Test
+    fun `can set isFirstLaunch to false`() {
+        repository.isFirstLaunch = false
+        assertFalse(repository.isFirstLaunch)
+    }
+
+    @Test
+    fun `isFirstLaunch persists across repository instances`() {
+        repository.isFirstLaunch = false
+
+        val newRepository = PreferencesRepository(context)
+        assertFalse(newRepository.isFirstLaunch)
+    }
+
+    @Test
     fun `action mask toggled constant is non-empty`() {
         assertTrue(PreferencesRepository.ACTION_MASK_TOGGLED.isNotEmpty())
     }

@@ -63,6 +63,11 @@
     <string name="error_open_settings">設定を開けませんでした</string>
     <string name="error_post_notification_denied">通知の送信権限が許可されていません</string>
 
+    <!-- Privacy Dialog (shown on first launch) -->
+    <string name="privacy_dialog_title">九尾マスクへようこそ</string>
+    <string name="privacy_dialog_message">• 通知の内容は一切保存・送信しません。メモリ上で即時処理し、すぐに破棄されます。\n• インターネット接続権限はなく、データが外部に送られることは不可能です。\n• 保存するのは設定（マスク対象アプリのリスト、ON/OFF状態、振動パターン）のみです。\n• 通知アクセス権限を使って内容をマスクしますが、内容自体は保存されません。\n• すべてオープンソース（Apache 2.0）で、コードを誰でも確認できます。\n• 安心してプライバシーを守りましょう🦊</string>
+    <string name="privacy_dialog_button_ok">了解しました</string>
+
     <!-- Version -->
     <string name="label_version">バージョン %s</string>
 

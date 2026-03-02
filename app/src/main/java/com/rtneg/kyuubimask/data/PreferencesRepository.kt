@@ -37,6 +37,7 @@ class PreferencesRepository(context: Context) {
         private const val KEY_NOTIFICATION_VIBRATE = "notification_vibrate"
         private const val KEY_VIBE_PATTERN = VibrationPatterns.PREF_KEY_VIBE_PATTERN
         private const val KEY_APP_ENABLED_PREFIX = "app_enabled_"
+        private const val KEY_IS_FIRST_LAUNCH = "is_first_launch"
 
         /** Broadcast action sent when masking is toggled (e.g. from Quick Settings tile). */
         const val ACTION_MASK_TOGGLED = "com.rtneg.kyuubimask.ACTION_MASK_TOGGLED"
@@ -105,4 +106,16 @@ class PreferencesRepository(context: Context) {
             .putBoolean(KEY_APP_ENABLED_PREFIX + packageName, enabled)
             .apply()
     }
+
+    /**
+     * Whether this is the first time the app has been launched.
+     * Defaults to true; set to false after the privacy dialog is shown.
+     */
+    var isFirstLaunch: Boolean
+        get() = preferences.getBoolean(KEY_IS_FIRST_LAUNCH, true)
+        set(value) {
+            preferences.edit()
+                .putBoolean(KEY_IS_FIRST_LAUNCH, value)
+                .apply()
+        }
 }
