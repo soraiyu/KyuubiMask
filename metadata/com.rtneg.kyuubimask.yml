@@ -44,14 +44,14 @@ RepoType: git
 Repo: https://github.com/soraiyu/KyuubiMask
 
 Builds:
-  - versionName: 1.4.0
-    versionCode: 7
-    commit: v1.4.0
+  - versionName: 1.5.0
+    versionCode: 9
+    commit: v1.5.0
     subdir: app
     gradle:
       - yes
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 1.4.0
-CurrentVersionCode: 7
+CurrentVersion: 1.5.0
+CurrentVersionCode: 9

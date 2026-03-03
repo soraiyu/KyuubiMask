@@ -81,7 +81,7 @@
     <string name="tile_label_masking_off">Masking Off</string>
 
     <!-- Main Toggle Screen -->
-    <string name="toggle_status_masking_on">Masking Enabled\n(Notifications are hidden)</string>
-    <string name="toggle_status_masking_off">Normal Display\n(Notifications shown as-is)</string>
+    <string name="toggle_status_masking_on">Masking ON\n(Hiding notifications)</string>
+    <string name="toggle_status_masking_off">Masking OFF\n(Showing notifications)</string>
     <string name="toggle_hint">Tap to toggle</string>
 </resources>
