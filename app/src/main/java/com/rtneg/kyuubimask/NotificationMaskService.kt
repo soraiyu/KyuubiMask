@@ -31,6 +31,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import com.rtneg.kyuubimask.data.DebugLogRepository
 import com.rtneg.kyuubimask.data.PreferencesRepository
+import com.rtneg.kyuubimask.strategy.GenericMaskStrategy
 
 /**
  * NotificationMaskService - Core notification masking service
@@ -50,6 +51,9 @@ import com.rtneg.kyuubimask.data.PreferencesRepository
 class NotificationMaskService : NotificationListenerService() {
 
     private lateinit var prefsRepository: PreferencesRepository
+
+    /** Cache to avoid creating a new GenericMaskStrategy instance per notification. */
+    private val genericStrategyCache = HashMap<String, GenericMaskStrategy>()
 
     /** Receives toggle broadcasts from the Quick Settings tile and Settings UI. */
     private val toggleReceiver = object : BroadcastReceiver() {
@@ -172,6 +176,13 @@ class NotificationMaskService : NotificationListenerService() {
         // Delegate to strategy registry for app-specific masking
         // The registry is the single source of truth for which apps are masked
         val strategy = NotificationMaskStrategyRegistry.findStrategy(packageName)
+            ?: if (prefsRepository.getUserSelectedPackages().contains(packageName)) {
+                // getUserSelectedPackages() is backed by SharedPreferences which caches
+                // values in memory after the first disk read, so this is inexpensive.
+                genericStrategyCache.getOrPut(packageName) { GenericMaskStrategy(packageName) }
+            } else {
+                null
+            }
         if (strategy != null) {
             if (BuildConfig.DEBUG) {
                 Log.d(TAG, "Masking notification from $packageName")

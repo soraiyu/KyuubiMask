@@ -20,6 +20,11 @@
     <string name="label_app_discord">Discord</string>
     <string name="label_app_whatsapp">WhatsApp</string>
     <string name="label_app_line">LINE</string>
+    <string name="btn_add_custom_apps">カスタムアプリを追加…</string>
+
+    <!-- Select Apps screen -->
+    <string name="label_select_apps_title">マスク対象アプリを選択</string>
+    <string name="label_select_apps_hint">マスクしたいアプリにチェックを入れてください</string>
 
     <!-- Notification Settings -->
     <string name="label_notification_settings">通知設定</string>

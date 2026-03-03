@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.5.0] - 2026-03-03
+
+### Added
+- User-selectable app masking: any installed app can now be chosen as a masking target via "Add custom apps…" in Settings
+- `SelectAppsActivity` for browsing and selecting installed apps with a searchable list
+- `GenericMaskStrategy` for masking notifications from user-selected apps
+- User-selected packages persisted in `PreferencesRepository`
+
 ## [1.4.1] - 2026-03-02
 
 ### Fixed
@@ -82,7 +90,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Real-time debug log viewer
 - Complete offline operation
 
-[Unreleased]: https://github.com/soraiyu/KyuubiMask/compare/v1.4.1...HEAD
+[Unreleased]: https://github.com/soraiyu/KyuubiMask/compare/v1.5.0...HEAD
+[1.5.0]: https://github.com/soraiyu/KyuubiMask/compare/v1.4.1...v1.5.0
 [1.4.1]: https://github.com/soraiyu/KyuubiMask/compare/v1.4.0...v1.4.1
 [1.4.0]: https://github.com/soraiyu/KyuubiMask/compare/v1.3.0...v1.4.0
 [1.3.0]: https://github.com/soraiyu/KyuubiMask/compare/v1.2.2...v1.3.0

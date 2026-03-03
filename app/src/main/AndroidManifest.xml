@@ -13,6 +13,11 @@
         <package android:name="com.discord" />
         <package android:name="com.whatsapp" />
         <package android:name="jp.naver.line.android" />
+        <!-- Allow enumerating all launcher-visible apps for the custom app selector -->
+        <intent>
+            <action android:name="android.intent.action.MAIN" />
+            <category android:name="android.intent.category.LAUNCHER" />
+        </intent>
     </queries>
 
     <!-- Required for notification access -->
@@ -47,6 +52,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- Custom App Selection Activity -->
+        <activity
+            android:name=".SelectAppsActivity"
+            android:exported="false"
+            android:theme="@style/Theme.KyuubiMask" />
 
         <!-- Notification Listener Service -->
         <!-- 

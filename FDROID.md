@@ -23,10 +23,11 @@ This document outlines KyuubiMask's readiness for F-Droid distribution.
 ### Build Configuration
 - **Status**: ✅ Reproducible builds supported
 - **Build tool**: Gradle with Kotlin DSL
+- **Signing**: Release signing is applied only when environment variables are set; F-Droid will build and sign without them
 - **Configuration**: [app/build.gradle.kts](app/build.gradle.kts)
 
 ### Metadata
-- **Status**: ✅ Complete
+- **Status**: ✅ Complete and up-to-date (v1.5.0 / versionCode 9)
 - **Location**: [metadata/com.rtneg.kyuubimask.yml](metadata/com.rtneg.kyuubimask.yml)
 - **Fastlane**: [fastlane/metadata/android/](fastlane/metadata/android/)
 
@@ -35,6 +36,10 @@ This document outlines KyuubiMask's readiness for F-Droid distribution.
 - **Repository**: https://github.com/soraiyu/KyuubiMask
 - **Issue Tracker**: https://github.com/soraiyu/KyuubiMask/issues
 
+## Potential Anti-Features
+
+- **NonFreeNet**: Previously, KyuubiMask was hardcoded to work only with Slack, Discord, WhatsApp, and LINE. Since v1.5.0, users can select **any installed app** as a masking target via the "Add custom apps…" button. KyuubiMask is now a general-purpose notification masker and the `NonFreeNet` anti-feature no longer applies. The built-in presets for Slack, Discord, WhatsApp, and LINE are offered purely as convenience defaults; they impose no dependency on those services.
+
 ## F-Droid Submission Checklist
 
 - [x] Apache 2.0 license
@@ -42,10 +47,12 @@ This document outlines KyuubiMask's readiness for F-Droid distribution.
 - [x] No tracking or analytics
 - [x] No internet permission
 - [x] Source code publicly available
-- [x] Metadata file created
+- [x] Metadata file created and version numbers correct
 - [x] Fastlane structure prepared
-- [ ] Screenshots added (optional)
-- [ ] Feature graphic added (optional)
+- [x] English default strings in values/strings.xml
+- [ ] **Screenshots for F-Droid** — place PNG/JPEG files in `fastlane/metadata/android/en-US/images/phoneScreenshots/` (and optionally `ja-JP/images/phoneScreenshots/` for Japanese). Recommended size: 1080×1920. This is what F-Droid displays on the app page.
+- [ ] **Screenshots for README.md** — place images in `docs/screenshots/` (or any directory) and reference them from `README.md` with relative paths. These appear on the GitHub repository page only and are independent from F-Droid.
+- [ ] Feature graphic — place as `fastlane/metadata/android/en-US/images/featureGraphic.png` (1024×500 px). Optional.
 - [ ] Submit to F-Droid repository
 
 ## How to Submit
@@ -59,3 +66,5 @@ This document outlines KyuubiMask's readiness for F-Droid distribution.
 
 - [F-Droid Inclusion Guide](https://f-droid.org/docs/Inclusion_Policy/)
 - [F-Droid Build Metadata Reference](https://f-droid.org/docs/Build_Metadata_Reference/)
+- [F-Droid Anti-Features](https://f-droid.org/docs/Anti-Features/)
+

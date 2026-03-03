@@ -38,6 +38,7 @@ class PreferencesRepository(context: Context) {
         private const val KEY_VIBE_PATTERN = VibrationPatterns.PREF_KEY_VIBE_PATTERN
         private const val KEY_APP_ENABLED_PREFIX = "app_enabled_"
         private const val KEY_IS_FIRST_LAUNCH = "is_first_launch"
+        private const val KEY_USER_SELECTED_PACKAGES = "user_selected_packages"
 
         /** Broadcast action sent when masking is toggled (e.g. from Quick Settings tile). */
         const val ACTION_MASK_TOGGLED = "com.rtneg.kyuubimask.ACTION_MASK_TOGGLED"
@@ -118,4 +119,29 @@ class PreferencesRepository(context: Context) {
                 .putBoolean(KEY_IS_FIRST_LAUNCH, value)
                 .apply()
         }
+
+    /**
+     * Returns the set of user-selected package names to mask.
+     * These are additional apps beyond the built-in presets.
+     */
+    fun getUserSelectedPackages(): Set<String> =
+        preferences.getStringSet(KEY_USER_SELECTED_PACKAGES, emptySet())?.toSet() ?: emptySet()
+
+    /**
+     * Adds a package to the user-selected set. No-op if already present.
+     */
+    fun addUserSelectedPackage(packageName: String) {
+        val current = getUserSelectedPackages()
+        if (packageName in current) return
+        preferences.edit().putStringSet(KEY_USER_SELECTED_PACKAGES, current + packageName).apply()
+    }
+
+    /**
+     * Removes a package from the user-selected set. No-op if not present.
+     */
+    fun removeUserSelectedPackage(packageName: String) {
+        val current = getUserSelectedPackages()
+        if (packageName !in current) return
+        preferences.edit().putStringSet(KEY_USER_SELECTED_PACKAGES, current - packageName).apply()
+    }
 }
