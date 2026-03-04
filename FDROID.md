@@ -51,7 +51,7 @@ This document outlines KyuubiMask's readiness for F-Droid distribution.
 - [x] Fastlane structure prepared
 - [x] English default strings in values/strings.xml
 - [x] Fastlane changelogs (`fastlane/metadata/android/<locale>/changelogs/9.txt`) added for v1.5.0
-- [ ] **Screenshots for F-Droid** — place PNG/JPEG files in `fastlane/metadata/android/en-US/images/phoneScreenshots/` (and optionally `ja-JP/images/phoneScreenshots/` for Japanese). Recommended size: 1080×1920. This is what F-Droid displays on the app page.
+- [ ] **Screenshots for F-Droid** — add PNG/JPEG files to `fastlane/metadata/android/en-US/images/phoneScreenshots/` (English, 4 shots ready) and `fastlane/metadata/android/ja-JP/images/phoneScreenshots/` (Japanese). Directories created; place screenshots named `01.png`, `02.png`, … Recommended size: 1080×1920. This is what F-Droid displays on the app page.
 - [ ] **Screenshots for README.md** — place images in `docs/screenshots/` (or any directory) and reference them from `README.md` with relative paths. These appear on the GitHub repository page only and are independent from F-Droid.
 - [x] Feature graphic — `fastlane/metadata/android/en-US/images/featureGraphic.png` (1024×500 px)
 - [ ] Submit to F-Droid repository
