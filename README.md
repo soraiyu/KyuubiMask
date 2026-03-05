@@ -33,7 +33,7 @@ KyuubiMask protects your privacy in everyday situations—on trains, at work, ar
 
 ### Supported Apps
 
-KyuubiMask works with **any installed app**. Use the "Add custom apps…" button in Settings to select additional masking targets.
+KyuubiMask works with **most installed apps**. Use the "Add custom apps…" button in Settings to select additional masking targets.
 
 **Built-in presets**
 - Slack
