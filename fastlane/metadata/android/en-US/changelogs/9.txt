@@ -1,2 +1,2 @@
-• User-selectable app masking: any installed app can now be chosen as a masking target via "Add custom apps…" in Settings
+• User-selectable app masking: most installed apps can now be chosen as a masking target via "Add custom apps…" in Settings
 • Built-in presets for Slack, Discord, WhatsApp, and LINE remain available for convenience
