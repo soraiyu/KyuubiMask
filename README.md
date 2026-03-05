@@ -23,7 +23,7 @@ KyuubiMask protects your privacy in everyday situations—on trains, at work, ar
 - 📸 **Prevents Screenshot Leaks** - Masked notifications won't expose sensitive data in screenshots
 - 🦊 **Smart Notification Masking** - Replace sensitive content with generic text automatically
 - 🚀 **Always-On Optimization** - Reduced memory usage, resistant to being killed by Android OS
-- 🎯 **Any App Supported** - Works with any installed app; Slack, Discord, WhatsApp, and LINE available as presets
+- 🎯 **Most Apps Supported** - Works with most installed apps; Slack, Discord, WhatsApp, and LINE available as presets
 - 🌍 **F-Droid Ready** - Open source, no tracking
 - ⚡ **Lightweight** - Minimal memory footprint and battery impact
 - 🔋 **Battery Efficient** - Optimized for continuous background operation
