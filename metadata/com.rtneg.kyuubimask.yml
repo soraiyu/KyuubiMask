@@ -1,6 +1,7 @@
 Categories:
   - Security
 License: Apache-2.0
+WebSite: https://github.com/soraiyu/KyuubiMask
 AuthorName: soraiyu
 SourceCode: https://github.com/soraiyu/KyuubiMask
 IssueTracker: https://github.com/soraiyu/KyuubiMask/issues
@@ -18,7 +19,8 @@ Description: |-
   Features:
   * Complete offline operation - no internet permission
   * No data storage or logging
-  * Masks notifications from Slack, Discord, WhatsApp, and LINE
+  * Masks notifications from any app you choose with generic text
+  * Built-in presets for Slack, Discord, WhatsApp, and LINE
   * Per-app toggle to choose which apps to mask
   * Quick Settings tile for one-tap masking toggle
   * Open source with Apache 2.0 license
