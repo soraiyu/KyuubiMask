@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - F-Droid distribution: app metadata, feature graphic, and changelogs added for F-Droid submission
-- App page assets (feature graphic, short/full descriptions) for en-US and ja-JP locales
+- App page assets: feature graphic for en-US, short/full descriptions for en-US and ja-JP locales
 
 ## [1.5.0] - 2026-03-03
 
