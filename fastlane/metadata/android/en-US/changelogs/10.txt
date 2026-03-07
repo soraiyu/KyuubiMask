@@ -1,0 +1,2 @@
+• Now available on F-Droid: app metadata and store assets added for F-Droid distribution
+• No changes to app functionality
