@@ -9,37 +9,38 @@ Changelog: https://github.com/soraiyu/KyuubiMask/blob/main/CHANGELOG.md
 
 AutoName: KyuubiMask
 
-Summary: プライバシーを守る通知マスクツール
+Summary: Privacy-focused notification masking tool
 
 Description: |-
-  KyuubiMaskは、画面共有・プレゼン・のぞき見などから大切な情報を守る、
-  プライバシー重視の通知マスクアプリです。
+  KyuubiMask is a privacy-first notification masking tool that protects your
+  sensitive information during screen sharing, presentations, or when your
+  screen is visible to others.
 
-  主な機能:
-  * 完全オフライン動作（インターネット権限なし）
-  * データの保存・ログ記録なし
-  * 任意のアプリの通知を汎用テキストに置き換えてマスク
-  * Slack・Discord・WhatsApp・LINE のプリセット内蔵
-  * アプリごとのマスク有効/無効切り替え
-  * クイック設定タイルでワンタップ切り替え
-  * Apache 2.0 ライセンスのオープンソース
-  * トラッキング・広告・アナリティクスなし
+  Features:
+  * Complete offline operation - no internet permission
+  * No data storage or logging
+  * Masks notifications from any app you choose with generic text
+  * Built-in presets for Slack, Discord, WhatsApp, and LINE
+  * Per-app toggle to choose which apps to mask
+  * Quick Settings tile for one-tap masking toggle
+  * Open source with Apache 2.0 license
+  * No tracking, analytics, or ads
 
-  プライバシーへの取り組み:
-  * 一切のデータ収集なし
-  * 通知内容を保存しない
-  * 完全オフラインで動作
-  * Google Play サービス・サードパーティ SDK 不使用
+  Privacy:
+  * No data collection whatsoever
+  * Notification content is never stored
+  * Works completely offline
+  * No Google Play Services or third-party SDKs
 
-  インストール済みの任意のアプリに対応。設定の「カスタムアプリを追加…」から対象を選択できます。
-  Slack・Discord・WhatsApp・LINE はプリセットとして利用可能です。
-  設定画面またはクイック設定タイルからサービスの有効/無効を切り替えられます。
-
-  こんなシーンに最適:
-  * 画面共有中のプライバシー保護
-  * プレゼン・デモ
-  * 公共の場での使用
-  * 画面録画
+  Works with any installed app — select targets via "Add custom apps…" in Settings.
+  Slack, Discord, WhatsApp, and LINE are available as built-in presets.
+  The service can be enabled or disabled in the settings or via the Quick Settings tile.
+  
+  Perfect for:
+  * Protecting privacy during screen sharing
+  * Presentations and demos
+  * Public spaces
+  * Screen recording
 
 RepoType: git
 Repo: https://github.com/soraiyu/KyuubiMask
