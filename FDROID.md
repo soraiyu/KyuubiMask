@@ -82,6 +82,14 @@ The only remaining step is to submit the app to F-Droid. See instructions below.
 
 > **Tip**: The review process typically takes a few weeks. F-Droid will comment on the MR if anything needs to be changed.
 
+## Reviewer Response Templates
+
+The following are suggested English replies for common F-Droid MR review comments.
+
+### Commit hash and Changelog URL correction
+
+> Thank you for pointing that out. I have updated the `commit` field to use the full SHA hash instead of the tag name. I have also corrected the `Changelog` URL, which was incorrectly pointing to `/blob/main/` — it now uses `/blob/HEAD/` so it resolves correctly regardless of the default branch name.
+
 ## Additional Resources
 
 - [F-Droid Inclusion Guide](https://f-droid.org/docs/Inclusion_Policy/)
