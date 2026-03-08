@@ -38,7 +38,7 @@ This document outlines KyuubiMask's readiness for F-Droid distribution.
 
 ### Git Tag
 - **Status**: ✅ `v1.6.0` tag exists and points to the correct commit on `main`
-- F-Droid builds from `commit: v1.6.0` as specified in the metadata YAML
+- F-Droid builds from commit `c22e5838ac77569742d7927ffc11fa25e9b8030e` (tag `v1.6.0`) as specified in the metadata YAML
 
 ## Potential Anti-Features
 
