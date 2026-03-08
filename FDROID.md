@@ -77,8 +77,20 @@ The only remaining step is to submit the app to F-Droid. See instructions below.
 1. Fork the [F-Droid Data repository](https://gitlab.com/fdroid/fdroiddata) on GitLab.
 2. In your fork, create a new file at `metadata/com.rtneg.kyuubimask.yml`.
 3. Copy the exact contents of [`metadata/com.rtneg.kyuubimask.yml`](metadata/com.rtneg.kyuubimask.yml) from this repository into it.
-4. Commit and submit a **merge request** to the F-Droid Data repository.
+4. Commit using the message below and submit a **merge request** to the F-Droid Data repository.
 5. F-Droid maintainers will review, build the APK from tag `v1.6.0`, and publish it.
+
+**Suggested commit message for the initial submission MR:**
+
+```
+Add com.rtneg.kyuubimask
+```
+
+**Suggested commit message when updating the MR after reviewer feedback (commit hash + Changelog URL fix):**
+
+```
+com.rtneg.kyuubimask: use full SHA for commit field; fix Changelog URL to use /HEAD/
+```
 
 > **Tip**: The review process typically takes a few weeks. F-Droid will comment on the MR if anything needs to be changed.
 
