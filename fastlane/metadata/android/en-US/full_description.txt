@@ -1,3 +1,5 @@
+KyuubiMask is designed to keep your notification content away from prying eyes. It replaces notification text as quickly as possible, making it much harder for others to read what you received—even if they're looking right at your screen. Notification content is never displayed or saved by this app.
+
 KyuubiMask is a privacy-first notification masking tool that protects your sensitive information during screen sharing, presentations, or when your screen is visible to others.
 
 🔒 PRIVACY FIRST
@@ -9,6 +11,7 @@ KyuubiMask is a privacy-first notification masking tool that protects your sensi
 
 ✨ FEATURES
 • Masks notifications from any app you choose with generic text
+• Tapping a masked notification opens the original app directly, without revealing any content
 • Built-in presets for Slack, Discord, WhatsApp, and LINE
 • Per-app toggle to choose which apps to mask
 • Quick Settings tile for one-tap masking toggle
@@ -29,6 +32,9 @@ KyuubiMask works with any installed app — select additional targets via the "A
 
 💡 HOW IT WORKS
 When enabled, KyuubiMask replaces notification content from supported apps with generic text like "New notification", hiding sensitive information while still allowing you to see that you received a notification.
+
+📖 WANT TO CHECK A NOTIFICATION LATER?
+This app never saves notification content. If you want to review what you received, on supported devices (Android 11+), you can use Android's built-in Notification History if available and enabled (Settings → Notifications → Notification History).
 
 🦊 OPEN SOURCE
 All code is available on GitHub. No hidden functionality, complete transparency.
