@@ -21,9 +21,12 @@
     <color name="status_active">#4CAF50</color>
     <color name="status_inactive">#FF5252</color>
     
-    <!-- Switch colors -->
-    <color name="switch_thumb">#FF6B35</color>
-    <color name="switch_track">#664433</color>
+    <!-- Switch colors (on/checked state) -->
+    <color name="switch_thumb_on">#FF6B35</color>
+    <color name="switch_track_on">#664433</color>
+    <!-- Switch colors (off/unchecked state) -->
+    <color name="switch_thumb_off">#9E9E9E</color>
+    <color name="switch_track_off">#3D3D3D</color>
     
     <!-- Chip colors -->
     <color name="chip_background">#333333</color>
