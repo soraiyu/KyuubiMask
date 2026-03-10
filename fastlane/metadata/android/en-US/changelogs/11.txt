@@ -1,0 +1,1 @@
+• Fixed: Switch toggles now correctly gray out when switched off
