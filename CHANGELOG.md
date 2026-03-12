@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.6.1] - 2026-03-10
 
 ### Fixed
-- Switch toggles now correctly gray out when switched off
+- Switch toggles no longer remain visually active (colored) when unchecked; they now correctly gray out to reflect the disabled state
 
 ## [1.6.0] - 2026-03-07
 
