@@ -22,6 +22,9 @@ android {
     }
 
     buildTypes {
+        debug {
+            applicationIdSuffix = ".debug"
+        }
         release {
             if (
                 !signingKeystorePath.isNullOrBlank() &&
