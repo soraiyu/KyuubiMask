@@ -38,7 +38,7 @@ This document outlines KyuubiMask's readiness for F-Droid distribution.
 
 ### Git Tag
 - **Status**: ✅ `v1.6.0` tag exists and points to the correct commit on `main`
-- F-Droid builds from `commit: v1.6.0` as specified in the metadata YAML
+- F-Droid builds from commit `c22e5838ac77569742d7927ffc11fa25e9b8030e` (tag `v1.6.0`) as specified in the metadata YAML
 
 ## Potential Anti-Features
 
@@ -77,10 +77,30 @@ The only remaining step is to submit the app to F-Droid. See instructions below.
 1. Fork the [F-Droid Data repository](https://gitlab.com/fdroid/fdroiddata) on GitLab.
 2. In your fork, create a new file at `metadata/com.rtneg.kyuubimask.yml`.
 3. Copy the exact contents of [`metadata/com.rtneg.kyuubimask.yml`](metadata/com.rtneg.kyuubimask.yml) from this repository into it.
-4. Commit and submit a **merge request** to the F-Droid Data repository.
+4. Commit using the message below and submit a **merge request** to the F-Droid Data repository.
 5. F-Droid maintainers will review, build the APK from tag `v1.6.0`, and publish it.
 
+**Suggested commit message for the initial submission MR:**
+
+```
+Add com.rtneg.kyuubimask
+```
+
+**Suggested commit message when updating the MR after reviewer feedback (commit hash + Changelog URL fix):**
+
+```
+com.rtneg.kyuubimask: use full SHA for commit field; fix Changelog URL to use /HEAD/
+```
+
 > **Tip**: The review process typically takes a few weeks. F-Droid will comment on the MR if anything needs to be changed.
+
+## Reviewer Response Templates
+
+The following are suggested English replies for common F-Droid MR review comments.
+
+### Commit hash and Changelog URL correction
+
+> Thank you for pointing that out. I have updated the `commit` field to use the full SHA hash instead of the tag name. I have also corrected the `Changelog` URL, which was incorrectly pointing to `/blob/main/` — it now uses `/blob/HEAD/` so it resolves correctly regardless of the default branch name.
 
 ## Additional Resources
 
