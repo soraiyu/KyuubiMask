@@ -85,13 +85,13 @@ class SettingsActivity : AppCompatActivity() {
 
         if (prefsRepository.isFirstLaunch) {
             startActivity(Intent(this, OnboardingActivity::class.java))
+        } else {
+            // Don't prompt for permissions while onboarding is active
+            checkNotificationPermission()
         }
 
         setupUI()
         updateServiceStatus()
-        
-        // Check and request notification permission on Android 13+
-        checkNotificationPermission()
     }
     
     override fun onDestroy() {

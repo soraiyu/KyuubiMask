@@ -17,6 +17,9 @@ package com.rtneg.kyuubimask
 
 import android.content.Intent
 import android.os.Bundle
+import android.provider.Settings
+import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.tabs.TabLayoutMediator
@@ -34,6 +37,9 @@ class OnboardingActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityOnboardingBinding
     private lateinit var prefsRepository: PreferencesRepository
+
+    private var tabMediator: TabLayoutMediator? = null
+    private var pageChangeCallback: ViewPager2.OnPageChangeCallback? = null
 
     private val pages: List<OnboardingPage> by lazy {
         listOf(
@@ -72,23 +78,37 @@ class OnboardingActivity : AppCompatActivity() {
 
         prefsRepository = (applicationContext as KyuubiMaskApp).prefsRepository
 
+        // Treat back press the same as Skip so the flag is always updated
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                finishOnboarding()
+            }
+        })
+
         setupViewPager()
         setupButtons()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        tabMediator?.detach()
+        pageChangeCallback?.let { binding.viewPager.unregisterOnPageChangeCallback(it) }
     }
 
     private fun setupViewPager() {
         val adapter = OnboardingPagerAdapter(pages)
         binding.viewPager.adapter = adapter
 
-        // Connect TabLayout dots to ViewPager2
-        TabLayoutMediator(binding.tabIndicator, binding.viewPager) { _, _ -> }.attach()
+        // Connect TabLayout dots to ViewPager2; keep reference for cleanup in onDestroy
+        tabMediator = TabLayoutMediator(binding.tabIndicator, binding.viewPager) { _, _ -> }
+            .also { it.attach() }
 
-        // Update button label when page changes
-        binding.viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+        // Update button label when page changes; keep reference for cleanup in onDestroy
+        pageChangeCallback = object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
                 updateButtonLabel(position)
             }
-        })
+        }.also { binding.viewPager.registerOnPageChangeCallback(it) }
     }
 
     private fun setupButtons() {
@@ -103,6 +123,8 @@ class OnboardingActivity : AppCompatActivity() {
             if (current < pages.lastIndex) {
                 binding.viewPager.currentItem = current + 1
             } else {
+                // Last page CTA: open notification listener settings, then finish onboarding
+                openNotificationListenerSettings()
                 finishOnboarding()
             }
         }
@@ -118,6 +140,14 @@ class OnboardingActivity : AppCompatActivity() {
         )
         binding.btnSkip.visibility =
             if (isLast) android.view.View.INVISIBLE else android.view.View.VISIBLE
+    }
+
+    private fun openNotificationListenerSettings() {
+        try {
+            startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))
+        } catch (_: Exception) {
+            Toast.makeText(this, R.string.error_open_settings, Toast.LENGTH_SHORT).show()
+        }
     }
 
     /**
