@@ -37,42 +37,7 @@
             android:textColor="@color/text_secondary"
             android:layout_marginBottom="28dp" />
 
-        <!-- Status Card -->
-        <androidx.cardview.widget.CardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:cardBackgroundColor="@color/card_background"
-            app:cardCornerRadius="12dp"
-            app:cardElevation="4dp"
-            android:layout_marginBottom="16dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/label_status"
-                    android:textColor="@color/text_secondary"
-                    android:textSize="12sp" />
-
-                <TextView
-                    android:id="@+id/tvStatus"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/status_checking"
-                    android:textSize="18sp"
-                    android:textStyle="bold"
-                    android:layout_marginTop="4dp" />
-
-            </LinearLayout>
-
-        </androidx.cardview.widget.CardView>
-
-        <!-- Enable Toggle Card -->
+        <!-- Status + Enable Card (horizontal) -->
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -97,26 +62,43 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/label_enable_masking"
-                        android:textColor="@color/text_primary"
-                        android:textSize="16sp" />
+                        android:text="@string/label_status"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="12sp" />
 
                     <TextView
+                        android:id="@+id/tvStatus"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/label_enable_description"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="12sp"
+                        android:text="@string/status_checking"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
                         android:layout_marginTop="4dp" />
 
                 </LinearLayout>
 
-                <com.google.android.material.switchmaterial.SwitchMaterial
-                    android:id="@+id/switchEnable"
+                <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    app:thumbTint="@color/switch_thumb"
-                    app:trackTint="@color/switch_track" />
+                    android:orientation="vertical"
+                    android:gravity="center_horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/label_enable_masking"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="12sp" />
+
+                    <com.google.android.material.switchmaterial.SwitchMaterial
+                        android:id="@+id/switchEnable"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        app:thumbTint="@color/switch_thumb"
+                        app:trackTint="@color/switch_track" />
+
+                </LinearLayout>
 
             </LinearLayout>
 
@@ -146,106 +128,140 @@
                     android:textStyle="bold"
                     android:layout_marginBottom="12dp" />
 
-                <!-- Slack -->
+                <!-- Row 1: Slack + Discord -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:gravity="center_vertical"
                     android:layout_marginBottom="8dp">
 
-                    <TextView
+                    <!-- Slack Tile -->
+                    <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="@string/label_app_slack"
-                        android:textColor="@color/text_primary"
-                        android:textSize="14sp" />
+                        android:orientation="vertical"
+                        android:gravity="center_horizontal"
+                        android:background="@drawable/bg_app_tile"
+                        android:padding="12dp"
+                        android:layout_marginEnd="4dp">
 
-                    <com.google.android.material.switchmaterial.SwitchMaterial
-                        android:id="@+id/switchSlack"
-                        android:layout_width="wrap_content"
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/label_app_slack"
+                            android:textColor="@color/text_primary"
+                            android:textSize="13sp"
+                            android:gravity="center" />
+
+                        <com.google.android.material.switchmaterial.SwitchMaterial
+                            android:id="@+id/switchSlack"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:contentDescription="@string/label_app_slack"
+                            android:layout_marginTop="4dp"
+                            app:thumbTint="@color/switch_thumb"
+                            app:trackTint="@color/switch_track" />
+
+                    </LinearLayout>
+
+                    <!-- Discord Tile -->
+                    <LinearLayout
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:contentDescription="@string/label_app_slack"
-                        app:thumbTint="@color/switch_thumb"
-                        app:trackTint="@color/switch_track" />
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:gravity="center_horizontal"
+                        android:background="@drawable/bg_app_tile"
+                        android:padding="12dp"
+                        android:layout_marginStart="4dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/label_app_discord"
+                            android:textColor="@color/text_primary"
+                            android:textSize="13sp"
+                            android:gravity="center" />
+
+                        <com.google.android.material.switchmaterial.SwitchMaterial
+                            android:id="@+id/switchDiscord"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:contentDescription="@string/label_app_discord"
+                            android:layout_marginTop="4dp"
+                            app:thumbTint="@color/switch_thumb"
+                            app:trackTint="@color/switch_track" />
+
+                    </LinearLayout>
 
                 </LinearLayout>
 
-                <!-- Discord -->
+                <!-- Row 2: WhatsApp + LINE -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:layout_marginBottom="8dp">
+                    android:orientation="horizontal">
 
-                    <TextView
+                    <!-- WhatsApp Tile -->
+                    <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="@string/label_app_discord"
-                        android:textColor="@color/text_primary"
-                        android:textSize="14sp" />
+                        android:orientation="vertical"
+                        android:gravity="center_horizontal"
+                        android:background="@drawable/bg_app_tile"
+                        android:padding="12dp"
+                        android:layout_marginEnd="4dp">
 
-                    <com.google.android.material.switchmaterial.SwitchMaterial
-                        android:id="@+id/switchDiscord"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:contentDescription="@string/label_app_discord"
-                        app:thumbTint="@color/switch_thumb"
-                        app:trackTint="@color/switch_track" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/label_app_whatsapp"
+                            android:textColor="@color/text_primary"
+                            android:textSize="13sp"
+                            android:gravity="center" />
 
-                </LinearLayout>
+                        <com.google.android.material.switchmaterial.SwitchMaterial
+                            android:id="@+id/switchWhatsApp"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:contentDescription="@string/label_app_whatsapp"
+                            android:layout_marginTop="4dp"
+                            app:thumbTint="@color/switch_thumb"
+                            app:trackTint="@color/switch_track" />
 
-                <!-- WhatsApp -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:layout_marginBottom="8dp">
+                    </LinearLayout>
 
-                    <TextView
+                    <!-- LINE Tile -->
+                    <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="@string/label_app_whatsapp"
-                        android:textColor="@color/text_primary"
-                        android:textSize="14sp" />
+                        android:orientation="vertical"
+                        android:gravity="center_horizontal"
+                        android:background="@drawable/bg_app_tile"
+                        android:padding="12dp"
+                        android:layout_marginStart="4dp">
 
-                    <com.google.android.material.switchmaterial.SwitchMaterial
-                        android:id="@+id/switchWhatsApp"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:contentDescription="@string/label_app_whatsapp"
-                        app:thumbTint="@color/switch_thumb"
-                        app:trackTint="@color/switch_track" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/label_app_line"
+                            android:textColor="@color/text_primary"
+                            android:textSize="13sp"
+                            android:gravity="center" />
 
-                </LinearLayout>
+                        <com.google.android.material.switchmaterial.SwitchMaterial
+                            android:id="@+id/switchLine"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:contentDescription="@string/label_app_line"
+                            android:layout_marginTop="4dp"
+                            app:thumbTint="@color/switch_thumb"
+                            app:trackTint="@color/switch_track" />
 
-                <!-- LINE -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical">
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="@string/label_app_line"
-                        android:textColor="@color/text_primary"
-                        android:textSize="14sp" />
-
-                    <com.google.android.material.switchmaterial.SwitchMaterial
-                        android:id="@+id/switchLine"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:contentDescription="@string/label_app_line"
-                        app:thumbTint="@color/switch_thumb"
-                        app:trackTint="@color/switch_track" />
+                    </LinearLayout>
 
                 </LinearLayout>
 
