@@ -23,7 +23,7 @@ android {
 
     buildTypes {
         debug {
-            applicationIdSuffix = ".debug"
+            applicationIdSuffix = ".debug.v${defaultConfig.versionName?.replace(".", "_")}"
         }
         release {
             if (
