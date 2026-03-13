@@ -22,6 +22,9 @@ android {
     }
 
     buildTypes {
+        debug {
+            applicationIdSuffix = ".debug.v${defaultConfig.versionName?.replace(".", "_")}"
+        }
         release {
             if (
                 !signingKeystorePath.isNullOrBlank() &&
