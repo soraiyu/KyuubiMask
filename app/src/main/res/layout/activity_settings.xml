@@ -94,6 +94,7 @@
                         android:id="@+id/switchEnable"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:contentDescription="@string/label_enable_masking"
                         android:layout_marginTop="4dp"
                         app:thumbTint="@color/switch_thumb"
                         app:trackTint="@color/switch_track" />
