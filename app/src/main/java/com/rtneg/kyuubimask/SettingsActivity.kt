@@ -30,7 +30,6 @@ import android.widget.ArrayAdapter
 import android.widget.AdapterView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.rtneg.kyuubimask.data.DebugLogRepository
@@ -83,9 +82,9 @@ class SettingsActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         prefsRepository = (applicationContext as KyuubiMaskApp).prefsRepository
-        
+
         if (prefsRepository.isFirstLaunch) {
-            showPrivacyDialog()
+            startActivity(Intent(this, OnboardingActivity::class.java))
         }
 
         setupUI()
@@ -113,22 +112,6 @@ class SettingsActivity : AppCompatActivity() {
         debugHandler.removeCallbacks(debugRefreshRunnable)
     }
     
-    /**
-     * Shows the privacy information dialog on the first app launch.
-     * Marks the first launch flag as false once the user acknowledges it
-     * by pressing the OK button.
-     */
-    private fun showPrivacyDialog() {
-        AlertDialog.Builder(this)
-            .setTitle(R.string.privacy_dialog_title)
-            .setMessage(R.string.privacy_dialog_message)
-            .setPositiveButton(R.string.privacy_dialog_button_ok) { _, _ ->
-                prefsRepository.isFirstLaunch = false
-            }
-            .setCancelable(false)
-            .show()
-    }
-
     /**
      * Check notification permission for Android 13+
      */

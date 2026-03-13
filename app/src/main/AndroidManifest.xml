@@ -59,6 +59,12 @@
             android:exported="false"
             android:theme="@style/Theme.KyuubiMask" />
 
+        <!-- Onboarding Activity (shown on first launch) -->
+        <activity
+            android:name=".OnboardingActivity"
+            android:exported="false"
+            android:theme="@style/Theme.KyuubiMask" />
+
         <!-- Notification Listener Service -->
         <!-- 
             Foreground service type 'specialUse' is used because:
