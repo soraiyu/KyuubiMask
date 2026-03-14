@@ -68,6 +68,21 @@
     <string name="error_open_settings">Cannot open settings</string>
     <string name="error_post_notification_denied">POST_NOTIFICATION permission not granted</string>
 
+    <!-- Onboarding -->
+    <string name="onboarding_skip">Skip</string>
+    <string name="onboarding_next">Next</string>
+    <string name="onboarding_start">Get Started</string>
+    <string name="onboarding_page1_title">Welcome!</string>
+    <string name="onboarding_page1_desc">Welcome to KyuubiMask! Hide notification content to protect your privacy.</string>
+    <string name="onboarding_page2_title">How does it work?</string>
+    <string name="onboarding_page2_desc">Notification content is replaced with generic text. Tapping opens the original app without revealing the content.</string>
+    <string name="onboarding_page3_title">Privacy First</string>
+    <string name="onboarding_page3_desc">Notification content is never stored or displayed. In practice, this greatly reduces the risk of others reading your messages.</string>
+    <string name="onboarding_page4_title">Want to review later?</string>
+    <string name="onboarding_page4_desc">Use Android\'s notification history (Settings → Notifications → Notification history).</string>
+    <string name="onboarding_page5_title">Let\'s start!</string>
+    <string name="onboarding_page5_desc">Grant the notification listener permission to get started!</string>
+
     <!-- Privacy Dialog (shown on first launch) -->
     <string name="privacy_dialog_title">Welcome to KyuubiMask</string>
     <string name="privacy_dialog_message">• Notification content is never stored or transmitted. It is processed in memory and immediately discarded.\n• There is no internet permission — it is impossible for data to leave your device.\n• Only settings are saved locally (list of masked apps, ON/OFF state, vibration pattern).\n• Notification access permission is used solely to mask content; the content itself is never saved.\n• KyuubiMask is fully open-source (Apache 2.0) — anyone can verify the code.\n• Protect your privacy with peace of mind 🦊</string>
