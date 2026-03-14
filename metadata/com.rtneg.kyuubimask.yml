@@ -14,7 +14,7 @@ Repo: https://github.com/soraiyu/KyuubiMask
 Builds:
   - versionName: 1.7.0
     versionCode: 12
-    commit: v1.7.0
+    commit: aa05f5192a01f6d7ded8be2b81a5fd68188bbf83
     subdir: app
     gradle:
       - yes
