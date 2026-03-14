@@ -27,7 +27,7 @@ This document outlines KyuubiMask's readiness for F-Droid distribution.
 - **Configuration**: [app/build.gradle.kts](app/build.gradle.kts)
 
 ### Metadata
-- **Status**: ✅ Complete and up-to-date (v1.6.0 / versionCode 10)
+- **Status**: ✅ Complete and up-to-date (v1.7.0 / versionCode 12)
 - **Location**: [metadata/com.rtneg.kyuubimask.yml](metadata/com.rtneg.kyuubimask.yml)
 - **Fastlane**: [fastlane/metadata/android/](fastlane/metadata/android/)
 
@@ -37,8 +37,8 @@ This document outlines KyuubiMask's readiness for F-Droid distribution.
 - **Issue Tracker**: https://github.com/soraiyu/KyuubiMask/issues
 
 ### Git Tag
-- **Status**: ✅ `v1.6.0` tag exists and points to the correct commit on `main`
-- F-Droid builds from `commit: v1.6.0` as specified in the metadata YAML
+- **Status**: ✅ `v1.7.0` tag exists and points to the correct commit on `main`
+- F-Droid builds from `commit: v1.7.0` as specified in the metadata YAML
 
 ## Potential Anti-Features
 
@@ -53,11 +53,11 @@ This document outlines KyuubiMask's readiness for F-Droid distribution.
 - [x] No tracking or analytics
 - [x] No internet permission
 - [x] Source code publicly available on GitHub
-- [x] `v1.6.0` git tag exists on `main`
+- [x] `v1.7.0` git tag exists on `main`
 - [x] Build metadata file (`metadata/com.rtneg.kyuubimask.yml`) — version numbers and build instructions correct
 - [x] Fastlane metadata structure prepared (`fastlane/metadata/android/`)
 - [x] English default strings in `values/strings.xml`
-- [x] Fastlane changelogs added for v1.5.0 (9.txt) and v1.6.0 (10.txt) in `fastlane/metadata/android/<locale>/changelogs/`
+- [x] Fastlane changelogs added for v1.5.0 (9.txt), v1.6.0 (10.txt), v1.6.1 (11.txt), and v1.7.0 (12.txt) in `fastlane/metadata/android/<locale>/changelogs/`
 - [x] Feature graphic — `fastlane/metadata/android/en-US/images/featureGraphic.png` (valid PNG, 1024×500 px)
 - [x] All store assets are on the `main` branch (Fastlane display assets are read from the default branch)
 
@@ -78,7 +78,7 @@ The only remaining step is to submit the app to F-Droid. See instructions below.
 2. In your fork, create a new file at `metadata/com.rtneg.kyuubimask.yml`.
 3. Copy the exact contents of [`metadata/com.rtneg.kyuubimask.yml`](metadata/com.rtneg.kyuubimask.yml) from this repository into it.
 4. Commit and submit a **merge request** to the F-Droid Data repository.
-5. F-Droid maintainers will review, build the APK from tag `v1.6.0`, and publish it.
+5. F-Droid maintainers will review, build the APK from tag `v1.7.0`, and publish it.
 
 > **Tip**: The review process typically takes a few weeks. F-Droid will comment on the MR if anything needs to be changed.
 

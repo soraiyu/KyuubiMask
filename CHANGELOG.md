@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.7.0] - 2026-03-14
+
+### Added
+- Replaced the first-launch privacy dialog with a 5-page swipe onboarding experience that covers the app's functionality, privacy features, and setup
+- Debug builds now append a `.debug.v{versionName}` suffix to `applicationId`, allowing debug and release variants to coexist on the same device
+
+### Changed
+- Settings screen redesigned: status and enable switch merged into one horizontal card featuring a fox 🦊 stamp; app preset toggles rearranged into a 2×2 tile grid; "Grant Notification Access" button moved above the settings cards
+
 ## [1.6.1] - 2026-03-10
 
 ### Fixed
@@ -101,7 +110,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Real-time debug log viewer
 - Complete offline operation
 
-[Unreleased]: https://github.com/soraiyu/KyuubiMask/compare/v1.6.1...HEAD
+[Unreleased]: https://github.com/soraiyu/KyuubiMask/compare/v1.7.0...HEAD
+[1.7.0]: https://github.com/soraiyu/KyuubiMask/compare/v1.6.1...v1.7.0
 [1.6.1]: https://github.com/soraiyu/KyuubiMask/compare/v1.6.0...v1.6.1
 [1.6.0]: https://github.com/soraiyu/KyuubiMask/compare/v1.5.0...v1.6.0
 [1.5.0]: https://github.com/soraiyu/KyuubiMask/compare/v1.4.1...v1.5.0

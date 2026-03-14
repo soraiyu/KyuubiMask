@@ -1,0 +1,2 @@
+• New: 5-page swipe onboarding replaces the first-launch privacy dialog
+• New: Settings screen redesigned with horizontal status+toggle card and 2×2 app tile grid
