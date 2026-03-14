@@ -10,8 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.7.0] - 2026-03-14
 
 ### Added
-- 5-page swipe onboarding replaces the first-launch privacy dialog, covering Welcome, How it works, Privacy first, Notification history, and Get started
-- `OnboardingActivity` with ViewPager2, dot-indicator, Skip button (top-right), and a "Get Started" button on the last slide that opens notification listener settings
+- Replaced the first-launch privacy dialog with a 5-page swipe onboarding experience that covers the app's functionality, privacy features, and setup
 - Debug builds now append a `.debug.v{versionName}` suffix to `applicationId`, allowing debug and release variants to coexist on the same device
 
 ### Changed
