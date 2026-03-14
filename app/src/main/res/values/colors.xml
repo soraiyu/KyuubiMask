@@ -31,6 +31,9 @@
     <!-- Chip colors -->
     <color name="chip_background">#333333</color>
 
+    <!-- App tile background (slightly lighter than card) -->
+    <color name="tile_background">#2E2E2E</color>
+
     <!-- MainToggleScreen colors -->
     <color name="masking_on_background">#1A237E</color>
     <color name="masking_off_background">#FFFFFF</color>
