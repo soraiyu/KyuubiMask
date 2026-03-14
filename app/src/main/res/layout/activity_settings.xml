@@ -35,7 +35,18 @@
             android:layout_height="wrap_content"
             android:textSize="12sp"
             android:textColor="@color/text_secondary"
-            android:layout_marginBottom="28dp" />
+            android:layout_marginBottom="16dp" />
+
+        <!-- Permission Button (shown only when permission is missing, moved to top for visibility) -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnPermission"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/btn_grant_permission"
+            android:textColor="@color/text_on_primary"
+            app:backgroundTint="@color/primary"
+            app:cornerRadius="8dp"
+            android:layout_marginBottom="16dp" />
 
         <!-- Status + Enable Card (horizontal) -->
         <androidx.cardview.widget.CardView
@@ -52,6 +63,14 @@
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
                 android:padding="16dp">
+
+                <!-- Fox stamp -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="🦊"
+                    android:textSize="36sp"
+                    android:layout_marginEnd="12dp" />
 
                 <LinearLayout
                     android:layout_width="0dp"
@@ -71,9 +90,9 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/status_checking"
-                        android:textSize="18sp"
+                        android:textSize="16sp"
                         android:textStyle="bold"
-                        android:layout_marginTop="4dp" />
+                        android:layout_marginTop="2dp" />
 
                 </LinearLayout>
 
@@ -428,17 +447,6 @@
             </LinearLayout>
 
         </androidx.cardview.widget.CardView>
-
-        <!-- Permission Button -->
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnPermission"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/btn_grant_permission"
-            android:textColor="@color/text_on_primary"
-            app:backgroundTint="@color/primary"
-            app:cornerRadius="8dp"
-            android:layout_marginBottom="24dp" />
 
         <!-- Debug Log Card (shown only in DEBUG builds, controlled by SettingsActivity) -->
         <androidx.cardview.widget.CardView
