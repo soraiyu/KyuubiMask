@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">九尾面具</string>
+    <string name="app_subtitle">九尾狐面具 • 隐私至上</string>
+
+    <!-- Status -->
+    <string name="label_status">服务状态</string>
+    <string name="status_active">🦊 保护中</string>
+    <string name="status_disabled">已停用</string>
+    <string name="status_permission_required">⚠️ 需要权限</string>
+    <string name="status_checking">检查中…</string>
+
+    <!-- Settings -->
+    <string name="label_enable_masking">启用通知遮罩</string>
+    <string name="label_enable_description">隐藏敏感的通知内容</string>
+    <string name="btn_grant_permission">授予通知访问权限</string>
+    <string name="btn_grant_post_notification">授予发送通知权限</string>
+    <string name="label_apps_to_mask">遮罩应用</string>
+    <string name="label_app_slack">Slack</string>
+    <string name="label_app_discord">Discord</string>
+    <string name="label_app_whatsapp">WhatsApp</string>
+    <string name="label_app_line">LINE</string>
+    <string name="btn_add_custom_apps">添加自定义应用…</string>
+
+    <!-- Select Apps screen -->
+    <string name="label_select_apps_title">选择要遮罩的应用</string>
+    <string name="label_select_apps_hint">勾选您希望隐藏通知的应用</string>
+
+    <!-- Notification Settings -->
+    <string name="label_notification_settings">通知设置</string>
+    <string name="label_notification_sound">播放声音</string>
+    <string name="label_notification_sound_description">收到通知时播放提示音</string>
+    <string name="label_notification_vibrate">震动</string>
+    <string name="label_notification_vibrate_description">收到通知时震动提醒</string>
+    <string name="label_vibe_pattern">振动模式</string>
+    <string name="label_vibe_pattern_short">短振动（200ms）</string>
+    <string name="label_vibe_pattern_double">双击振动</string>
+    <string name="label_vibe_pattern_heart">心形振动</string>
+    <string name="label_vibe_pattern_long">长振动</string>
+    <string name="btn_vibe_test">测试</string>
+    <string name="toast_vibe_tested">振动模式已测试</string>
+    <string name="toast_vibe_unavailable">此设备没有振动器</string>
+
+    <!-- Masked notification -->
+    <string name="masked_text">新通知</string>
+
+    <!-- Foreground Service -->
+    <string name="service_channel_name">九尾面具服务</string>
+    <string name="service_channel_description">保持通知遮罩服务持续运行</string>
+    <string name="service_running_title">九尾面具运行中</string>
+    <string name="service_running_text">正在保护您的通知隐私</string>
+    <string name="service_paused_title">九尾面具已暂停</string>
+    <string name="service_paused_text">遮罩功能已停用</string>
+
+    <!-- Privacy -->
+    <string name="privacy_notice">通知内容不会被存储或传输。仅有服务状态和振动等设置会保存在本地设备上。</string>
+
+    <!-- Permissions -->
+    <string name="post_notification_permission_required">Android 13 及以上版本需要通知发送权限</string>
+    <string name="post_notification_permission_granted">✅ 通知发送权限已授予</string>
+
+    <!-- Debug -->
+    <string name="label_debug_log">调试日志</string>
+    <string name="btn_clear">清除</string>
+    <string name="debug_waiting">等待通知中…</string>
+
+    <!-- Errors -->
+    <string name="error_open_settings">无法打开设置</string>
+    <string name="error_post_notification_denied">未授予通知发送权限</string>
+
+    <!-- Onboarding -->
+    <string name="onboarding_skip">跳过</string>
+    <string name="onboarding_next">下一步</string>
+    <string name="onboarding_start">开始使用</string>
+    <string name="onboarding_page1_title">欢迎使用！</string>
+    <string name="onboarding_page1_desc">欢迎使用九尾面具！隐藏通知内容，保护您的隐私安全。</string>
+    <string name="onboarding_page2_title">如何运作？</string>
+    <string name="onboarding_page2_desc">通知内容将被替换为通用文本。点击通知可直接打开原应用，无需显示内容。</string>
+    <string name="onboarding_page3_title">隐私至上</string>
+    <string name="onboarding_page3_desc">通知内容不会被存储或显示，有效降低他人窥视您消息内容的风险。</string>
+    <string name="onboarding_page4_title">想稍后查看？</string>
+    <string name="onboarding_page4_desc">请使用 Android 的通知历史记录（设置 → 通知 → 通知历史记录）。</string>
+    <string name="onboarding_page5_title">开始吧！</string>
+    <string name="onboarding_page5_desc">授予通知侦听权限即可开始使用！</string>
+
+    <!-- Privacy Dialog (shown on first launch) -->
+    <string name="privacy_dialog_title">欢迎使用九尾面具</string>
+    <string name="privacy_dialog_message">• 通知内容不会被存储或传输，在内存中处理后立即丢弃。\n• 本应用无网络权限，数据不可能离开您的设备。\n• 仅保存设置（遮罩应用列表、开/关状态、振动模式）。\n• 通知访问权限仅用于遮罩内容，不会记录任何内容。\n• 九尾面具完全开源（Apache 2.0），任何人均可审查代码。\n• 安心保护您的隐私 🦊</string>
+    <string name="privacy_dialog_button_ok">我知道了</string>
+
+    <!-- Version -->
+    <string name="label_version">版本 %s</string>
+
+    <!-- Quick Settings Tile -->
+    <string name="tile_label_masking_on">遮罩已开启</string>
+    <string name="tile_label_masking_off">遮罩已关闭</string>
+
+    <!-- Main Toggle Screen -->
+    <string name="toggle_status_masking_on">遮罩已启用\n（正在隐藏通知）</string>
+    <string name="toggle_status_masking_off">遮罩已停用\n（正在显示通知）</string>
+    <string name="toggle_hint">点击切换</string>
+</resources>
