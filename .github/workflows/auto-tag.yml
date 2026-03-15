@@ -11,11 +11,11 @@ jobs:
   auto-tag:
     # Only run if PR was merged (not just closed)
     if: github.event.pull_request.merged == true
-    name: Create Version Tag
+    name: Update Version Files and Create Tag
     runs-on: ubuntu-latest
     
     permissions:
-      contents: write  # Required to create and push tags
+      contents: write  # Required to commit files and push tags
     
     steps:
     - name: Checkout code
@@ -35,10 +35,17 @@ jobs:
         # Extract versionName from app/build.gradle.kts
         # Expected format: versionName = "x.y.z"
         VERSION=$(grep -E '^\s*versionName\s*=\s*"' app/build.gradle.kts | sed -E 's/.*"(.+)".*/\1/')
+        VERSION_CODE=$(grep -E '^\s*versionCode\s*=\s*' app/build.gradle.kts | sed -E 's/.*=\s*([0-9]+).*/\1/')
         
         if [ -z "$VERSION" ]; then
           echo "❌ Could not extract version from build.gradle.kts"
           echo "Expected format: versionName = \"x.y.z\""
+          exit 1
+        fi
+        
+        if [ -z "$VERSION_CODE" ]; then
+          echo "❌ Could not extract versionCode from build.gradle.kts"
+          echo "Expected format: versionCode = <number>"
           exit 1
         fi
         
@@ -48,8 +55,9 @@ jobs:
         fi
         
         echo "version=$VERSION" >> $GITHUB_OUTPUT
+        echo "version_code=$VERSION_CODE" >> $GITHUB_OUTPUT
         echo "tag=v$VERSION" >> $GITHUB_OUTPUT
-        echo "📦 Extracted version: $VERSION"
+        echo "📦 Extracted version: $VERSION (code: $VERSION_CODE)"
         
     - name: Check if tag already exists
       id: check_tag
@@ -63,6 +71,185 @@ jobs:
         else
           echo "exists=false" >> $GITHUB_OUTPUT
           echo "✅ Tag $TAG does not exist yet"
+        fi
+
+    - name: Update CHANGELOG.md
+      if: steps.check_tag.outputs.exists == 'false'
+      env:
+        VERSION: ${{ steps.get_version.outputs.version }}
+      run: |
+        python3 - <<'PYEOF'
+        import re, os
+        from datetime import datetime, timezone
+
+        version = os.environ['VERSION']
+        today = datetime.now(timezone.utc).strftime('%Y-%m-%d')
+        repo = 'soraiyu/KyuubiMask'
+
+        with open('CHANGELOG.md', 'r') as f:
+            content = f.read()
+
+        # Extract content between [Unreleased] and first versioned section
+        unreleased_match = re.search(
+            r'^## \[Unreleased\]\n(.*?)(?=^## \[|\Z)',
+            content, re.MULTILINE | re.DOTALL
+        )
+        unreleased_body = unreleased_match.group(1).strip() if unreleased_match else ''
+
+        # Get previous version (first versioned heading)
+        prev_match = re.search(r'^## \[(\d+\.\d+\.\d+)\]', content, re.MULTILINE)
+        prev_version = prev_match.group(1) if prev_match else None
+
+        # Build new versioned section
+        new_versioned = f'## [{version}] - {today}'
+        if unreleased_body:
+            new_versioned += f'\n\n{unreleased_body}'
+
+        # Replace [Unreleased] block with an empty [Unreleased] + the new versioned section
+        content = re.sub(
+            r'^## \[Unreleased\].*?(?=^## \[|\Z)',
+            f'## [Unreleased]\n\n{new_versioned}\n\n',
+            content,
+            flags=re.MULTILINE | re.DOTALL
+        )
+
+        # Update [Unreleased] comparison link
+        content = re.sub(
+            r'\[Unreleased\]: .*',
+            f'[Unreleased]: https://github.com/{repo}/compare/v{version}...HEAD',
+            content
+        )
+
+        # Insert new version link after [Unreleased] link (only if not already present)
+        if f'[{version}]:' not in content:
+            if prev_version:
+                new_link = f'[{version}]: https://github.com/{repo}/compare/v{prev_version}...v{version}'
+            else:
+                new_link = f'[{version}]: https://github.com/{repo}/releases/tag/v{version}'
+            content = re.sub(
+                r'(\[Unreleased\]: [^\n]+\n)',
+                f'\\g<1>{new_link}\n',
+                content
+            )
+
+        with open('CHANGELOG.md', 'w') as f:
+            f.write(content)
+
+        print(f'✅ CHANGELOG.md updated with version {version}')
+        PYEOF
+
+    - name: Update F-Droid metadata
+      if: steps.check_tag.outputs.exists == 'false'
+      env:
+        VERSION: ${{ steps.get_version.outputs.version }}
+        VERSION_CODE: ${{ steps.get_version.outputs.version_code }}
+        COMMIT_SHA: ${{ github.sha }}
+      run: |
+        python3 - <<'PYEOF'
+        import re, os
+
+        version = os.environ['VERSION']
+        version_code = os.environ['VERSION_CODE']
+        commit_sha = os.environ['COMMIT_SHA']
+
+        with open('metadata/com.rtneg.kyuubimask.yml', 'r') as f:
+            content = f.read()
+
+        # Insert new build entry at top of Builds section (only if not already present)
+        if f'versionName: {version}' not in content:
+            new_build = (
+                f'  - versionName: {version}\n'
+                f'    versionCode: {version_code}\n'
+                f'    commit: {commit_sha}\n'
+                f'    subdir: app\n'
+                f'    gradle:\n'
+                f'      - yes'
+            )
+            content = re.sub(
+                r'(^Builds:\n)',
+                f'\\g<1>{new_build}\n',
+                content, flags=re.MULTILINE
+            )
+
+        # Update CurrentVersion and CurrentVersionCode
+        content = re.sub(r'^CurrentVersion: .*', f'CurrentVersion: {version}', content, flags=re.MULTILINE)
+        content = re.sub(r'^CurrentVersionCode: .*', f'CurrentVersionCode: {version_code}', content, flags=re.MULTILINE)
+
+        with open('metadata/com.rtneg.kyuubimask.yml', 'w') as f:
+            f.write(content)
+
+        print(f'✅ F-Droid metadata updated with version {version}')
+        PYEOF
+
+    - name: Create fastlane changelogs
+      if: steps.check_tag.outputs.exists == 'false'
+      env:
+        VERSION: ${{ steps.get_version.outputs.version }}
+        VERSION_CODE: ${{ steps.get_version.outputs.version_code }}
+      run: |
+        python3 - <<'PYEOF'
+        import re, os
+
+        version = os.environ['VERSION']
+        version_code = os.environ['VERSION_CODE']
+
+        en_path = f'fastlane/metadata/android/en-US/changelogs/{version_code}.txt'
+        ja_path = f'fastlane/metadata/android/ja-JP/changelogs/{version_code}.txt'
+
+        os.makedirs(os.path.dirname(en_path), exist_ok=True)
+        os.makedirs(os.path.dirname(ja_path), exist_ok=True)
+
+        def extract_changelog_bullets(version):
+            with open('CHANGELOG.md', 'r') as f:
+                content = f.read()
+            version_match = re.search(
+                rf'^## \[{re.escape(version)}\][^\n]*\n(.*?)(?=^## \[|\Z)',
+                content, re.MULTILINE | re.DOTALL
+            )
+            if not version_match:
+                return f'Version {version}'
+            section = version_match.group(1).strip()
+            lines = []
+            for line in section.split('\n'):
+                line = line.strip()
+                if line.startswith('- '):
+                    lines.append('• ' + line[2:])
+                elif line and not line.startswith('#'):
+                    lines.append(line)
+            return '\n'.join(lines) if lines else f'Version {version}'
+
+        if not os.path.exists(en_path):
+            changelog_text = extract_changelog_bullets(version)
+            with open(en_path, 'w') as f:
+                f.write(changelog_text + '\n')
+            print(f'✅ Created {en_path}')
+        else:
+            print(f'ℹ️  {en_path} already exists, skipping')
+
+        if not os.path.exists(ja_path):
+            # Use English content as placeholder; replace manually for Japanese localisation
+            if os.path.exists(en_path):
+                with open(en_path) as f:
+                    en_content = f.read()
+            else:
+                en_content = f'Version {version}\n'
+            with open(ja_path, 'w') as f:
+                f.write(en_content)
+            print(f'✅ Created {ja_path} (using English content as placeholder)')
+        else:
+            print(f'ℹ️  {ja_path} already exists, skipping')
+        PYEOF
+
+    - name: Commit updated files
+      if: steps.check_tag.outputs.exists == 'false'
+      run: |
+        git add CHANGELOG.md metadata/com.rtneg.kyuubimask.yml fastlane/metadata/android/en-US/changelogs/ fastlane/metadata/android/ja-JP/changelogs/
+        if git diff --staged --quiet; then
+          echo "ℹ️  No file changes to commit"
+        else
+          git commit -m "chore: update version files for v${{ steps.get_version.outputs.version }} [skip ci]"
+          git push origin HEAD
+          echo "✅ File updates committed and pushed"
         fi
         
     - name: Create and push tag
