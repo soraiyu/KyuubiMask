@@ -7,6 +7,11 @@ on:
       - main
       - master
 
+concurrency:
+  # Serialize release runs on the same base branch to prevent version/tag races
+  group: release-${{ github.event.pull_request.base.ref }}
+  cancel-in-progress: false
+
 jobs:
   auto-tag:
     # Only run if PR was merged (not just closed)
@@ -49,9 +54,11 @@ jobs:
           exit 1
         fi
         
-        # Validate version format (basic semver check)
-        if ! echo "$VERSION" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+'; then
-          echo "⚠️  Warning: Version '$VERSION' doesn't follow semver format (x.y.z)"
+        # Validate version format: strict x.y.z semver required for auto-bump logic
+        if ! echo "$VERSION" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+          echo "❌ Version '$VERSION' is not a valid semver string (expected x.y.z with integers only)"
+          echo "Please update versionName in app/build.gradle.kts to follow the x.y.z format before merging."
+          exit 1
         fi
         
         ORIGINAL_VERSION="$VERSION"
@@ -83,6 +90,7 @@ jobs:
     - name: Update CHANGELOG.md
       env:
         VERSION: ${{ steps.get_version.outputs.version }}
+        GITHUB_REPOSITORY: ${{ github.repository }}
       run: |
         python3 - <<'PYEOF'
         import re, os
@@ -90,7 +98,7 @@ jobs:
 
         version = os.environ['VERSION']
         today = datetime.now(timezone.utc).strftime('%Y-%m-%d')
-        repo = 'soraiyu/KyuubiMask'
+        repo = os.environ['GITHUB_REPOSITORY']
 
         with open('CHANGELOG.md', 'r') as f:
             content = f.read()
@@ -148,14 +156,15 @@ jobs:
       env:
         VERSION: ${{ steps.get_version.outputs.version }}
         VERSION_CODE: ${{ steps.get_version.outputs.version_code }}
-        COMMIT_SHA: ${{ github.sha }}
       run: |
         python3 - <<'PYEOF'
         import re, os
 
         version = os.environ['VERSION']
         version_code = os.environ['VERSION_CODE']
-        commit_sha = os.environ['COMMIT_SHA']
+        # Use the tag name as the commit ref so F-Droid always resolves to the
+        # tagged commit, regardless of any auto-bump commit that precedes the tag.
+        commit_ref = f'v{version}'
 
         with open('metadata/com.rtneg.kyuubimask.yml', 'r') as f:
             content = f.read()
@@ -165,7 +174,7 @@ jobs:
             new_build = (
                 f'  - versionName: {version}\n'
                 f'    versionCode: {version_code}\n'
-                f'    commit: {commit_sha}\n'
+                f'    commit: {commit_ref}\n'
                 f'    subdir: app\n'
                 f'    gradle:\n'
                 f'      - yes'
@@ -251,7 +260,7 @@ jobs:
           echo "ℹ️  No file changes to commit"
         else
           git commit -m "chore: update version files for v${{ steps.get_version.outputs.version }} [skip ci]"
-          git push origin HEAD
+          git push origin HEAD:${{ github.event.pull_request.base.ref }}
           echo "✅ File updates committed and pushed"
         fi
         
