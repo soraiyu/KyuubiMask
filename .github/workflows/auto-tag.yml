@@ -27,7 +27,13 @@ jobs:
       uses: actions/checkout@v4
       with:
         fetch-depth: 0
-        token: ${{ secrets.GITHUB_TOKEN }}
+        # PAT is required to push to main, which is protected by a ruleset that
+        # blocks direct pushes from GITHUB_TOKEN (github-actions[bot]).
+        # Create a classic PAT with 'repo' scope (or a fine-grained PAT with
+        # Contents: Read and write), add it as a repository secret named 'PAT',
+        # and ensure the PAT owner is configured as a bypass actor in the
+        # repository ruleset (Settings → Rules → Rulesets → Bypass list).
+        token: ${{ secrets.PAT }}
         
     - name: Configure Git
       run: |
