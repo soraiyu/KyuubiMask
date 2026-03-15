@@ -30,8 +30,11 @@ import android.widget.ArrayAdapter
 import android.widget.AdapterView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.ContextCompat
+import androidx.core.os.LocaleListCompat
 import com.rtneg.kyuubimask.data.DebugLogRepository
 import com.rtneg.kyuubimask.data.PreferencesRepository
 import com.rtneg.kyuubimask.databinding.ActivitySettingsBinding
@@ -205,6 +208,9 @@ class SettingsActivity : AppCompatActivity() {
             openNotificationListenerSettings()
         }
 
+        // Language button
+        setupLanguageButton()
+
         // Debug log panel (DEBUG builds only)
         if (BuildConfig.DEBUG) {
             binding.cardDebugLog.visibility = View.VISIBLE
@@ -326,6 +332,72 @@ class SettingsActivity : AppCompatActivity() {
                 else R.color.status_inactive
             )
         )
+    }
+
+    /**
+     * Sets up the Language button. Shows current language and opens a picker on click.
+     * Uses AppCompatDelegate.setApplicationLocales() for compatibility with all Android versions.
+     * On Android 13+ this also syncs with the system per-app language preference.
+     */
+    private fun setupLanguageButton() {
+        updateCurrentLanguageLabel()
+        binding.btnLanguage.setOnClickListener {
+            showLanguagePickerDialog()
+        }
+    }
+
+    /** Maps a BCP-47 locale tag to its display string resource ID. */
+    private fun localeTagToStringRes(tag: String): Int = when {
+        tag.startsWith("ja")       -> R.string.language_japanese
+        tag.startsWith("zh-Hans")  -> R.string.language_chinese_simplified
+        tag.startsWith("zh-Hant")  -> R.string.language_chinese_traditional
+        tag.startsWith("en")       -> R.string.language_english
+        else                       -> R.string.language_system_default
+    }
+
+    /** Updates the current language label to reflect the active locale. */
+    private fun updateCurrentLanguageLabel() {
+        val currentLocales = AppCompatDelegate.getApplicationLocales()
+        binding.tvCurrentLanguage.text = if (currentLocales.isEmpty) {
+            getString(R.string.language_system_default)
+        } else {
+            val tag = currentLocales[0]?.toLanguageTag() ?: ""
+            getString(localeTagToStringRes(tag))
+        }
+    }
+
+    /** Shows an AlertDialog for the user to pick a language. */
+    private fun showLanguagePickerDialog() {
+        // Locale tags that map to each choice (empty string = system default)
+        val localeTags = arrayOf("", "en", "ja", "zh-Hans", "zh-Hant")
+        val labels = arrayOf(
+            getString(R.string.language_system_default),
+            getString(R.string.language_english),
+            getString(R.string.language_japanese),
+            getString(R.string.language_chinese_simplified),
+            getString(R.string.language_chinese_traditional),
+        )
+
+        // Determine which item is currently selected
+        val currentLocales = AppCompatDelegate.getApplicationLocales()
+        val currentTag = if (currentLocales.isEmpty) "" else currentLocales[0]?.toLanguageTag() ?: ""
+        val currentIndex = localeTags.indexOfFirst { tag ->
+            if (tag.isEmpty()) currentTag.isEmpty() else currentTag.startsWith(tag)
+        }.coerceAtLeast(0)
+
+        AlertDialog.Builder(this)
+            .setTitle(getString(R.string.language_dialog_title))
+            .setSingleChoiceItems(labels, currentIndex) { dialog, which ->
+                val tag = localeTags[which]
+                val localeList = if (tag.isEmpty()) {
+                    LocaleListCompat.getEmptyLocaleList()
+                } else {
+                    LocaleListCompat.forLanguageTags(tag)
+                }
+                AppCompatDelegate.setApplicationLocales(localeList)
+                dialog.dismiss()
+            }
+            .show()
     }
 
     /**

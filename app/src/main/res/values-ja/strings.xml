@@ -88,6 +88,17 @@
     <string name="privacy_dialog_message">• 通知の内容は一切保存・送信せず、メモリ上で即時に処理されたあと破棄されます。\n• インターネット接続の権限を持たないため、データが外部へ送信されることはありません。\n• 保存するのは設定（マスク対象アプリのリスト、ON/OFF状態、振動パターン）のみです。\n• 通知アクセス権限を使って内容をマスクしますが、内容の記録は一切行いません。\n• すべてオープンソース（Apache 2.0）で、コードをいつでも確認できます。\n• どうぞ安心してお使いください🦊</string>
     <string name="privacy_dialog_button_ok">了解しました</string>
 
+    <!-- Language Settings -->
+    <string name="label_language_settings">言語</string>
+    <string name="label_language_settings_description">アプリの表示言語を変更します</string>
+    <string name="btn_language_change">変更</string>
+    <string name="language_system_default">システムのデフォルト</string>
+    <string name="language_english">English</string>
+    <string name="language_japanese">日本語</string>
+    <string name="language_chinese_simplified">中文（简体）</string>
+    <string name="language_chinese_traditional">中文（繁體）</string>
+    <string name="language_dialog_title">言語を選択</string>
+
     <!-- Version -->
     <string name="label_version">バージョン %s</string>
 
