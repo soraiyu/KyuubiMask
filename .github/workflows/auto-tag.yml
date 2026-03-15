@@ -23,16 +23,34 @@ jobs:
       contents: write  # Required to commit files and push tags
     
     steps:
+    - name: Validate PAT secret
+      run: |
+        if [ -z "${{ secrets.PAT }}" ]; then
+          echo "❌ Repository secret 'PAT' is not configured."
+          echo ""
+          echo "This workflow requires a fine-grained PAT to push to main,"
+          echo "because the branch ruleset blocks direct pushes from GITHUB_TOKEN."
+          echo ""
+          echo "Setup steps:"
+          echo "  1. Create a fine-grained PAT (Settings → Developer settings → Fine-grained tokens)"
+          echo "     Repository access: $GITHUB_REPOSITORY only"
+          echo "     Permissions: Contents (Read and write)"
+          echo "  2. Add it as a repository secret named 'PAT'"
+          echo "     (Settings → Secrets and variables → Actions → New repository secret)"
+          echo "  3. Add your account as a bypass actor for the branch ruleset"
+          echo "     (Settings → Rules → Rulesets → <ruleset name> → Bypass list)"
+          exit 1
+        fi
+        echo "✅ PAT secret is configured"
+
     - name: Checkout code
       uses: actions/checkout@v4
       with:
         fetch-depth: 0
-        # PAT is required to push to main, which is protected by a ruleset that
-        # blocks direct pushes from GITHUB_TOKEN (github-actions[bot]).
-        # Create a classic PAT with 'repo' scope (or a fine-grained PAT with
-        # Contents: Read and write), add it as a repository secret named 'PAT',
-        # and ensure the PAT owner is configured as a bypass actor in the
-        # repository ruleset (Settings → Rules → Rulesets → Bypass list).
+        # A fine-grained PAT (Contents: Read and write) is required to push to
+        # main, which is protected by a ruleset that blocks direct pushes from
+        # GITHUB_TOKEN (github-actions[bot]). The PAT owner must be added as a
+        # bypass actor in the ruleset (Settings → Rules → Rulesets → Bypass list).
         token: ${{ secrets.PAT }}
         
     - name: Configure Git
