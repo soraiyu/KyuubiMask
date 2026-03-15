@@ -28,11 +28,15 @@ jobs:
     permissions:
       contents: write       # push release branch
       pull-requests: write  # create PR and enable auto-merge
+      issues: write         # create/update 'release' label
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
       with:
+        # Check out the base branch (e.g. main) at the post-merge state,
+        # not the synthetic refs/pull/*/merge commit.
+        ref: ${{ github.event.pull_request.base.ref }}
         fetch-depth: 0
 
     - name: Configure Git
@@ -70,8 +74,15 @@ jobs:
         ORIGINAL_VERSION="$VERSION"
         ORIGINAL_VERSION_CODE="$VERSION_CODE"
 
-        # Auto-bump patch version until we find an unused tag
+        # Auto-bump patch version until we find an unused tag.
+        # Re-run guard: if a release branch for this version already exists on the
+        # remote, a prior run of this workflow already claimed this version — break
+        # immediately instead of bumping, so we don't produce a spurious extra release.
         while git rev-parse "v$VERSION" >/dev/null 2>&1; do
+          if git ls-remote --exit-code origin "refs/heads/release/v$VERSION" >/dev/null 2>&1; then
+            echo "ℹ️  Tag v$VERSION exists but release/v$VERSION branch also exists — resuming prior run, no extra bump"
+            break
+          fi
           PREV_VERSION="$VERSION"
           IFS='.' read -ra PARTS <<< "$VERSION"
           VERSION="${PARTS[0]}.${PARTS[1]}.$((${PARTS[2]} + 1))"
@@ -326,7 +337,13 @@ jobs:
   # Creates and pushes the git tag. Tag pushes are not restricted by branch rulesets,
   # so GITHUB_TOKEN is sufficient — no PAT required.
   create-tag:
-    if: github.event.pull_request.merged == true && contains(github.event.pull_request.labels.*.name, 'release')
+    # Guard: only run for PRs merged by github-actions[bot] from a release/v* branch.
+    # This prevents accidental or malicious tagging from manually-labelled PRs.
+    if: >-
+      github.event.pull_request.merged == true &&
+      contains(github.event.pull_request.labels.*.name, 'release') &&
+      github.event.pull_request.user.login == 'github-actions[bot]' &&
+      startsWith(github.event.pull_request.head.ref, 'release/v')
     name: Create Release Tag
     runs-on: ubuntu-latest
 
@@ -337,6 +354,8 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
       with:
+        # Check out the base branch at the post-merge state, not refs/pull/*/merge.
+        ref: ${{ github.event.pull_request.base.ref }}
         fetch-depth: 0
 
     - name: Configure Git
