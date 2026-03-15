@@ -88,6 +88,17 @@
     <string name="privacy_dialog_message">• Notification content is never stored or transmitted. It is processed in memory and immediately discarded.\n• There is no internet permission — it is impossible for data to leave your device.\n• Only settings are saved locally (list of masked apps, ON/OFF state, vibration pattern).\n• Notification access permission is used solely to mask content; the content itself is never saved.\n• KyuubiMask is fully open-source (Apache 2.0) — anyone can verify the code.\n• Protect your privacy with peace of mind 🦊</string>
     <string name="privacy_dialog_button_ok">Got it</string>
 
+    <!-- Language Settings -->
+    <string name="label_language_settings">Language</string>
+    <string name="label_language_settings_description">Change the app display language</string>
+    <string name="btn_language_change">Change</string>
+    <string name="language_system_default">System default</string>
+    <string name="language_english">English</string>
+    <string name="language_japanese">日本語</string>
+    <string name="language_chinese_simplified">中文（简体）</string>
+    <string name="language_chinese_traditional">中文（繁體）</string>
+    <string name="language_dialog_title">Select Language</string>
+
     <!-- Version -->
     <string name="label_version">Version %s</string>
 

@@ -88,6 +88,17 @@
     <string name="privacy_dialog_message">• 通知內容不會被儲存或傳輸，在記憶體中處理後立即丟棄。\n• 本應用程式無網路權限，資料不可能離開您的裝置。\n• 僅儲存設定（遮罩應用程式清單、開/關狀態、振動模式）。\n• 通知存取權限僅用於遮罩內容，不會記錄任何內容。\n• 九尾面具完全開源（Apache 2.0），任何人均可審查程式碼。\n• 安心保護您的隱私 🦊</string>
     <string name="privacy_dialog_button_ok">我知道了</string>
 
+    <!-- Language Settings -->
+    <string name="label_language_settings">語言</string>
+    <string name="label_language_settings_description">更改應用程式顯示語言</string>
+    <string name="btn_language_change">更改</string>
+    <string name="language_system_default">系統預設</string>
+    <string name="language_english">English</string>
+    <string name="language_japanese">日本語</string>
+    <string name="language_chinese_simplified">中文（简体）</string>
+    <string name="language_chinese_traditional">中文（繁體）</string>
+    <string name="language_dialog_title">選擇語言</string>
+
     <!-- Version -->
     <string name="label_version">版本 %s</string>
 

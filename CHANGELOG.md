@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Per-app language selection: Language card in Settings lets users switch the app language independently of the system locale (English / 日本語 / 中文（简体）/ 中文（繁體）/ System default). Uses `AppCompatDelegate.setApplicationLocales()` for compatibility with all Android versions and syncs with Android 13+'s native per-app language preference.
+
 ## [1.7.0] - 2026-03-14
 
 ### Added
