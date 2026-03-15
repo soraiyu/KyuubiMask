@@ -2,6 +2,6 @@
 <locale-config xmlns:android="http://schemas.android.com/apk/res/android">
     <locale android:name="en" />
     <locale android:name="ja" />
-    <locale android:name="zh-CN" />
-    <locale android:name="zh-TW" />
+    <locale android:name="zh-Hans" />
+    <locale android:name="zh-Hant" />
 </locale-config>
