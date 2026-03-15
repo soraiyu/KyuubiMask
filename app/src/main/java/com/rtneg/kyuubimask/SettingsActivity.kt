@@ -65,6 +65,15 @@ class SettingsActivity : AppCompatActivity() {
 
     companion object {
         private const val DEBUG_POLL_INTERVAL_MS = 1000L
+
+        /** BCP-47 locale tag (empty = system default) paired with its display string resource. */
+        private val LANGUAGE_OPTIONS = listOf(
+            "" to R.string.language_system_default,
+            "en" to R.string.language_english,
+            "ja" to R.string.language_japanese,
+            "zh-Hans" to R.string.language_chinese_simplified,
+            "zh-Hant" to R.string.language_chinese_traditional,
+        )
     }
     
     // Request notification permission for Android 13+
@@ -347,13 +356,10 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     /** Maps a BCP-47 locale tag to its display string resource ID. */
-    private fun localeTagToStringRes(tag: String): Int = when {
-        tag.startsWith("ja")       -> R.string.language_japanese
-        tag.startsWith("zh-Hans")  -> R.string.language_chinese_simplified
-        tag.startsWith("zh-Hant")  -> R.string.language_chinese_traditional
-        tag.startsWith("en")       -> R.string.language_english
-        else                       -> R.string.language_system_default
-    }
+    private fun localeTagToStringRes(tag: String): Int =
+        LANGUAGE_OPTIONS.firstOrNull { (optionTag, _) ->
+            optionTag.isNotEmpty() && tag.startsWith(optionTag)
+        }?.second ?: R.string.language_system_default
 
     /** Updates the current language label to reflect the active locale. */
     private fun updateCurrentLanguageLabel() {
@@ -368,20 +374,13 @@ class SettingsActivity : AppCompatActivity() {
 
     /** Shows an AlertDialog for the user to pick a language. */
     private fun showLanguagePickerDialog() {
-        // Locale tags that map to each choice (empty string = system default)
-        val localeTags = arrayOf("", "en", "ja", "zh-Hans", "zh-Hant")
-        val labels = arrayOf(
-            getString(R.string.language_system_default),
-            getString(R.string.language_english),
-            getString(R.string.language_japanese),
-            getString(R.string.language_chinese_simplified),
-            getString(R.string.language_chinese_traditional),
-        )
+        val localeTags = LANGUAGE_OPTIONS.map { it.first }.toTypedArray()
+        val labels = LANGUAGE_OPTIONS.map { getString(it.second) }.toTypedArray()
 
         // Determine which item is currently selected
         val currentLocales = AppCompatDelegate.getApplicationLocales()
         val currentTag = if (currentLocales.isEmpty) "" else currentLocales[0]?.toLanguageTag() ?: ""
-        val currentIndex = localeTags.indexOfFirst { tag ->
+        val currentIndex = LANGUAGE_OPTIONS.indexOfFirst { (tag, _) ->
             if (tag.isEmpty()) currentTag.isEmpty() else currentTag.startsWith(tag)
         }.coerceAtLeast(0)
 
