@@ -292,18 +292,33 @@ jobs:
           echo "✅ Tag $TAG created and pushed directly"
         else
           git commit -m "chore: update version files for v$VERSION [skip ci]"
-          git push origin "HEAD:refs/heads/$BRANCH"
+          # --force handles re-runs where the branch already exists remotely
+          git push origin "HEAD:refs/heads/$BRANCH" --force
           echo "✅ Pushed release branch: $BRANCH"
 
-          PR_URL=$(gh pr create \
+          # Create PR; fall back to finding the existing PR on re-runs
+          if ! PR_URL=$(gh pr create \
             --base "$BASE" \
             --head "$BRANCH" \
             --title "chore: release v$VERSION" \
             --body "Automated release PR for v$VERSION. Merging this will trigger tag creation." \
-            --label "release")
-          echo "✅ Release PR created: $PR_URL"
+            --label "release"); then
+            PR_URL=$(gh pr list --head "$BRANCH" --base "$BASE" --json url -q '.[0].url')
+            if [ -z "$PR_URL" ]; then
+              echo "❌ Failed to create PR and no existing PR found for $BRANCH → $BASE"
+              exit 1
+            fi
+            echo "ℹ️  Using existing PR: $PR_URL"
+          else
+            echo "✅ Release PR created: $PR_URL"
+          fi
 
-          gh pr merge "$PR_URL" --auto --squash
+          if ! gh pr merge "$PR_URL" --auto --squash; then
+            echo "❌ Failed to enable auto-merge."
+            echo "   Please verify that 'Allow auto-merge' is enabled in"
+            echo "   Settings → General → Pull Requests, then re-run this workflow."
+            exit 1
+          fi
           echo "✅ Auto-merge enabled on: $PR_URL"
         fi
 
