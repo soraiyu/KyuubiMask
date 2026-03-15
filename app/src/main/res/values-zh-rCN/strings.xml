@@ -32,14 +32,14 @@
     <string name="label_notification_sound_description">收到通知时播放提示音</string>
     <string name="label_notification_vibrate">震动</string>
     <string name="label_notification_vibrate_description">收到通知时震动提醒</string>
-    <string name="label_vibe_pattern">振动模式</string>
-    <string name="label_vibe_pattern_short">短振动（200ms）</string>
-    <string name="label_vibe_pattern_double">双击振动</string>
-    <string name="label_vibe_pattern_heart">心形振动</string>
-    <string name="label_vibe_pattern_long">长振动</string>
+    <string name="label_vibe_pattern">震动模式</string>
+    <string name="label_vibe_pattern_short">短震动（200ms）</string>
+    <string name="label_vibe_pattern_double">双击震动</string>
+    <string name="label_vibe_pattern_heart">心形震动</string>
+    <string name="label_vibe_pattern_long">长震动</string>
     <string name="btn_vibe_test">测试</string>
-    <string name="toast_vibe_tested">振动模式已测试</string>
-    <string name="toast_vibe_unavailable">此设备没有振动器</string>
+    <string name="toast_vibe_tested">震动模式已测试</string>
+    <string name="toast_vibe_unavailable">此设备没有震动器</string>
 
     <!-- Masked notification -->
     <string name="masked_text">新通知</string>
@@ -53,7 +53,7 @@
     <string name="service_paused_text">遮罩功能已停用</string>
 
     <!-- Privacy -->
-    <string name="privacy_notice">通知内容不会被存储或传输。仅有服务状态和振动等设置会保存在本地设备上。</string>
+    <string name="privacy_notice">通知内容不会被存储或传输。仅有服务状态和震动等设置会保存在本地设备上。</string>
 
     <!-- Permissions -->
     <string name="post_notification_permission_required">Android 13 及以上版本需要通知发送权限</string>
@@ -85,7 +85,7 @@
 
     <!-- Privacy Dialog (shown on first launch) -->
     <string name="privacy_dialog_title">欢迎使用九尾面具</string>
-    <string name="privacy_dialog_message">• 通知内容不会被存储或传输，在内存中处理后立即丢弃。\n• 本应用无网络权限，数据不可能离开您的设备。\n• 仅保存设置（遮罩应用列表、开/关状态、振动模式）。\n• 通知访问权限仅用于遮罩内容，不会记录任何内容。\n• 九尾面具完全开源（Apache 2.0），任何人均可审查代码。\n• 安心保护您的隐私 🦊</string>
+    <string name="privacy_dialog_message">• 通知内容不会被存储或传输，在内存中处理后立即丢弃。\n• 本应用无网络权限，数据不可能离开您的设备。\n• 仅保存设置（遮罩应用列表、开/关状态、震动模式）。\n• 通知访问权限仅用于遮罩内容，不会记录任何内容。\n• 九尾面具完全开源（Apache 2.0），任何人均可审查代码。\n• 安心保护您的隐私 🦊</string>
     <string name="privacy_dialog_button_ok">我知道了</string>
 
     <!-- Version -->
