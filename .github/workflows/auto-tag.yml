@@ -29,7 +29,7 @@ jobs:
         git config user.name "github-actions[bot]"
         git config user.email "github-actions[bot]@users.noreply.github.com"
         
-    - name: Extract version from build.gradle.kts
+    - name: Extract version and auto-bump if needed
       id: get_version
       run: |
         # Extract versionName from app/build.gradle.kts
@@ -54,27 +54,33 @@ jobs:
           echo "⚠️  Warning: Version '$VERSION' doesn't follow semver format (x.y.z)"
         fi
         
+        ORIGINAL_VERSION="$VERSION"
+        ORIGINAL_VERSION_CODE="$VERSION_CODE"
+        
+        # Auto-bump patch version until we find an unused tag
+        while git rev-parse "v$VERSION" >/dev/null 2>&1; do
+          PREV_VERSION="$VERSION"
+          IFS='.' read -ra PARTS <<< "$VERSION"
+          VERSION="${PARTS[0]}.${PARTS[1]}.$((${PARTS[2]} + 1))"
+          VERSION_CODE=$((VERSION_CODE + 1))
+          echo "⚠️  Tag v$PREV_VERSION already exists - auto-bumping to v$VERSION (code: $VERSION_CODE)"
+        done
+        
+        # Update build.gradle.kts if version was bumped
+        if [ "$VERSION" != "$ORIGINAL_VERSION" ]; then
+          sed -i "s/versionCode = $ORIGINAL_VERSION_CODE/versionCode = $VERSION_CODE/" app/build.gradle.kts
+          sed -i "s/versionName = \"$ORIGINAL_VERSION\"/versionName = \"$VERSION\"/" app/build.gradle.kts
+          echo "✅ build.gradle.kts updated: versionName $ORIGINAL_VERSION → $VERSION, versionCode $ORIGINAL_VERSION_CODE → $VERSION_CODE"
+        else
+          echo "✅ Tag v$VERSION does not exist yet - no bump needed"
+        fi
+        
         echo "version=$VERSION" >> $GITHUB_OUTPUT
         echo "version_code=$VERSION_CODE" >> $GITHUB_OUTPUT
         echo "tag=v$VERSION" >> $GITHUB_OUTPUT
-        echo "📦 Extracted version: $VERSION (code: $VERSION_CODE)"
-        
-    - name: Check if tag already exists
-      id: check_tag
-      run: |
-        TAG=v${{ steps.get_version.outputs.version }}
-        
-        # Check if tag exists (tags already fetched by checkout action)
-        if git rev-parse "$TAG" >/dev/null 2>&1; then
-          echo "exists=true" >> $GITHUB_OUTPUT
-          echo "⚠️  Tag $TAG already exists"
-        else
-          echo "exists=false" >> $GITHUB_OUTPUT
-          echo "✅ Tag $TAG does not exist yet"
-        fi
+        echo "📦 Final version: $VERSION (code: $VERSION_CODE)"
 
     - name: Update CHANGELOG.md
-      if: steps.check_tag.outputs.exists == 'false'
       env:
         VERSION: ${{ steps.get_version.outputs.version }}
       run: |
@@ -139,7 +145,6 @@ jobs:
         PYEOF
 
     - name: Update F-Droid metadata
-      if: steps.check_tag.outputs.exists == 'false'
       env:
         VERSION: ${{ steps.get_version.outputs.version }}
         VERSION_CODE: ${{ steps.get_version.outputs.version_code }}
@@ -182,7 +187,6 @@ jobs:
         PYEOF
 
     - name: Create fastlane changelogs
-      if: steps.check_tag.outputs.exists == 'false'
       env:
         VERSION: ${{ steps.get_version.outputs.version }}
         VERSION_CODE: ${{ steps.get_version.outputs.version_code }}
@@ -241,9 +245,8 @@ jobs:
         PYEOF
 
     - name: Commit updated files
-      if: steps.check_tag.outputs.exists == 'false'
       run: |
-        git add CHANGELOG.md metadata/com.rtneg.kyuubimask.yml fastlane/metadata/android/en-US/changelogs/ fastlane/metadata/android/ja-JP/changelogs/
+        git add app/build.gradle.kts CHANGELOG.md metadata/com.rtneg.kyuubimask.yml fastlane/metadata/android/en-US/changelogs/ fastlane/metadata/android/ja-JP/changelogs/
         if git diff --staged --quiet; then
           echo "ℹ️  No file changes to commit"
         else
@@ -253,7 +256,6 @@ jobs:
         fi
         
     - name: Create and push tag
-      if: steps.check_tag.outputs.exists == 'false'
       run: |
         TAG=v${{ steps.get_version.outputs.version }}
         
@@ -264,10 +266,3 @@ jobs:
         git push origin "$TAG"
         
         echo "✅ Tag created and pushed successfully!"
-        
-    - name: Tag already exists
-      if: steps.check_tag.outputs.exists == 'true'
-      run: |
-        TAG=v${{ steps.get_version.outputs.version }}
-        echo "ℹ️  Tag $TAG already exists. Skipping tag creation."
-        echo "💡 To create a new release, update the versionName in app/build.gradle.kts"
