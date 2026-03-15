@@ -13,22 +13,27 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  # Phase 1: triggered by any regular (non-release) PR merged to main.
-  # Prepares version files on a release branch, then opens a PR with auto-merge
-  # enabled so the changes land in main through the normal review/CI gate.
-  # No PAT is required because we never push directly to the protected branch.
+  # Triggered by any PR merged to main/master.
+  # Steps:
+  #   1. Auto-bump versionName/versionCode in build.gradle.kts if the current
+  #      version tag already exists, then push the change directly to the base branch.
+  #   2. Create and push the git tag at the updated HEAD.
+  #   3. Update CHANGELOG.md, F-Droid metadata, and fastlane changelogs, then
+  #      push those changes to the base branch (best-effort; the tag is already done).
   #
-  # Prerequisites:
-  #   • "Allow auto-merge" must be enabled in Settings → General → Pull Requests.
-  prepare-release:
-    if: github.event.pull_request.merged == true && !contains(github.event.pull_request.labels.*.name, 'release')
-    name: Prepare Release PR
+  # Prerequisites (for the auto-bump path):
+  #   • In Settings → Branches, edit the branch protection rule for main/master,
+  #     enable "Allow specified actors to bypass required pull requests", and add
+  #     "github-actions[bot]" to the bypass list.
+  #   • Alternatively, developers can bump versionName themselves in each PR — in
+  #     that case no bypass is needed, because no commit to main is required.
+  auto-tag:
+    if: github.event.pull_request.merged == true
+    name: Create Release Tag
     runs-on: ubuntu-latest
 
     permissions:
-      contents: write       # push release branch
-      pull-requests: write  # create PR and enable auto-merge
-      issues: write         # create/update 'release' label
+      contents: write  # push commits to base branch and push git tag
 
     steps:
     - name: Checkout code
@@ -75,14 +80,7 @@ jobs:
         ORIGINAL_VERSION_CODE="$VERSION_CODE"
 
         # Auto-bump patch version until we find an unused tag.
-        # Re-run guard: if a release branch for this version already exists on the
-        # remote, a prior run of this workflow already claimed this version — break
-        # immediately instead of bumping, so we don't produce a spurious extra release.
         while git rev-parse "v$VERSION" >/dev/null 2>&1; do
-          if git ls-remote --exit-code origin "refs/heads/release/v$VERSION" >/dev/null 2>&1; then
-            echo "ℹ️  Tag v$VERSION exists but release/v$VERSION branch also exists — resuming prior run, no extra bump"
-            break
-          fi
           PREV_VERSION="$VERSION"
           IFS='.' read -ra PARTS <<< "$VERSION"
           VERSION="${PARTS[0]}.${PARTS[1]}.$((${PARTS[2]} + 1))"
@@ -90,11 +88,12 @@ jobs:
           echo "⚠️  Tag v$PREV_VERSION already exists - auto-bumping to v$VERSION (code: $VERSION_CODE)"
         done
 
-        # Update build.gradle.kts if version was bumped
+        BUMPED=false
         if [ "$VERSION" != "$ORIGINAL_VERSION" ]; then
           sed -i "s/versionCode = $ORIGINAL_VERSION_CODE/versionCode = $VERSION_CODE/" app/build.gradle.kts
           sed -i "s/versionName = \"$ORIGINAL_VERSION\"/versionName = \"$VERSION\"/" app/build.gradle.kts
           echo "✅ build.gradle.kts updated: versionName $ORIGINAL_VERSION → $VERSION, versionCode $ORIGINAL_VERSION_CODE → $VERSION_CODE"
+          BUMPED=true
         else
           echo "✅ Tag v$VERSION does not exist yet - no bump needed"
         fi
@@ -102,7 +101,60 @@ jobs:
         echo "version=$VERSION" >> $GITHUB_OUTPUT
         echo "version_code=$VERSION_CODE" >> $GITHUB_OUTPUT
         echo "tag=v$VERSION" >> $GITHUB_OUTPUT
+        echo "bumped=$BUMPED" >> $GITHUB_OUTPUT
         echo "📦 Final version: $VERSION (code: $VERSION_CODE)"
+
+    # Push build.gradle.kts to the base branch when we auto-bumped versionName/versionCode.
+    # This step is critical: without it the tag would point to a commit with the wrong
+    # versionName, causing the built APK to report the old version.
+    # Requires github-actions[bot] to be in the branch protection bypass list.
+    - name: Push version bump to base branch
+      if: steps.get_version.outputs.bumped == 'true'
+      env:
+        BASE: ${{ github.event.pull_request.base.ref }}
+      run: |
+        TAG="v${{ steps.get_version.outputs.version }}"
+        git add app/build.gradle.kts
+        git commit -m "chore: bump version to $TAG [skip ci]"
+
+        if git push origin "HEAD:refs/heads/$BASE"; then
+          echo "✅ Version bump pushed to $BASE"
+        else
+          echo "❌ Could not push version bump to $BASE."
+          echo "   Branch protection requires a pull request for direct pushes."
+          echo ""
+          echo "   To enable automatic version bumps, choose one option:"
+          echo "   Option A — Settings → Branches → Edit rule for '$BASE'"
+          echo "              → Enable 'Allow specified actors to bypass required pull requests'"
+          echo "              → Add 'github-actions[bot]' to the bypass list."
+          echo "   Option B — Bump versionName manually in app/build.gradle.kts in each PR."
+          echo "              When the version tag does not already exist, no commit to $BASE"
+          echo "              is needed and the tag will be created automatically."
+          exit 1
+        fi
+
+    - name: Create and push tag
+      run: |
+        TAG="v${{ steps.get_version.outputs.version }}"
+
+        if git rev-parse "$TAG" >/dev/null 2>&1; then
+          echo "⚠️  Tag $TAG already exists, skipping"
+          exit 0
+        fi
+
+        # After the version-bump push the local HEAD may be behind origin; re-sync.
+        if [ "${{ steps.get_version.outputs.bumped }}" = "true" ]; then
+          git fetch origin "${{ github.event.pull_request.base.ref }}"
+          git reset --hard "origin/${{ github.event.pull_request.base.ref }}"
+        fi
+
+        echo "🏷️  Creating tag: $TAG"
+        git tag -a "$TAG" -m "Release $TAG - Auto-tagged on PR merge"
+
+        echo "📤 Pushing tag: $TAG"
+        git push origin "$TAG"
+
+        echo "✅ Tag $TAG created and pushed successfully!"
 
     - name: Update CHANGELOG.md
       env:
@@ -270,123 +322,33 @@ jobs:
             print(f'ℹ️  {ja_path} already exists, skipping')
         PYEOF
 
-    - name: Ensure 'release' label exists
+    # Push CHANGELOG/metadata updates after the tag exists.
+    # This is best-effort: the tag was already created above, so a push failure
+    # here does not block the release — it only means the metadata files in the
+    # base branch will be stale until the next PR merge succeeds.
+    - name: Push metadata updates to base branch
+      continue-on-error: true
       env:
-        GH_TOKEN: ${{ github.token }}
-      run: |
-        gh label create release \
-          --description "Automated release PR" \
-          --color "0075ca" \
-          --force
-        echo "✅ 'release' label is ready"
-
-    - name: Commit, push release branch, and open auto-merge PR
-      env:
-        VERSION: ${{ steps.get_version.outputs.version }}
         BASE: ${{ github.event.pull_request.base.ref }}
-        GH_TOKEN: ${{ github.token }}
       run: |
-        BRANCH="release/v$VERSION"
-        TAG="v$VERSION"
+        TAG="v${{ steps.get_version.outputs.version }}"
 
-        git add app/build.gradle.kts CHANGELOG.md metadata/com.rtneg.kyuubimask.yml \
+        git add CHANGELOG.md metadata/com.rtneg.kyuubimask.yml \
           fastlane/metadata/android/en-US/changelogs/ \
           fastlane/metadata/android/ja-JP/changelogs/
 
         if git diff --staged --quiet; then
-          # All version files are already up to date — create the tag directly from
-          # the current HEAD. Tag pushes are not restricted by branch rulesets, so
-          # GITHUB_TOKEN is sufficient here too.
-          echo "ℹ️  No file changes needed — creating tag directly from HEAD"
-          git tag -a "$TAG" -m "Release $TAG - Auto-tagged on PR merge"
-          git push origin "$TAG"
-          echo "✅ Tag $TAG created and pushed directly"
-        else
-          git commit -m "chore: update version files for v$VERSION [skip ci]"
-          # --force handles re-runs where the branch already exists remotely
-          git push origin "HEAD:refs/heads/$BRANCH" --force
-          echo "✅ Pushed release branch: $BRANCH"
-
-          # Create PR; fall back to finding the existing PR on re-runs
-          if ! PR_URL=$(gh pr create \
-            --base "$BASE" \
-            --head "$BRANCH" \
-            --title "chore: release v$VERSION" \
-            --body "Automated release PR for v$VERSION. Merging this will trigger tag creation." \
-            --label "release"); then
-            PR_URL=$(gh pr list --head "$BRANCH" --base "$BASE" --json url -q '.[0].url')
-            if [ -z "$PR_URL" ]; then
-              echo "❌ Failed to create PR and no existing PR found for $BRANCH → $BASE"
-              exit 1
-            fi
-            echo "ℹ️  Using existing PR: $PR_URL"
-          else
-            echo "✅ Release PR created: $PR_URL"
-          fi
-
-          if ! gh pr merge "$PR_URL" --auto --squash; then
-            echo "❌ Failed to enable auto-merge."
-            echo "   Please verify that 'Allow auto-merge' is enabled in"
-            echo "   Settings → General → Pull Requests, then re-run this workflow."
-            exit 1
-          fi
-          echo "✅ Auto-merge enabled on: $PR_URL"
-        fi
-
-  # Phase 2: triggered when the auto-created release PR (label: 'release') is merged.
-  # Creates and pushes the git tag. Tag pushes are not restricted by branch rulesets,
-  # so GITHUB_TOKEN is sufficient — no PAT required.
-  create-tag:
-    # Guard: only run for PRs merged by github-actions[bot] from a release/v* branch.
-    # This prevents accidental or malicious tagging from manually-labelled PRs.
-    if: >-
-      github.event.pull_request.merged == true &&
-      contains(github.event.pull_request.labels.*.name, 'release') &&
-      github.event.pull_request.user.login == 'github-actions[bot]' &&
-      startsWith(github.event.pull_request.head.ref, 'release/v')
-    name: Create Release Tag
-    runs-on: ubuntu-latest
-
-    permissions:
-      contents: write  # push git tag
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      with:
-        # Check out the base branch at the post-merge state, not refs/pull/*/merge.
-        ref: ${{ github.event.pull_request.base.ref }}
-        fetch-depth: 0
-
-    - name: Configure Git
-      run: |
-        git config user.name "github-actions[bot]"
-        git config user.email "github-actions[bot]@users.noreply.github.com"
-
-    - name: Extract version
-      id: get_version
-      run: |
-        VERSION=$(grep -E '^\s*versionName\s*=\s*"' app/build.gradle.kts | sed -E 's/.*"(.+)".*/\1/')
-        if [ -z "$VERSION" ]; then
-          echo "❌ Could not extract version from build.gradle.kts"
-          exit 1
-        fi
-        echo "version=$VERSION" >> $GITHUB_OUTPUT
-        echo "📦 Version: $VERSION"
-
-    - name: Create and push tag
-      run: |
-        TAG=v${{ steps.get_version.outputs.version }}
-
-        if git rev-parse "$TAG" >/dev/null 2>&1; then
-          echo "⚠️  Tag $TAG already exists, skipping"
+          echo "ℹ️  No metadata changes to commit"
           exit 0
         fi
 
-        echo "🏷️  Creating tag: $TAG"
-        git tag -a "$TAG" -m "Release $TAG - Auto-tagged on PR merge"
+        git commit -m "chore: update release metadata for $TAG [skip ci]"
 
-        echo "📤 Pushing tag: $TAG"
-        git push origin "$TAG"
-
-        echo "✅ Tag created and pushed successfully!"
+        if git push origin "HEAD:refs/heads/$BASE"; then
+          echo "✅ Metadata updates pushed to $BASE"
+        else
+          echo "⚠️  Could not push metadata updates to $BASE (branch protection)."
+          echo "   The tag has already been created successfully."
+          echo "   Metadata files (CHANGELOG.md, F-Droid, fastlane) will be updated"
+          echo "   on the next successful push to $BASE."
+        fi
