@@ -13,51 +13,33 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  auto-tag:
-    # Only run if PR was merged (not just closed)
-    if: github.event.pull_request.merged == true
-    name: Update Version Files and Create Tag
+  # Phase 1: triggered by any regular (non-release) PR merged to main.
+  # Prepares version files on a release branch, then opens a PR with auto-merge
+  # enabled so the changes land in main through the normal review/CI gate.
+  # No PAT is required because we never push directly to the protected branch.
+  #
+  # Prerequisites:
+  #   • "Allow auto-merge" must be enabled in Settings → General → Pull Requests.
+  prepare-release:
+    if: github.event.pull_request.merged == true && !contains(github.event.pull_request.labels.*.name, 'release')
+    name: Prepare Release PR
     runs-on: ubuntu-latest
-    
-    permissions:
-      contents: write  # Required to commit files and push tags
-    
-    steps:
-    - name: Validate PAT secret
-      run: |
-        if [ -z "${{ secrets.PAT }}" ]; then
-          echo "❌ Repository secret 'PAT' is not configured."
-          echo ""
-          echo "This workflow requires a fine-grained PAT to push to main,"
-          echo "because the branch ruleset blocks direct pushes from GITHUB_TOKEN."
-          echo ""
-          echo "Setup steps:"
-          echo "  1. Create a fine-grained PAT (Settings → Developer settings → Fine-grained tokens)"
-          echo "     Repository access: $GITHUB_REPOSITORY only"
-          echo "     Permissions: Contents (Read and write)"
-          echo "  2. Add it as a repository secret named 'PAT'"
-          echo "     (Settings → Secrets and variables → Actions → New repository secret)"
-          echo "  3. Add your account as a bypass actor for the branch ruleset"
-          echo "     (Settings → Rules → Rulesets → <ruleset name> → Bypass list)"
-          exit 1
-        fi
-        echo "✅ PAT secret is configured"
 
+    permissions:
+      contents: write       # push release branch
+      pull-requests: write  # create PR and enable auto-merge
+
+    steps:
     - name: Checkout code
       uses: actions/checkout@v4
       with:
         fetch-depth: 0
-        # A fine-grained PAT (Contents: Read and write) is required to push to
-        # main, which is protected by a ruleset that blocks direct pushes from
-        # GITHUB_TOKEN (github-actions[bot]). The PAT owner must be added as a
-        # bypass actor in the ruleset (Settings → Rules → Rulesets → Bypass list).
-        token: ${{ secrets.PAT }}
-        
+
     - name: Configure Git
       run: |
         git config user.name "github-actions[bot]"
         git config user.email "github-actions[bot]@users.noreply.github.com"
-        
+
     - name: Extract version and auto-bump if needed
       id: get_version
       run: |
@@ -65,29 +47,29 @@ jobs:
         # Expected format: versionName = "x.y.z"
         VERSION=$(grep -E '^\s*versionName\s*=\s*"' app/build.gradle.kts | sed -E 's/.*"(.+)".*/\1/')
         VERSION_CODE=$(grep -E '^\s*versionCode\s*=\s*' app/build.gradle.kts | sed -E 's/.*=\s*([0-9]+).*/\1/')
-        
+
         if [ -z "$VERSION" ]; then
           echo "❌ Could not extract version from build.gradle.kts"
           echo "Expected format: versionName = \"x.y.z\""
           exit 1
         fi
-        
+
         if [ -z "$VERSION_CODE" ]; then
           echo "❌ Could not extract versionCode from build.gradle.kts"
           echo "Expected format: versionCode = <number>"
           exit 1
         fi
-        
+
         # Validate version format: strict x.y.z semver required for auto-bump logic
         if ! echo "$VERSION" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+$'; then
           echo "❌ Version '$VERSION' is not a valid semver string (expected x.y.z with integers only)"
           echo "Please update versionName in app/build.gradle.kts to follow the x.y.z format before merging."
           exit 1
         fi
-        
+
         ORIGINAL_VERSION="$VERSION"
         ORIGINAL_VERSION_CODE="$VERSION_CODE"
-        
+
         # Auto-bump patch version until we find an unused tag
         while git rev-parse "v$VERSION" >/dev/null 2>&1; do
           PREV_VERSION="$VERSION"
@@ -96,7 +78,7 @@ jobs:
           VERSION_CODE=$((VERSION_CODE + 1))
           echo "⚠️  Tag v$PREV_VERSION already exists - auto-bumping to v$VERSION (code: $VERSION_CODE)"
         done
-        
+
         # Update build.gradle.kts if version was bumped
         if [ "$VERSION" != "$ORIGINAL_VERSION" ]; then
           sed -i "s/versionCode = $ORIGINAL_VERSION_CODE/versionCode = $VERSION_CODE/" app/build.gradle.kts
@@ -105,7 +87,7 @@ jobs:
         else
           echo "✅ Tag v$VERSION does not exist yet - no bump needed"
         fi
-        
+
         echo "version=$VERSION" >> $GITHUB_OUTPUT
         echo "version_code=$VERSION_CODE" >> $GITHUB_OUTPUT
         echo "tag=v$VERSION" >> $GITHUB_OUTPUT
@@ -277,25 +259,100 @@ jobs:
             print(f'ℹ️  {ja_path} already exists, skipping')
         PYEOF
 
-    - name: Commit updated files
+    - name: Ensure 'release' label exists
+      env:
+        GH_TOKEN: ${{ github.token }}
       run: |
-        git add app/build.gradle.kts CHANGELOG.md metadata/com.rtneg.kyuubimask.yml fastlane/metadata/android/en-US/changelogs/ fastlane/metadata/android/ja-JP/changelogs/
+        gh label create release \
+          --description "Automated release PR" \
+          --color "0075ca" \
+          --force
+        echo "✅ 'release' label is ready"
+
+    - name: Commit, push release branch, and open auto-merge PR
+      env:
+        VERSION: ${{ steps.get_version.outputs.version }}
+        BASE: ${{ github.event.pull_request.base.ref }}
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        BRANCH="release/v$VERSION"
+        TAG="v$VERSION"
+
+        git add app/build.gradle.kts CHANGELOG.md metadata/com.rtneg.kyuubimask.yml \
+          fastlane/metadata/android/en-US/changelogs/ \
+          fastlane/metadata/android/ja-JP/changelogs/
+
         if git diff --staged --quiet; then
-          echo "ℹ️  No file changes to commit"
+          # All version files are already up to date — create the tag directly from
+          # the current HEAD. Tag pushes are not restricted by branch rulesets, so
+          # GITHUB_TOKEN is sufficient here too.
+          echo "ℹ️  No file changes needed — creating tag directly from HEAD"
+          git tag -a "$TAG" -m "Release $TAG - Auto-tagged on PR merge"
+          git push origin "$TAG"
+          echo "✅ Tag $TAG created and pushed directly"
         else
-          git commit -m "chore: update version files for v${{ steps.get_version.outputs.version }} [skip ci]"
-          git push origin HEAD:${{ github.event.pull_request.base.ref }}
-          echo "✅ File updates committed and pushed"
+          git commit -m "chore: update version files for v$VERSION [skip ci]"
+          git push origin "HEAD:refs/heads/$BRANCH"
+          echo "✅ Pushed release branch: $BRANCH"
+
+          PR_URL=$(gh pr create \
+            --base "$BASE" \
+            --head "$BRANCH" \
+            --title "chore: release v$VERSION" \
+            --body "Automated release PR for v$VERSION. Merging this will trigger tag creation." \
+            --label "release")
+          echo "✅ Release PR created: $PR_URL"
+
+          gh pr merge "$PR_URL" --auto --squash
+          echo "✅ Auto-merge enabled on: $PR_URL"
         fi
-        
+
+  # Phase 2: triggered when the auto-created release PR (label: 'release') is merged.
+  # Creates and pushes the git tag. Tag pushes are not restricted by branch rulesets,
+  # so GITHUB_TOKEN is sufficient — no PAT required.
+  create-tag:
+    if: github.event.pull_request.merged == true && contains(github.event.pull_request.labels.*.name, 'release')
+    name: Create Release Tag
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write  # push git tag
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Configure Git
+      run: |
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+
+    - name: Extract version
+      id: get_version
+      run: |
+        VERSION=$(grep -E '^\s*versionName\s*=\s*"' app/build.gradle.kts | sed -E 's/.*"(.+)".*/\1/')
+        if [ -z "$VERSION" ]; then
+          echo "❌ Could not extract version from build.gradle.kts"
+          exit 1
+        fi
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+        echo "📦 Version: $VERSION"
+
     - name: Create and push tag
       run: |
         TAG=v${{ steps.get_version.outputs.version }}
-        
+
+        if git rev-parse "$TAG" >/dev/null 2>&1; then
+          echo "⚠️  Tag $TAG already exists, skipping"
+          exit 0
+        fi
+
         echo "🏷️  Creating tag: $TAG"
         git tag -a "$TAG" -m "Release $TAG - Auto-tagged on PR merge"
-        
+
         echo "📤 Pushing tag: $TAG"
         git push origin "$TAG"
-        
+
         echo "✅ Tag created and pushed successfully!"
