@@ -198,6 +198,9 @@ abstract class AbstractMaskStrategy : NotificationMaskStrategy {
     companion object {
         private const val TAG = "KyuubiMask"
 
+        /** Generic package-name segments that do not make for a useful app label. */
+        private val SKIP_WORDS = setOf("android", "app", "mobile")
+
         /**
          * Derives a human-readable app name from a package name.
          *
@@ -205,7 +208,7 @@ abstract class AbstractMaskStrategy : NotificationMaskStrategy {
          * unavailable (e.g. the app is installed only in a managed work profile).
          *
          * Algorithm: split on '.', skip generic suffixes ("android", "app", "mobile"),
-         * and title-case the first remaining segment.
+         * and title-case the last remaining segment.
          *
          * Examples:
          * - "com.Slack"             → "Slack"
@@ -214,9 +217,8 @@ abstract class AbstractMaskStrategy : NotificationMaskStrategy {
          * - "com.example.app"       → "Example"
          */
         internal fun appNameFromPackage(packageName: String): String {
-            val skipWords = setOf("android", "app", "mobile")
             return packageName.split('.')
-                .lastOrNull { it.isNotEmpty() && it.lowercase() !in skipWords }
+                .lastOrNull { it.isNotEmpty() && it.lowercase(java.util.Locale.ROOT) !in SKIP_WORDS }
                 ?.replaceFirstChar { it.titlecase(java.util.Locale.ROOT) }
                 ?: packageName
         }
