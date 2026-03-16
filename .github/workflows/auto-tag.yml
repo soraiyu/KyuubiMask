@@ -37,7 +37,7 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
       with:
         # Check out the base branch (e.g. main) at the post-merge state,
         # not the synthetic refs/pull/*/merge commit.
@@ -370,7 +370,7 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
       with:
         # Check out the base branch at the post-merge state, not refs/pull/*/merge.
         ref: ${{ github.event.pull_request.base.ref }}
