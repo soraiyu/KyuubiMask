@@ -300,7 +300,7 @@ class PreferencesRepositoryTest {
     }
 
     @Test
-    fun `isUserSelectedApp returns false for work profile when only main profile entry exists`() {
+    fun `isUserSelectedApp returns true for work profile via legacy plain-package fallback`() {
         // Plain package name (userId == 0 key) is also treated as a fallback for ALL profiles
         // (backward compat for legacy entries added before per-profile support)
         repository.addUserSelectedPackage("com.example.app")
