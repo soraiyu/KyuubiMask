@@ -322,8 +322,11 @@ class PreferencesRepositoryTest {
     }
 
     @Test
-    fun `profileAppKey returns plain package for userId 0`() {
-        assertEquals("com.example.app", PreferencesRepository.profileAppKey("com.example.app", 0))
+    fun `profileAppKey returns colon-separated key for userId 0`() {
+        assertEquals(
+            "com.example.app${PreferencesRepository.PROFILE_KEY_SEPARATOR}0",
+            PreferencesRepository.profileAppKey("com.example.app", 0)
+        )
     }
 
     @Test

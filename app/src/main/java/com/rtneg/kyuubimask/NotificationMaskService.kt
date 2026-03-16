@@ -177,9 +177,12 @@ class NotificationMaskService : NotificationListenerService() {
         // The registry is the single source of truth for which apps are masked
         val strategy = NotificationMaskStrategyRegistry.findStrategy(packageName)
             ?: run {
-                // sbn.user.hashCode() returns the user/profile ID (UserHandle.mHandle) on all
-                // API levels consistently with the LauncherApps-based enumeration in
-                // SelectAppsActivity; sbn.getUserId() is deprecated from API 33.
+                // UserHandle.hashCode() returns the internal user ID (mHandle field). This is
+                // confirmed by the platform source (@Override public int hashCode(){return mHandle;})
+                // and has been stable since UserHandle was introduced in API 17.
+                // UserHandle.getIdentifier() is not included in the public SDK stubs at compileSdk 35,
+                // so hashCode() is the only non-reflective way to retrieve the numeric user ID
+                // at this project's minSdk (26).
                 val userId = sbn.user.hashCode()
                 // Check if this (packageName, profile) combination is selected for masking.
                 // isUserSelectedApp handles both profile-specific keys ("pkg:userId") and the

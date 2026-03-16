@@ -118,25 +118,22 @@ class SelectAppsActivity : AppCompatActivity() {
         if (launcherApps != null && !profiles.isNullOrEmpty()) {
             // Enumerate apps across all profiles (personal + work/managed)
             for (profile in profiles) {
-                // UserHandle.hashCode() returns the user ID (mHandle field) on all API levels.
-                // UserHandle.getIdentifier() is equivalent but only available from API 24.
+                // UserHandle.hashCode() returns the internal user ID (mHandle field). This is
+                // confirmed by the platform source (@Override public int hashCode(){return mHandle;})
+                // and has been stable since UserHandle was introduced in API 17.
+                // UserHandle.getIdentifier() is not included in the public SDK stubs at compileSdk 35,
+                // so hashCode() is the only non-reflective way to retrieve the numeric user ID
+                // at this project's minSdk (26).
                 val userId = profile.hashCode()
 
                 try {
+                    // Use the LauncherActivityInfo objects from the initial call directly so
+                    // we can read both packageName and label without a second IPC call per app.
                     launcherApps.getActivityList(null, profile)
-                        .map { it.applicationInfo.packageName }
-                        .toSet()
-                        .filter { it != packageName && it !in builtInPackages }
-                        .forEach { pkg ->
-                            val label = try {
-                                launcherApps.getActivityList(pkg, profile)
-                                    .firstOrNull()
-                                    ?.label
-                                    ?.toString()
-                                    ?: pkg
-                            } catch (e: Exception) {
-                                pkg
-                            }
+                        .groupBy { it.applicationInfo.packageName }
+                        .filter { (pkg, _) -> pkg != packageName && pkg !in builtInPackages }
+                        .forEach { (pkg, activities) ->
+                            val label = activities.firstOrNull()?.label?.toString() ?: pkg
                             val storageKey = PreferencesRepository.profileAppKey(pkg, userId)
                             items.add(
                                 AppItem(
@@ -185,10 +182,57 @@ class SelectAppsActivity : AppCompatActivity() {
                 }
         }
 
-        items.sortWith(compareByDescending<AppItem> { it.isSelected }.thenBy { it.label })
+        // Migrate any legacy plain-package keys (no ":userId" suffix) to explicit per-profile keys
+        // so that each profile can be independently toggled in the UI.
+        migrateLegacyKeys(items)
+
+        // Recompute isSelected after migration: the migration may have added explicit per-profile
+        // keys that replace a previous plain-key match, so refresh from preferences.
+        val migratedItems = items.map { item ->
+            item.copy(isSelected = prefsRepository.isUserSelectedApp(item.packageName, item.userId))
+        }
+
         // Selected apps are shown first so users can quickly review their choices;
         // remaining apps are sorted alphabetically by label.
-        items
+        migratedItems.sortedWith(compareByDescending<AppItem> { it.isSelected }.thenBy { it.label })
+    }
+
+    /**
+     * Migrates legacy plain-package preference keys to the explicit "packageName:userId" format.
+     *
+     * Before per-profile support, selections were stored as plain package names (e.g.,
+     * "com.example.app"). This migration converts each such key to an explicit per-profile key for
+     * every profile in which the package was found, then removes the plain key.  After migration,
+     * each profile is independently controllable because no plain key remains to trigger the
+     * backward-compat fallback in [PreferencesRepository.isUserSelectedApp].
+     */
+    private fun migrateLegacyKeys(items: List<AppItem>) {
+        val currentPackages = prefsRepository.getUserSelectedPackages()
+        val plainKeys = currentPackages.filter {
+            PreferencesRepository.PROFILE_KEY_SEPARATOR !in it
+        }
+        if (plainKeys.isEmpty()) return
+
+        // Build a map of packageName → discovered userId values from the enumerated items
+        val profilesByPackage = items.groupBy({ it.packageName }, { it.userId })
+
+        for (plainKey in plainKeys) {
+            val userIds = profilesByPackage[plainKey]
+            if (userIds != null) {
+                // Add an explicit per-profile key for every discovered profile of this package
+                for (uid in userIds) {
+                    prefsRepository.addUserSelectedPackage(
+                        PreferencesRepository.profileAppKey(plainKey, uid)
+                    )
+                }
+            } else {
+                // Package no longer enumerated (e.g. uninstalled): migrate to personal profile
+                prefsRepository.addUserSelectedPackage(
+                    PreferencesRepository.profileAppKey(plainKey, 0)
+                )
+            }
+            prefsRepository.removeUserSelectedPackage(plainKey)
+        }
     }
 
     private class AppListAdapter(
@@ -225,7 +269,11 @@ class SelectAppsActivity : AppCompatActivity() {
             } else {
                 item.packageName
             }
-            holder.checkBox.contentDescription = item.label
+            holder.checkBox.contentDescription = if (item.userId != 0) {
+                "${item.label} • $workProfileLabel"
+            } else {
+                item.label
+            }
             holder.checkBox.setOnCheckedChangeListener(null)
             holder.checkBox.isChecked = item.storageKey in selectedKeys
             holder.checkBox.setOnCheckedChangeListener { _, isChecked ->

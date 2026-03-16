@@ -48,19 +48,26 @@ class PreferencesRepository(context: Context) {
 
         /**
          * Separator used between a package name and a user ID in profile-specific storage keys.
-         * A work-profile entry is stored as "com.example.app:10"; a main-profile (or legacy)
-         * entry is stored as "com.example.app" (no suffix).
+         * Every entry is stored as "packageName:userId" (e.g., "com.example.app:0" for the main
+         * profile, "com.example.app:10" for a work profile). Legacy plain entries without this
+         * separator are migrated to per-profile format by SelectAppsActivity on first load.
          */
         internal const val PROFILE_KEY_SEPARATOR = ":"
 
         /**
-         * Returns the storage key for a (packageName, userId) pair.
-         * For the main (personal) profile (userId == 0) the plain package name is returned so
-         * that existing saved data continues to work without migration.
-         * For non-zero user IDs (work / managed profiles) the key is "packageName:userId".
+         * Returns the storage key for a (packageName, userId) pair in the format
+         * "packageName:userId" for all user IDs, including the main profile (userId == 0).
+         *
+         * Examples:
+         *   profileAppKey("com.example.app", 0)  → "com.example.app:0"
+         *   profileAppKey("com.example.app", 10) → "com.example.app:10"
+         *
+         * Legacy entries stored without a suffix ("com.example.app") are handled by the backward-
+         * compat fallback in [isUserSelectedApp] and are migrated to this format by
+         * SelectAppsActivity on first load.
          */
         fun profileAppKey(packageName: String, userId: Int): String =
-            if (userId == 0) packageName else "$packageName$PROFILE_KEY_SEPARATOR$userId"
+            "$packageName$PROFILE_KEY_SEPARATOR$userId"
     }
     
     /**
@@ -164,19 +171,19 @@ class PreferencesRepository(context: Context) {
     /**
      * Returns true if the given (packageName, userId) combination is selected for masking.
      *
-     * Two formats are recognised:
-     * - Profile-specific key ("packageName:userId") added by the new per-profile UI for
-     *   work / managed-profile apps.
-     * - Plain package name ("packageName") added by the legacy UI or for main-profile apps.
-     *   This is also checked as a fallback so that existing user selections continue to work
-     *   for notifications from any profile of that app.
+     * Checks the explicit per-profile key ("packageName:userId") first. If not found, falls back
+     * to the legacy plain package name ("packageName") for backward compatibility with entries
+     * stored before per-profile support was added. Plain-key entries are migrated to the
+     * "packageName:userId" format by SelectAppsActivity on first load, after which this fallback
+     * becomes a no-op for normal use.
      */
     fun isUserSelectedApp(packageName: String, userId: Int): Boolean {
         val packages = getUserSelectedPackages()
-        // Check the profile-specific key (or plain package name when userId == 0, via profileAppKey)
+        // Check the profile-specific key ("pkg:userId") — new format for all profiles
         if (packages.contains(profileAppKey(packageName, userId))) return true
-        // Backward-compat fallback: a plain-package entry added by the old UI is treated as
-        // an app-wide selection that covers notifications from any profile of that app.
-        return userId != 0 && packages.contains(packageName)
+        // Backward-compat fallback: a plain package name entry (no ":userId" suffix) was the
+        // format used before per-profile support. Treat it as an app-wide selection covering
+        // all profiles until SelectAppsActivity migrates it to per-profile keys.
+        return packages.contains(packageName)
     }
 }
