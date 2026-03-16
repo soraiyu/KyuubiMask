@@ -79,20 +79,18 @@ jobs:
         ORIGINAL_VERSION="$VERSION"
         ORIGINAL_VERSION_CODE="$VERSION_CODE"
 
-        # Auto-bump patch version until we find an unused tag.
-        # Re-run guard: if a release branch for this version already exists on the
-        # remote, a prior run of this workflow already claimed this version — break
-        # immediately instead of bumping, so we don't produce a spurious extra release.
-        while git rev-parse "v$VERSION" >/dev/null 2>&1; do
-          if git ls-remote --exit-code origin "refs/heads/release/v$VERSION" >/dev/null 2>&1; then
-            echo "ℹ️  Tag v$VERSION exists but release/v$VERSION branch also exists — resuming prior run, no extra bump"
-            break
-          fi
+        # Auto-bump patch version until we find a version that is neither tagged
+        # nor has an in-flight release branch on the remote.
+        # Checking the release branch covers the case where multiple PRs are merged
+        # before the first release PR is reviewed and merged: without this check, all
+        # PRs would claim the same version because the git tag does not exist yet.
+        while git rev-parse "v$VERSION" >/dev/null 2>&1 || \
+              git ls-remote --exit-code origin "refs/heads/release/v$VERSION" >/dev/null 2>&1; do
           PREV_VERSION="$VERSION"
           IFS='.' read -ra PARTS <<< "$VERSION"
           VERSION="${PARTS[0]}.${PARTS[1]}.$((${PARTS[2]} + 1))"
           VERSION_CODE=$((VERSION_CODE + 1))
-          echo "⚠️  Tag v$PREV_VERSION already exists - auto-bumping to v$VERSION (code: $VERSION_CODE)"
+          echo "⚠️  v$PREV_VERSION already claimed (tag or in-flight release branch) — auto-bumping to v$VERSION (code: $VERSION_CODE)"
         done
 
         # Update build.gradle.kts if version was bumped
