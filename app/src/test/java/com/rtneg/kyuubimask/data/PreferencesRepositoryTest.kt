@@ -277,4 +277,60 @@ class PreferencesRepositoryTest {
 
         assertTrue(repository.getUserSelectedPackages().contains("com.example.only"))
     }
+
+    // --- isUserSelectedApp (per-profile) ---
+
+    @Test
+    fun `isUserSelectedApp returns true for main profile when plain package name is stored`() {
+        repository.addUserSelectedPackage("com.example.app")
+        assertTrue(repository.isUserSelectedApp("com.example.app", 0))
+    }
+
+    @Test
+    fun `isUserSelectedApp returns false when package is not selected`() {
+        assertFalse(repository.isUserSelectedApp("com.example.app", 0))
+        assertFalse(repository.isUserSelectedApp("com.example.app", 10))
+    }
+
+    @Test
+    fun `isUserSelectedApp returns true for work profile when profile key is stored`() {
+        val workProfileKey = "com.example.app${PreferencesRepository.PROFILE_KEY_SEPARATOR}10"
+        repository.addUserSelectedPackage(workProfileKey)
+        assertTrue(repository.isUserSelectedApp("com.example.app", 10))
+    }
+
+    @Test
+    fun `isUserSelectedApp returns false for work profile when only main profile entry exists`() {
+        // Plain package name (userId == 0 key) is also treated as a fallback for ALL profiles
+        // (backward compat for legacy entries added before per-profile support)
+        repository.addUserSelectedPackage("com.example.app")
+        // Legacy plain-package entry is still treated as app-wide selection
+        assertTrue(repository.isUserSelectedApp("com.example.app", 10))
+    }
+
+    @Test
+    fun `isUserSelectedApp is independent per profile`() {
+        val workKey = "com.example.app${PreferencesRepository.PROFILE_KEY_SEPARATOR}10"
+        repository.addUserSelectedPackage(workKey)
+
+        // Work profile → selected
+        assertTrue(repository.isUserSelectedApp("com.example.app", 10))
+        // Main profile → NOT selected (no plain entry or :0 entry)
+        assertFalse(repository.isUserSelectedApp("com.example.app", 0))
+        // Different work profile → NOT selected
+        assertFalse(repository.isUserSelectedApp("com.example.app", 11))
+    }
+
+    @Test
+    fun `profileAppKey returns plain package for userId 0`() {
+        assertEquals("com.example.app", PreferencesRepository.profileAppKey("com.example.app", 0))
+    }
+
+    @Test
+    fun `profileAppKey returns colon-separated key for non-zero userId`() {
+        assertEquals(
+            "com.example.app${PreferencesRepository.PROFILE_KEY_SEPARATOR}10",
+            PreferencesRepository.profileAppKey("com.example.app", 10)
+        )
+    }
 }

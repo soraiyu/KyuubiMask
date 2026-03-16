@@ -25,6 +25,7 @@
     <!-- Select Apps screen -->
     <string name="label_select_apps_title">マスク対象アプリを選択</string>
     <string name="label_select_apps_hint">マスクしたいアプリにチェックを入れてください</string>
+    <string name="label_work_profile">仕事用</string>
 
     <!-- Notification Settings -->
     <string name="label_notification_settings">通知設定</string>

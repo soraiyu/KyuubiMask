@@ -176,12 +176,20 @@ class NotificationMaskService : NotificationListenerService() {
         // Delegate to strategy registry for app-specific masking
         // The registry is the single source of truth for which apps are masked
         val strategy = NotificationMaskStrategyRegistry.findStrategy(packageName)
-            ?: if (prefsRepository.getUserSelectedPackages().contains(packageName)) {
-                // getUserSelectedPackages() is backed by SharedPreferences which caches
-                // values in memory after the first disk read, so this is inexpensive.
-                genericStrategyCache.getOrPut(packageName) { GenericMaskStrategy(packageName) }
-            } else {
-                null
+            ?: run {
+                // sbn.user.hashCode() returns the user/profile ID (UserHandle.mHandle) on all
+                // API levels consistently with the LauncherApps-based enumeration in
+                // SelectAppsActivity; sbn.getUserId() is deprecated from API 33.
+                val userId = sbn.user.hashCode()
+                // Check if this (packageName, profile) combination is selected for masking.
+                // isUserSelectedApp handles both profile-specific keys ("pkg:userId") and the
+                // legacy plain package name, so existing user selections are preserved.
+                if (prefsRepository.isUserSelectedApp(packageName, userId)) {
+                    val cacheKey = PreferencesRepository.profileAppKey(packageName, userId)
+                    genericStrategyCache.getOrPut(cacheKey) { GenericMaskStrategy(packageName) }
+                } else {
+                    null
+                }
             }
         if (strategy != null) {
             if (BuildConfig.DEBUG) {

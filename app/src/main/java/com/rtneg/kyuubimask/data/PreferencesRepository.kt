@@ -45,6 +45,22 @@ class PreferencesRepository(context: Context) {
 
         /** Broadcast extra – Boolean, the new masking-enabled state. */
         const val EXTRA_ENABLED = "enabled"
+
+        /**
+         * Separator used between a package name and a user ID in profile-specific storage keys.
+         * A work-profile entry is stored as "com.example.app:10"; a main-profile (or legacy)
+         * entry is stored as "com.example.app" (no suffix).
+         */
+        internal const val PROFILE_KEY_SEPARATOR = ":"
+
+        /**
+         * Returns the storage key for a (packageName, userId) pair.
+         * For the main (personal) profile (userId == 0) the plain package name is returned so
+         * that existing saved data continues to work without migration.
+         * For non-zero user IDs (work / managed profiles) the key is "packageName:userId".
+         */
+        fun profileAppKey(packageName: String, userId: Int): String =
+            if (userId == 0) packageName else "$packageName$PROFILE_KEY_SEPARATOR$userId"
     }
     
     /**
@@ -143,5 +159,24 @@ class PreferencesRepository(context: Context) {
         val current = getUserSelectedPackages()
         if (packageName !in current) return
         preferences.edit().putStringSet(KEY_USER_SELECTED_PACKAGES, current - packageName).apply()
+    }
+
+    /**
+     * Returns true if the given (packageName, userId) combination is selected for masking.
+     *
+     * Two formats are recognised:
+     * - Profile-specific key ("packageName:userId") added by the new per-profile UI for
+     *   work / managed-profile apps.
+     * - Plain package name ("packageName") added by the legacy UI or for main-profile apps.
+     *   This is also checked as a fallback so that existing user selections continue to work
+     *   for notifications from any profile of that app.
+     */
+    fun isUserSelectedApp(packageName: String, userId: Int): Boolean {
+        val packages = getUserSelectedPackages()
+        // Check the profile-specific key (or plain package name when userId == 0, via profileAppKey)
+        if (packages.contains(profileAppKey(packageName, userId))) return true
+        // Backward-compat fallback: a plain-package entry added by the old UI is treated as
+        // an app-wide selection that covers notifications from any profile of that app.
+        return userId != 0 && packages.contains(packageName)
     }
 }
