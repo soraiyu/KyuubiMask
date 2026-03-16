@@ -13,21 +13,26 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  # Phase 1: triggered by any regular (non-release) PR merged to main.
-  # Prepares version files on a release branch, then opens a PR with auto-merge
-  # enabled so the changes land in main through the normal review/CI gate.
-  # No PAT is required because we never push directly to the protected branch.
+  # Phase 1: triggered by any regular (non-release) PR merged to main/master.
+  # Bumps the version, updates all release files, pushes to a release/vX.Y.Z
+  # branch, and opens a pull request for review.
+  # The developer reviews and merges that PR; Actions never commits directly
+  # to the base branch.
   #
   # Prerequisites:
-  #   • "Allow auto-merge" must be enabled in Settings → General → Pull Requests.
+  #   • Settings → Actions → General → "Allow GitHub Actions to create and
+  #     approve pull requests" must be enabled so that GITHUB_TOKEN can open
+  #     the release PR via `gh pr create`.
   prepare-release:
-    if: github.event.pull_request.merged == true && !contains(github.event.pull_request.labels.*.name, 'release')
+    if: >-
+      github.event.pull_request.merged == true &&
+      !contains(github.event.pull_request.labels.*.name, 'release')
     name: Prepare Release PR
     runs-on: ubuntu-latest
 
     permissions:
       contents: write       # push release branch
-      pull-requests: write  # create PR and enable auto-merge
+      pull-requests: write  # create release PR
       issues: write         # create/update 'release' label
 
     steps:
@@ -280,7 +285,7 @@ jobs:
           --force
         echo "✅ 'release' label is ready"
 
-    - name: Commit, push release branch, and open auto-merge PR
+    - name: Commit, push release branch, and open PR
       env:
         VERSION: ${{ steps.get_version.outputs.version }}
         BASE: ${{ github.event.pull_request.base.ref }}
@@ -294,44 +299,57 @@ jobs:
           fastlane/metadata/android/ja-JP/changelogs/
 
         if git diff --staged --quiet; then
-          # All version files are already up to date — create the tag directly from
-          # the current HEAD. Tag pushes are not restricted by branch rulesets, so
-          # GITHUB_TOKEN is sufficient here too.
-          echo "ℹ️  No file changes needed — creating tag directly from HEAD"
+          echo "ℹ️  No file changes needed — all version files are already up to date"
+          # The developer already bumped the version in their PR. No release branch
+          # or PR is required. Push the tag directly — this is not a commit to main,
+          # so it satisfies the "no direct commits to main" constraint.
+          if git ls-remote --tags origin "$TAG" | grep -q .; then
+            echo "ℹ️  Tag $TAG already exists on remote — nothing to do"
+            exit 0
+          fi
+          echo "🏷️  Creating tag: $TAG (no file changes needed)"
           git tag -a "$TAG" -m "Release $TAG - Auto-tagged on PR merge"
           git push origin "$TAG"
-          echo "✅ Tag $TAG created and pushed directly"
-        else
-          git commit -m "chore: update version files for v$VERSION [skip ci]"
-          # --force handles re-runs where the branch already exists remotely
-          git push origin "HEAD:refs/heads/$BRANCH" --force
-          echo "✅ Pushed release branch: $BRANCH"
+          echo "✅ Tag $TAG created and pushed successfully!"
+          exit 0
+        fi
 
-          # Create PR; fall back to finding the existing PR on re-runs
-          if ! PR_URL=$(gh pr create \
-            --base "$BASE" \
-            --head "$BRANCH" \
-            --title "chore: release v$VERSION" \
-            --body "Automated release PR for v$VERSION. Merging this will trigger tag creation." \
-            --label "release"); then
-            PR_URL=$(gh pr list --head "$BRANCH" --base "$BASE" --json url -q '.[0].url')
-            if [ -z "$PR_URL" ]; then
-              echo "❌ Failed to create PR and no existing PR found for $BRANCH → $BASE"
-              exit 1
-            fi
-            echo "ℹ️  Using existing PR: $PR_URL"
-          else
-            echo "✅ Release PR created: $PR_URL"
-          fi
+        git commit -m "chore: update version files for $TAG"
+        # --force handles re-runs where the branch already exists remotely
+        git push origin "HEAD:refs/heads/$BRANCH" --force
+        echo "✅ Pushed release branch: $BRANCH"
 
-          if ! gh pr merge "$PR_URL" --auto --squash; then
-            echo "❌ Failed to enable auto-merge."
-            echo "   Please verify that 'Allow auto-merge' is enabled in"
-            echo "   Settings → General → Pull Requests, then re-run this workflow."
+        # Write PR body to a temp file to avoid YAML multi-line string issues
+        {
+          printf 'Automated release PR for %s.\n\n' "$TAG"
+          printf 'Changes included:\n'
+          printf '- app/build.gradle.kts — version bump\n'
+          printf '- CHANGELOG.md — [Unreleased] promoted to [%s]\n' "$VERSION"
+          printf '- metadata/com.rtneg.kyuubimask.yml — F-Droid build entry + CurrentVersion\n'
+          printf '- fastlane/metadata/android/*/changelogs/ — store changelogs\n'
+          printf '\nNext step: Review and merge this PR to create the %s git tag and trigger the release build.\n' "$TAG"
+        } > /tmp/pr-body.txt
+
+        # Create PR; fall back to finding the existing PR on re-runs
+        if ! PR_URL=$(gh pr create \
+          --base "$BASE" \
+          --head "$BRANCH" \
+          --title "chore: release $TAG" \
+          --body-file /tmp/pr-body.txt \
+          --label "release"); then
+          PR_URL=$(gh pr list --head "$BRANCH" --base "$BASE" --json url -q '.[0].url')
+          if [ -z "$PR_URL" ]; then
+            echo "❌ Failed to create PR and no existing PR found for $BRANCH → $BASE"
+            echo ""
+            echo "   'Allow GitHub Actions to create and approve pull requests' may be"
+            echo "   disabled. Enable it under Settings → Actions → General."
             exit 1
           fi
-          echo "✅ Auto-merge enabled on: $PR_URL"
+          echo "ℹ️  Using existing PR: $PR_URL"
+        else
+          echo "✅ Release PR created: $PR_URL"
         fi
+        echo "📋 Review and merge the PR to trigger tag creation: $PR_URL"
 
   # Phase 2: triggered when the auto-created release PR (label: 'release') is merged.
   # Creates and pushes the git tag. Tag pushes are not restricted by branch rulesets,
@@ -376,7 +394,7 @@ jobs:
 
     - name: Create and push tag
       run: |
-        TAG=v${{ steps.get_version.outputs.version }}
+        TAG="v${{ steps.get_version.outputs.version }}"
 
         if git rev-parse "$TAG" >/dev/null 2>&1; then
           echo "⚠️  Tag $TAG already exists, skipping"
@@ -389,4 +407,4 @@ jobs:
         echo "📤 Pushing tag: $TAG"
         git push origin "$TAG"
 
-        echo "✅ Tag created and pushed successfully!"
+        echo "✅ Tag $TAG created and pushed successfully!"
