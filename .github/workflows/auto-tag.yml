@@ -300,8 +300,17 @@ jobs:
 
         if git diff --staged --quiet; then
           echo "ℹ️  No file changes needed — all version files are already up to date"
-          echo "ℹ️  If the tag does not exist yet, it will be created by the create-tag"
-          echo "ℹ️  job when a release-labelled PR is merged. No new PR needed."
+          # The developer already bumped the version in their PR. No release branch
+          # or PR is required. Push the tag directly — this is not a commit to main,
+          # so it satisfies the "no direct commits to main" constraint.
+          if git ls-remote --tags origin "$TAG" | grep -q .; then
+            echo "ℹ️  Tag $TAG already exists on remote — nothing to do"
+            exit 0
+          fi
+          echo "🏷️  Creating tag: $TAG (no file changes needed)"
+          git tag -a "$TAG" -m "Release $TAG - Auto-tagged on PR merge"
+          git push origin "$TAG"
+          echo "✅ Tag $TAG created and pushed successfully!"
           exit 0
         fi
 
