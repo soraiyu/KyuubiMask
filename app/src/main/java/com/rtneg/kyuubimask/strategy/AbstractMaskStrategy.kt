@@ -106,12 +106,17 @@ abstract class AbstractMaskStrategy : NotificationMaskStrategy {
             }
         }
 
-        // Get the app name (falls back to "App" on failure)
+        // Get the app name; fall back to a name derived from the package name on failure.
+        // getApplicationInfo() can throw NameNotFoundException when, for example, the app is
+        // installed in a work profile while the listener service runs in the personal profile
+        // (e.g. "com.Slack" installed only in the work profile → NameNotFoundException in the
+        // personal-profile PackageManager).  Deriving from the package name produces a readable
+        // label in those cases ("com.Slack" → "Slack") instead of the opaque fallback "App".
         val appName = try {
             val appInfo = context.packageManager.getApplicationInfo(packageName, 0)
             context.packageManager.getApplicationLabel(appInfo).toString()
         } catch (e: android.content.pm.PackageManager.NameNotFoundException) {
-            "App"
+            appNameFromPackage(packageName)
         }
 
         // Generate notification ID (unique combination of package name, ID, and tag)
@@ -192,5 +197,28 @@ abstract class AbstractMaskStrategy : NotificationMaskStrategy {
 
     companion object {
         private const val TAG = "KyuubiMask"
+
+        /**
+         * Derives a human-readable app name from a package name.
+         *
+         * Used as a fallback when [android.content.pm.PackageManager.getApplicationInfo] is
+         * unavailable (e.g. the app is installed only in a managed work profile).
+         *
+         * Algorithm: split on '.', skip generic suffixes ("android", "app", "mobile"),
+         * and title-case the first remaining segment.
+         *
+         * Examples:
+         * - "com.Slack"             → "Slack"
+         * - "com.discord"           → "Discord"
+         * - "jp.naver.line.android" → "Line"
+         * - "com.example.app"       → "Example"
+         */
+        internal fun appNameFromPackage(packageName: String): String {
+            val skipWords = setOf("android", "app", "mobile")
+            return packageName.split('.')
+                .lastOrNull { it.isNotEmpty() && it.lowercase() !in skipWords }
+                ?.replaceFirstChar { it.titlecase(java.util.Locale.ROOT) }
+                ?: packageName
+        }
     }
 }

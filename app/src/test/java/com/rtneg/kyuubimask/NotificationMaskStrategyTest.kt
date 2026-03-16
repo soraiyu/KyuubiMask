@@ -15,6 +15,7 @@
  */
 package com.rtneg.kyuubimask
 
+import com.rtneg.kyuubimask.strategy.AbstractMaskStrategy
 import com.rtneg.kyuubimask.strategy.DiscordMaskStrategy
 import com.rtneg.kyuubimask.strategy.LineMaskStrategy
 import com.rtneg.kyuubimask.strategy.SlackMaskStrategy
@@ -157,5 +158,40 @@ class NotificationMaskStrategyTest {
     @Test
     fun `registry returns null for empty string`() {
         assertNull(NotificationMaskStrategyRegistry.findStrategy(""))
+    }
+
+    // --- appNameFromPackage fallback tests ---
+
+    @Test
+    fun `appNameFromPackage returns Slack for com_Slack`() {
+        kotlin.test.assertEquals("Slack", AbstractMaskStrategy.appNameFromPackage("com.Slack"))
+    }
+
+    @Test
+    fun `appNameFromPackage returns Discord for com_discord`() {
+        kotlin.test.assertEquals("Discord", AbstractMaskStrategy.appNameFromPackage("com.discord"))
+    }
+
+    @Test
+    fun `appNameFromPackage returns Line for jp_naver_line_android`() {
+        // "android" is in the skip list, so it takes "line" and title-cases it
+        kotlin.test.assertEquals("Line", AbstractMaskStrategy.appNameFromPackage("jp.naver.line.android"))
+    }
+
+    @Test
+    fun `appNameFromPackage skips generic suffix app`() {
+        // "app" is in the skip list, so it should use "example" instead
+        kotlin.test.assertEquals("Example", AbstractMaskStrategy.appNameFromPackage("com.example.app"))
+    }
+
+    @Test
+    fun `appNameFromPackage falls back to full package name when all segments are generic`() {
+        // All segments are generic or empty — return the raw package name
+        kotlin.test.assertEquals("android.app.mobile", AbstractMaskStrategy.appNameFromPackage("android.app.mobile"))
+    }
+
+    @Test
+    fun `appNameFromPackage handles single-segment package name`() {
+        kotlin.test.assertEquals("Slack", AbstractMaskStrategy.appNameFromPackage("slack"))
     }
 }
