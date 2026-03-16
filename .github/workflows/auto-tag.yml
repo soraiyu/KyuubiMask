@@ -323,10 +323,10 @@ jobs:
         {
           printf 'Automated release PR for %s.\n\n' "$TAG"
           printf 'Changes included:\n'
-          printf '- app/build.gradle.kts — version bump\n'
-          printf '- CHANGELOG.md — [Unreleased] promoted to [%s]\n' "$VERSION"
-          printf '- metadata/com.rtneg.kyuubimask.yml — F-Droid build entry + CurrentVersion\n'
-          printf '- fastlane/metadata/android/*/changelogs/ — store changelogs\n'
+          printf '%s\n' '- app/build.gradle.kts — version bump'
+          printf '%s\n' "- CHANGELOG.md — [Unreleased] promoted to [$VERSION]"
+          printf '%s\n' '- metadata/com.rtneg.kyuubimask.yml — F-Droid build entry + CurrentVersion'
+          printf '%s\n' '- fastlane/metadata/android/*/changelogs/ — store changelogs'
           printf '\nNext step: Review and merge this PR to create the %s git tag and trigger the release build.\n' "$TAG"
         } > /tmp/pr-body.txt
 
