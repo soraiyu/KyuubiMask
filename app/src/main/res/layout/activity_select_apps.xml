@@ -18,7 +18,8 @@
         android:layout_height="wrap_content"
         android:paddingStart="12dp"
         android:paddingEnd="12dp"
-        android:paddingBottom="4dp">
+        android:paddingBottom="4dp"
+        android:visibility="gone">
 
         <com.google.android.material.chip.Chip
             android:id="@+id/chipWorkOnly"
@@ -26,8 +27,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:checkable="true"
-            android:text="@string/chip_work_only"
-            android:visibility="gone" />
+            android:text="@string/chip_work_only" />
 
     </com.google.android.material.chip.ChipGroup>
 
