@@ -1,8 +1,8 @@
 name: Auto Label PR
 
 on:
-  pull_request:
-    types: [opened, synchronize, reopened, labeled, unlabeled]
+  pull_request_target:
+    types: [opened, synchronize, reopened]
     branches:
       - main
       - master
@@ -49,7 +49,7 @@ jobs:
           [ -z "$PAGE_FILES" ] && break
           CHANGED_FILES="${CHANGED_FILES}${PAGE_FILES}"$'\n'
           # If fewer than 100 results, we've reached the last page
-          COUNT=$(echo "$PAGE_FILES" | wc -l)
+          COUNT=$(echo "$PAGE_FILES" | wc -l | xargs)
           [ "$COUNT" -lt 100 ] && break
           PAGE=$((PAGE + 1))
         done
