@@ -26,7 +26,6 @@
     <string name="label_select_apps_title">マスク対象アプリを選択</string>
     <string name="label_select_apps_hint">マスクしたいアプリにチェックを入れてください</string>
     <string name="label_work_profile">仕事用</string>
-    <string name="chip_sort_by_name">名前順</string>
     <string name="chip_work_only">仕事用のみ</string>
 
     <!-- Notification Settings -->

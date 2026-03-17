@@ -21,14 +21,6 @@
         android:paddingBottom="4dp">
 
         <com.google.android.material.chip.Chip
-            android:id="@+id/chipSortByName"
-            style="@style/Widget.MaterialComponents.Chip.Filter"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:checkable="true"
-            android:text="@string/chip_sort_by_name" />
-
-        <com.google.android.material.chip.Chip
             android:id="@+id/chipWorkOnly"
             style="@style/Widget.MaterialComponents.Chip.Filter"
             android:layout_width="wrap_content"

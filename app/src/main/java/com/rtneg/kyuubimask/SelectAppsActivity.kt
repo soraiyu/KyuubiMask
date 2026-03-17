@@ -94,7 +94,6 @@ class SelectAppsActivity : AppCompatActivity() {
         val recyclerView = findViewById<RecyclerView>(R.id.recyclerViewApps)
         recyclerView.layoutManager = LinearLayoutManager(this)
 
-        val chipSortByName = findViewById<Chip>(R.id.chipSortByName)
         val chipWorkOnly = findViewById<Chip>(R.id.chipWorkOnly)
 
         lifecycleScope.launch {
@@ -113,9 +112,6 @@ class SelectAppsActivity : AppCompatActivity() {
                 chipWorkOnly.visibility = View.VISIBLE
             }
 
-            chipSortByName.setOnCheckedChangeListener { _, isChecked ->
-                adapter.sortByName = isChecked
-            }
             chipWorkOnly.setOnCheckedChangeListener { _, isChecked ->
                 adapter.filterWorkOnly = isChecked
             }
@@ -264,10 +260,6 @@ class SelectAppsActivity : AppCompatActivity() {
         private val selectedKeys: MutableSet<String> =
             items.filter { it.isSelected }.map { it.storageKey }.toMutableSet()
 
-        /** When true, list is sorted purely A–Z; when false, selected items appear first. */
-        var sortByName: Boolean = false
-            set(value) { field = value; refreshDisplayList() }
-
         /** When true, only work-profile apps (userId != 0) are shown. */
         var filterWorkOnly: Boolean = false
             set(value) { field = value; refreshDisplayList() }
@@ -293,13 +285,9 @@ class SelectAppsActivity : AppCompatActivity() {
 
         private fun computeDisplayList(): List<AppItem> {
             val source = if (filterWorkOnly) allItems.filter { it.userId != 0 } else allItems
-            return if (sortByName) {
-                source.sortedBy { it.label }
-            } else {
-                source.sortedWith(
-                    compareByDescending<AppItem> { it.storageKey in selectedKeys }.thenBy { it.label }
-                )
-            }
+            return source.sortedWith(
+                compareByDescending<AppItem> { it.storageKey in selectedKeys }.thenBy { it.label }
+            )
         }
 
         private fun refreshDisplayList() {
