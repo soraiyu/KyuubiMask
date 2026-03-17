@@ -53,10 +53,12 @@ jobs:
         TAG="${{ github.ref_name }}"
         VERSION="${TAG#v}"
 
-        VERSION_CODE=$(grep -E '^\s*versionCode\s*=\s*' app/build.gradle.kts | sed -E 's/.*=\s*([0-9]+).*/\1/')
-        if [ -z "$VERSION_CODE" ]; then
-          echo "❌ Could not extract versionCode from build.gradle.kts"
-          exit 1
+        # Validate that the tag matches strict semver x.y.z format.
+        # Tags like 'v1.0.0-beta', 'vtest', or 'v1' are silently skipped.
+        if ! echo "$VERSION" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+          echo "ℹ️  Tag $TAG does not match the expected semver format (vX.Y.Z) — skipping"
+          echo "skip=true" >> $GITHUB_OUTPUT
+          exit 0
         fi
 
         # Explicitly fetch all tags: the workflow checks out the default branch
@@ -72,6 +74,17 @@ jobs:
           exit 1
         fi
 
+        # Read build.gradle.kts at the tagged commit rather than the default-branch
+        # HEAD. This ensures versionCode is correct even if new commits have landed
+        # on the default branch after the tag was pushed (back-tags, re-runs, etc.).
+        GRADLE_CONTENT=$(git show "$TAG:app/build.gradle.kts")
+
+        VERSION_CODE=$(echo "$GRADLE_CONTENT" | grep -E '^\s*versionCode\s*=\s*' | sed -E 's/.*=\s*([0-9]+).*/\1/')
+        if [ -z "$VERSION_CODE" ]; then
+          echo "❌ Could not extract versionCode from build.gradle.kts at tag $TAG"
+          exit 1
+        fi
+
         echo "version=$VERSION" >> $GITHUB_OUTPUT
         echo "version_code=$VERSION_CODE" >> $GITHUB_OUTPUT
         echo "tag=$TAG" >> $GITHUB_OUTPUT
@@ -79,6 +92,7 @@ jobs:
         echo "📦 Version: $VERSION (code: $VERSION_CODE), tagged commit: $COMMIT_HASH"
 
     - name: Update F-Droid metadata
+      if: steps.get_version.outputs.skip != 'true'
       env:
         VERSION: ${{ steps.get_version.outputs.version }}
         VERSION_CODE: ${{ steps.get_version.outputs.version_code }}
@@ -125,6 +139,7 @@ jobs:
         PYEOF
 
     - name: Ensure 'fdroid' label exists
+      if: steps.get_version.outputs.skip != 'true'
       env:
         GH_TOKEN: ${{ github.token }}
       run: |
@@ -135,6 +150,7 @@ jobs:
         echo "✅ 'fdroid' label is ready"
 
     - name: Commit, push branch, and open PR
+      if: steps.get_version.outputs.skip != 'true'
       env:
         VERSION: ${{ steps.get_version.outputs.version }}
         BASE: ${{ github.event.repository.default_branch }}
