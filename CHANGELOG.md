@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.7.5] - 2026-03-17
 
+### Added
+- "Work only" filter chip in the app-selection screen: users can now limit the list to work-profile (managed) apps only, in addition to the existing "All" and "Personal" views.
+
 ## [1.7.4] - 2026-03-17
 
 ## [1.7.3] - 2026-03-17
