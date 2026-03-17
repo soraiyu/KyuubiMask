@@ -176,12 +176,23 @@ class NotificationMaskService : NotificationListenerService() {
         // Delegate to strategy registry for app-specific masking
         // The registry is the single source of truth for which apps are masked
         val strategy = NotificationMaskStrategyRegistry.findStrategy(packageName)
-            ?: if (prefsRepository.getUserSelectedPackages().contains(packageName)) {
-                // getUserSelectedPackages() is backed by SharedPreferences which caches
-                // values in memory after the first disk read, so this is inexpensive.
-                genericStrategyCache.getOrPut(packageName) { GenericMaskStrategy(packageName) }
-            } else {
-                null
+            ?: run {
+                // UserHandle.hashCode() returns the internal user ID (mHandle field). This is
+                // confirmed by the platform source (@Override public int hashCode(){return mHandle;})
+                // and has been stable since UserHandle was introduced in API 17.
+                // UserHandle.getIdentifier() is not included in the public SDK stubs at compileSdk 35,
+                // so hashCode() is the only non-reflective way to retrieve the numeric user ID
+                // at this project's minSdk (26).
+                val userId = sbn.user.hashCode()
+                // Check if this (packageName, profile) combination is selected for masking.
+                // isUserSelectedApp handles both profile-specific keys ("pkg:userId") and the
+                // legacy plain package name, so existing user selections are preserved.
+                if (prefsRepository.isUserSelectedApp(packageName, userId)) {
+                    val cacheKey = PreferencesRepository.profileAppKey(packageName, userId)
+                    genericStrategyCache.getOrPut(cacheKey) { GenericMaskStrategy(packageName) }
+                } else {
+                    null
+                }
             }
         if (strategy != null) {
             if (BuildConfig.DEBUG) {

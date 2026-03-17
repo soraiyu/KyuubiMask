@@ -16,8 +16,10 @@
 package com.rtneg.kyuubimask
 
 import android.content.Intent
+import android.content.pm.LauncherApps
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.os.UserManager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -43,6 +45,11 @@ import kotlinx.coroutines.withContext
  * already have dedicated toggles in SettingsActivity. All other launcher-visible apps are
  * shown here so the user can add them to the mask list. This makes KyuubiMask a general-purpose
  * notification masker, not limited to specific proprietary services.
+ *
+ * Work/managed-profile apps are enumerated separately using LauncherApps so that the user can
+ * independently control masking for personal-profile and work-profile instances of the same app.
+ * Work-profile apps are stored with a profile key ("packageName:userId") and displayed with a
+ * "Work" badge to distinguish them from their personal-profile counterparts.
  */
 class SelectAppsActivity : AppCompatActivity() {
 
@@ -59,6 +66,14 @@ class SelectAppsActivity : AppCompatActivity() {
     data class AppItem(
         val label: String,
         val packageName: String,
+        /** Android user/profile ID that owns this app instance (0 = personal profile). */
+        val userId: Int,
+        /**
+         * Key used to store this item in SharedPreferences.
+         * For the main profile (userId == 0) this is just the package name.
+         * For work/managed profiles (userId != 0) this is "packageName:userId".
+         */
+        val storageKey: String,
         val isSelected: Boolean,
     )
 
@@ -78,11 +93,11 @@ class SelectAppsActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
             val items = loadAppItems()
-            recyclerView.adapter = AppListAdapter(items) { item, checked ->
+            recyclerView.adapter = AppListAdapter(items, getString(R.string.label_work_profile)) { item, checked ->
                 if (checked) {
-                    prefsRepository.addUserSelectedPackage(item.packageName)
+                    prefsRepository.addUserSelectedPackage(item.storageKey)
                 } else {
-                    prefsRepository.removeUserSelectedPackage(item.packageName)
+                    prefsRepository.removeUserSelectedPackage(item.storageKey)
                 }
             }
         }
@@ -94,41 +109,141 @@ class SelectAppsActivity : AppCompatActivity() {
     }
 
     private suspend fun loadAppItems(): List<AppItem> = withContext(Dispatchers.IO) {
-        val userSelected = prefsRepository.getUserSelectedPackages()
-        val launcherIntent = Intent(Intent.ACTION_MAIN).apply {
-            addCategory(Intent.CATEGORY_LAUNCHER)
-        }
-        return@withContext packageManager
-            .queryIntentActivities(launcherIntent, PackageManager.MATCH_DEFAULT_ONLY)
-            .map { it.activityInfo.packageName }
-            .toSet()
-            .filter { it != packageName && it !in builtInPackages }
-            .map { pkg ->
-                val label = try {
-                    val info = packageManager.getApplicationInfo(pkg, 0)
-                    packageManager.getApplicationLabel(info).toString()
-                } catch (e: PackageManager.NameNotFoundException) {
-                    pkg
+        val items = mutableListOf<AppItem>()
+
+        val launcherApps = getSystemService(LauncherApps::class.java)
+        val userManager = getSystemService(UserManager::class.java)
+        val profiles = userManager?.userProfiles
+
+        if (launcherApps != null && !profiles.isNullOrEmpty()) {
+            // Enumerate apps across all profiles (personal + work/managed)
+            for (profile in profiles) {
+                // UserHandle.hashCode() returns the internal user ID (mHandle field). This is
+                // confirmed by the platform source (@Override public int hashCode(){return mHandle;})
+                // and has been stable since UserHandle was introduced in API 17.
+                // UserHandle.getIdentifier() is not included in the public SDK stubs at compileSdk 35,
+                // so hashCode() is the only non-reflective way to retrieve the numeric user ID
+                // at this project's minSdk (26).
+                val userId = profile.hashCode()
+
+                try {
+                    // Use the LauncherActivityInfo objects from the initial call directly so
+                    // we can read both packageName and label without a second IPC call per app.
+                    launcherApps.getActivityList(null, profile)
+                        .groupBy { it.applicationInfo.packageName }
+                        .filter { (pkg, _) -> pkg != packageName && pkg !in builtInPackages }
+                        .forEach { (pkg, activities) ->
+                            val label = activities.firstOrNull()?.label?.toString() ?: pkg
+                            val storageKey = PreferencesRepository.profileAppKey(pkg, userId)
+                            items.add(
+                                AppItem(
+                                    label = label,
+                                    packageName = pkg,
+                                    userId = userId,
+                                    storageKey = storageKey,
+                                    isSelected = prefsRepository.isUserSelectedApp(pkg, userId),
+                                )
+                            )
+                        }
+                } catch (e: SecurityException) {
+                    // Profile not accessible; fall through and enumerate via PackageManager below
                 }
-                AppItem(
-                    label = label,
-                    packageName = pkg,
-                    isSelected = pkg in userSelected,
+            }
+        }
+
+        // Fallback: if LauncherApps enumeration yielded nothing (e.g. single-user device or
+        // permission not available), enumerate via PackageManager as before.
+        if (items.isEmpty()) {
+            val launcherIntent = Intent(Intent.ACTION_MAIN).apply {
+                addCategory(Intent.CATEGORY_LAUNCHER)
+            }
+            packageManager
+                .queryIntentActivities(launcherIntent, PackageManager.MATCH_DEFAULT_ONLY)
+                .map { it.activityInfo.packageName }
+                .toSet()
+                .filter { it != packageName && it !in builtInPackages }
+                .forEach { pkg ->
+                    val label = try {
+                        val info = packageManager.getApplicationInfo(pkg, 0)
+                        packageManager.getApplicationLabel(info).toString()
+                    } catch (e: PackageManager.NameNotFoundException) {
+                        pkg
+                    }
+                    val storageKey = PreferencesRepository.profileAppKey(pkg, 0)
+                    items.add(
+                        AppItem(
+                            label = label,
+                            packageName = pkg,
+                            userId = 0,
+                            storageKey = storageKey,
+                            isSelected = prefsRepository.isUserSelectedApp(pkg, 0),
+                        )
+                    )
+                }
+        }
+
+        // Migrate any legacy plain-package keys (no ":userId" suffix) to explicit per-profile keys
+        // so that each profile can be independently toggled in the UI.
+        migrateLegacyKeys(items)
+
+        // Recompute isSelected after migration: the migration may have added explicit per-profile
+        // keys that replace a previous plain-key match, so refresh from preferences.
+        val migratedItems = items.map { item ->
+            item.copy(isSelected = prefsRepository.isUserSelectedApp(item.packageName, item.userId))
+        }
+
+        // Selected apps are shown first so users can quickly review their choices;
+        // remaining apps are sorted alphabetically by label.
+        migratedItems.sortedWith(compareByDescending<AppItem> { it.isSelected }.thenBy { it.label })
+    }
+
+    /**
+     * Migrates legacy plain-package preference keys to the explicit "packageName:userId" format.
+     *
+     * Before per-profile support, selections were stored as plain package names (e.g.,
+     * "com.example.app"). This migration converts each such key to an explicit per-profile key for
+     * every profile in which the package was found, then removes the plain key.  After migration,
+     * each profile is independently controllable because no plain key remains to trigger the
+     * backward-compat fallback in [PreferencesRepository.isUserSelectedApp].
+     */
+    private fun migrateLegacyKeys(items: List<AppItem>) {
+        val currentPackages = prefsRepository.getUserSelectedPackages()
+        val plainKeys = currentPackages.filter {
+            PreferencesRepository.PROFILE_KEY_SEPARATOR !in it
+        }
+        if (plainKeys.isEmpty()) return
+
+        // Build a map of packageName → discovered userId values from the enumerated items
+        val profilesByPackage = items.groupBy({ it.packageName }, { it.userId })
+
+        for (plainKey in plainKeys) {
+            val userIds = profilesByPackage[plainKey]
+            if (userIds != null) {
+                // Add an explicit per-profile key for every discovered profile of this package
+                for (uid in userIds) {
+                    prefsRepository.addUserSelectedPackage(
+                        PreferencesRepository.profileAppKey(plainKey, uid)
+                    )
+                }
+            } else {
+                // Package no longer enumerated (e.g. uninstalled): migrate to personal profile
+                prefsRepository.addUserSelectedPackage(
+                    PreferencesRepository.profileAppKey(plainKey, 0)
                 )
             }
-            .sortedWith(compareByDescending<AppItem> { it.isSelected }.thenBy { it.label })
-            // Selected apps are shown first so users can quickly review their choices;
-            // remaining apps are sorted alphabetically by label.
+            prefsRepository.removeUserSelectedPackage(plainKey)
+        }
     }
 
     private class AppListAdapter(
         items: List<AppItem>,
+        private val workProfileLabel: String,
         private val onToggle: (AppItem, Boolean) -> Unit,
     ) : RecyclerView.Adapter<AppListAdapter.ViewHolder>() {
 
         private val mutableItems: MutableList<AppItem> = items.toMutableList()
-        private val selectedPackages: MutableSet<String> =
-            items.filter { it.isSelected }.map { it.packageName }.toMutableSet()
+        private val selectedKeys: MutableSet<String> =
+            items.filter { it.isSelected }.map { it.storageKey }.toMutableSet()
 
         class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
             val tvLabel: TextView = view.findViewById(R.id.tvAppLabel)
@@ -147,20 +262,30 @@ class SelectAppsActivity : AppCompatActivity() {
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
             val item = mutableItems[position]
             holder.tvLabel.text = item.label
-            holder.tvPackage.text = item.packageName
-            holder.checkBox.contentDescription = item.label
+            // For work-profile apps, append the profile badge to the package name line so the
+            // user can clearly distinguish them from the same app in their personal profile.
+            holder.tvPackage.text = if (item.userId != 0) {
+                "${item.packageName} • $workProfileLabel"
+            } else {
+                item.packageName
+            }
+            holder.checkBox.contentDescription = if (item.userId != 0) {
+                "${item.label} • $workProfileLabel"
+            } else {
+                item.label
+            }
             holder.checkBox.setOnCheckedChangeListener(null)
-            holder.checkBox.isChecked = item.packageName in selectedPackages
+            holder.checkBox.isChecked = item.storageKey in selectedKeys
             holder.checkBox.setOnCheckedChangeListener { _, isChecked ->
                 if (isChecked) {
-                    selectedPackages.add(item.packageName)
+                    selectedKeys.add(item.storageKey)
                 } else {
-                    selectedPackages.remove(item.packageName)
+                    selectedKeys.remove(item.storageKey)
                 }
                 onToggle(item, isChecked)
                 // Re-sort to keep selected apps at the top
                 mutableItems.sortWith(
-                    compareByDescending<AppItem> { it.packageName in selectedPackages }.thenBy { it.label }
+                    compareByDescending<AppItem> { it.storageKey in selectedKeys }.thenBy { it.label }
                 )
                 notifyDataSetChanged()
             }
