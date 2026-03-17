@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.7.5] - 2026-03-17
+
 ## [1.7.4] - 2026-03-17
 
 ## [1.7.3] - 2026-03-17
@@ -125,7 +127,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Real-time debug log viewer
 - Complete offline operation
 
-[Unreleased]: https://github.com/soraiyu/KyuubiMask/compare/v1.7.4...HEAD
+[Unreleased]: https://github.com/soraiyu/KyuubiMask/compare/v1.7.5...HEAD
+[1.7.5]: https://github.com/soraiyu/KyuubiMask/compare/v1.7.4...v1.7.5
 [1.7.4]: https://github.com/soraiyu/KyuubiMask/compare/v1.7.3...v1.7.4
 [1.7.3]: https://github.com/soraiyu/KyuubiMask/compare/v1.7.2...v1.7.3
 [1.7.2]: https://github.com/soraiyu/KyuubiMask/compare/v1.7.1...v1.7.2
