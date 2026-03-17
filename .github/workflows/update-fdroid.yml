@@ -1,0 +1,187 @@
+name: Update F-Droid Metadata on Tag
+
+# Triggered whenever a version tag (e.g. v1.2.3) is pushed to the repository,
+# regardless of whether the tag was created by the auto-tag workflow or manually.
+# At tag-push time the commit hash is known, so we can write the exact hash into
+# metadata/com.rtneg.kyuubimask.yml and open a PR for review.
+#
+# This intentionally runs AFTER the tag exists so that the commit field in the
+# F-Droid metadata always contains the real tagged-commit hash, not a placeholder.
+#
+# Prerequisites:
+#   • Settings → Actions → General → "Allow GitHub Actions to create and
+#     approve pull requests" must be enabled so that GITHUB_TOKEN can open
+#     the metadata PR via `gh pr create`.
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+concurrency:
+  # Only one metadata-update run per tag at a time
+  group: fdroid-${{ github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  update-fdroid:
+    name: Update F-Droid Metadata
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write      # push fdroid branch
+      pull-requests: write # create F-Droid metadata PR
+      issues: write        # create/update 'fdroid' label
+
+    steps:
+    - name: Checkout default branch
+      uses: actions/checkout@v6
+      with:
+        # Check out the default branch so we commit the metadata update there,
+        # not on the detached HEAD that a tag ref would give us.
+        ref: ${{ github.event.repository.default_branch }}
+        fetch-depth: 0
+
+    - name: Configure Git
+      run: |
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+
+    - name: Extract version and resolve tag commit hash
+      id: get_version
+      run: |
+        TAG="${{ github.ref_name }}"
+        VERSION="${TAG#v}"
+
+        VERSION_CODE=$(grep -E '^\s*versionCode\s*=\s*' app/build.gradle.kts | sed -E 's/.*=\s*([0-9]+).*/\1/')
+        if [ -z "$VERSION_CODE" ]; then
+          echo "❌ Could not extract versionCode from build.gradle.kts"
+          exit 1
+        fi
+
+        # Explicitly fetch all tags: the workflow checks out the default branch
+        # (not the tag ref), so the newly pushed tag may not be in the local
+        # ref namespace yet even with fetch-depth: 0.
+        git fetch --tags origin
+
+        # For an annotated tag, git rev-parse gives the tag object; rev-list -n 1
+        # dereferences it to the commit the tag actually points to.
+        COMMIT_HASH=$(git rev-list -n 1 "$TAG")
+        if [ -z "$COMMIT_HASH" ]; then
+          echo "❌ Could not resolve tag $TAG to a commit hash"
+          exit 1
+        fi
+
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+        echo "version_code=$VERSION_CODE" >> $GITHUB_OUTPUT
+        echo "tag=$TAG" >> $GITHUB_OUTPUT
+        echo "commit_hash=$COMMIT_HASH" >> $GITHUB_OUTPUT
+        echo "📦 Version: $VERSION (code: $VERSION_CODE), tagged commit: $COMMIT_HASH"
+
+    - name: Update F-Droid metadata
+      env:
+        VERSION: ${{ steps.get_version.outputs.version }}
+        VERSION_CODE: ${{ steps.get_version.outputs.version_code }}
+        COMMIT_HASH: ${{ steps.get_version.outputs.commit_hash }}
+      run: |
+        python3 - <<'PYEOF'
+        import re, os
+
+        version = os.environ['VERSION']
+        version_code = os.environ['VERSION_CODE']
+        commit_hash = os.environ['COMMIT_HASH']
+
+        with open('metadata/com.rtneg.kyuubimask.yml', 'r') as f:
+            content = f.read()
+
+        # Insert new build entry at top of Builds section (only if not already present).
+        # We search for 'versionName: {version}' specifically inside the Builds block
+        # by checking the section that starts at 'Builds:' to avoid false matches.
+        builds_match = re.search(r'^Builds:\n(.*?)(?=^\S|\Z)', content, re.MULTILINE | re.DOTALL)
+        builds_block = builds_match.group(1) if builds_match else ''
+        if f'versionName: {version}' not in builds_block:
+            new_build = (
+                f'  - versionName: {version}\n'
+                f'    versionCode: {version_code}\n'
+                f'    commit: {commit_hash}\n'
+                f'    subdir: app\n'
+                f'    gradle:\n'
+                f'      - yes'
+            )
+            content = re.sub(
+                r'(^Builds:\n)',
+                f'\\g<1>{new_build}\n',
+                content, flags=re.MULTILINE
+            )
+
+        # Update CurrentVersion and CurrentVersionCode
+        content = re.sub(r'^CurrentVersion: .*', f'CurrentVersion: {version}', content, flags=re.MULTILINE)
+        content = re.sub(r'^CurrentVersionCode: .*', f'CurrentVersionCode: {version_code}', content, flags=re.MULTILINE)
+
+        with open('metadata/com.rtneg.kyuubimask.yml', 'w') as f:
+            f.write(content)
+
+        print(f'✅ F-Droid metadata updated with version {version} (commit: {commit_hash})')
+        PYEOF
+
+    - name: Ensure 'fdroid' label exists
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        gh label create fdroid \
+          --description "F-Droid metadata update PR" \
+          --color "4c9a2a" \
+          --force
+        echo "✅ 'fdroid' label is ready"
+
+    - name: Commit, push branch, and open PR
+      env:
+        VERSION: ${{ steps.get_version.outputs.version }}
+        BASE: ${{ github.event.repository.default_branch }}
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        BRANCH="fdroid/v$VERSION"
+        TAG="v$VERSION"
+
+        git add metadata/com.rtneg.kyuubimask.yml
+
+        if git diff --staged --quiet; then
+          echo "ℹ️  F-Droid metadata already up to date — nothing to do"
+          exit 0
+        fi
+
+        git commit -m "chore: update F-Droid metadata for $TAG"
+        # --force is safe here: the concurrency group (fdroid-<tag>) ensures only
+        # one workflow run per tag is active at a time, so this only overwrites
+        # the branch from a previous run of the same workflow (i.e., a re-run).
+        git push origin "HEAD:refs/heads/$BRANCH" --force
+        echo "✅ Pushed F-Droid branch: $BRANCH"
+
+        # Write PR body to a temp file to avoid YAML multi-line string issues
+        {
+          printf 'Automated F-Droid metadata update for %s.\n\n' "$TAG"
+          printf 'Changes included:\n'
+          printf '%s\n' '- metadata/com.rtneg.kyuubimask.yml — F-Droid build entry with tagged commit hash + CurrentVersion'
+          printf '\nThis PR was created after the %s git tag was pushed, so the commit field contains the exact hash of the tagged commit.\n' "$TAG"
+        } > /tmp/fdroid-pr-body.txt
+
+        # Create PR; fall back to finding the existing PR on re-runs
+        if ! PR_URL=$(gh pr create \
+          --base "$BASE" \
+          --head "$BRANCH" \
+          --title "chore: update F-Droid metadata for $TAG" \
+          --body-file /tmp/fdroid-pr-body.txt \
+          --label "fdroid"); then
+          PR_URL=$(gh pr list --head "$BRANCH" --base "$BASE" --json url -q '.[0].url')
+          if [ -z "$PR_URL" ]; then
+            echo "❌ Failed to create PR and no existing PR found for $BRANCH → $BASE"
+            echo ""
+            echo "   'Allow GitHub Actions to create and approve pull requests' may be"
+            echo "   disabled. Enable it under Settings → Actions → General."
+            exit 1
+          fi
+          echo "ℹ️  Using existing PR: $PR_URL"
+        else
+          echo "✅ F-Droid metadata PR created: $PR_URL"
+        fi
+        echo "📋 Review and merge the PR to update F-Droid metadata: $PR_URL"

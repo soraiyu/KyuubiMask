@@ -14,8 +14,11 @@ concurrency:
 
 jobs:
   # Phase 1: triggered by any regular (non-release) PR merged to main/master.
-  # Bumps the version, updates all release files, pushes to a release/vX.Y.Z
-  # branch, and opens a pull request for review.
+  # Bumps the version, updates release files (build.gradle.kts, CHANGELOG.md,
+  # and fastlane changelogs), pushes to a release/vX.Y.Z branch, and opens a
+  # pull request for review. metadata/com.rtneg.kyuubimask.yml is intentionally
+  # NOT updated here — that file needs the real tagged-commit hash, which is only
+  # available after the tag is created (Phase 2 / update-fdroid.yml).
   # The developer reviews and merges that PR; Actions never commits directly
   # to the base branch.
   #
@@ -185,49 +188,6 @@ jobs:
         print(f'✅ CHANGELOG.md updated with version {version}')
         PYEOF
 
-    - name: Update F-Droid metadata
-      env:
-        VERSION: ${{ steps.get_version.outputs.version }}
-        VERSION_CODE: ${{ steps.get_version.outputs.version_code }}
-      run: |
-        python3 - <<'PYEOF'
-        import re, os
-
-        version = os.environ['VERSION']
-        version_code = os.environ['VERSION_CODE']
-        # Use the tag name as the commit ref so F-Droid always resolves to the
-        # tagged commit, regardless of any auto-bump commit that precedes the tag.
-        commit_ref = f'v{version}'
-
-        with open('metadata/com.rtneg.kyuubimask.yml', 'r') as f:
-            content = f.read()
-
-        # Insert new build entry at top of Builds section (only if not already present)
-        if f'versionName: {version}' not in content:
-            new_build = (
-                f'  - versionName: {version}\n'
-                f'    versionCode: {version_code}\n'
-                f'    commit: {commit_ref}\n'
-                f'    subdir: app\n'
-                f'    gradle:\n'
-                f'      - yes'
-            )
-            content = re.sub(
-                r'(^Builds:\n)',
-                f'\\g<1>{new_build}\n',
-                content, flags=re.MULTILINE
-            )
-
-        # Update CurrentVersion and CurrentVersionCode
-        content = re.sub(r'^CurrentVersion: .*', f'CurrentVersion: {version}', content, flags=re.MULTILINE)
-        content = re.sub(r'^CurrentVersionCode: .*', f'CurrentVersionCode: {version_code}', content, flags=re.MULTILINE)
-
-        with open('metadata/com.rtneg.kyuubimask.yml', 'w') as f:
-            f.write(content)
-
-        print(f'✅ F-Droid metadata updated with version {version}')
-        PYEOF
-
     - name: Create fastlane changelogs
       env:
         VERSION: ${{ steps.get_version.outputs.version }}
@@ -305,7 +265,7 @@ jobs:
         BRANCH="release/v$VERSION"
         TAG="v$VERSION"
 
-        git add app/build.gradle.kts CHANGELOG.md metadata/com.rtneg.kyuubimask.yml \
+        git add app/build.gradle.kts CHANGELOG.md \
           fastlane/metadata/android/en-US/changelogs/ \
           fastlane/metadata/android/ja-JP/changelogs/
 
@@ -336,9 +296,9 @@ jobs:
           printf 'Changes included:\n'
           printf '%s\n' '- app/build.gradle.kts — version bump'
           printf '%s\n' "- CHANGELOG.md — [Unreleased] promoted to [$VERSION]"
-          printf '%s\n' '- metadata/com.rtneg.kyuubimask.yml — F-Droid build entry + CurrentVersion'
           printf '%s\n' '- fastlane/metadata/android/*/changelogs/ — store changelogs'
           printf '\nNext step: Review and merge this PR to create the %s git tag and trigger the release build.\n' "$TAG"
+          printf 'After the tag is pushed, a separate PR will be opened to update the F-Droid metadata with the correct commit hash.\n'
         } > /tmp/pr-body.txt
 
         # Create PR; fall back to finding the existing PR on re-runs
