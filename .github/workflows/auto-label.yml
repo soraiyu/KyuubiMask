@@ -1,0 +1,74 @@
+name: Auto Label PR
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened]
+    branches:
+      - main
+      - master
+
+jobs:
+  label-skip-release:
+    # Don't run on the automated release PRs created by auto-tag.yml
+    if: >-
+      !contains(github.event.pull_request.labels.*.name, 'release')
+    name: Apply skip-release label for non-app changes
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write  # create label if it doesn't exist
+
+    steps:
+    - name: Ensure 'skip-release' label exists
+      env:
+        GH_TOKEN: ${{ github.token }}
+        REPO: ${{ github.repository }}
+      run: |
+        gh label create skip-release \
+          --repo "$REPO" \
+          --description "PR does not affect the app — skip version bump" \
+          --color "e4e669" \
+          --force
+        echo "✅ 'skip-release' label is ready"
+
+    - name: Check changed files and manage skip-release label
+      env:
+        GH_TOKEN: ${{ github.token }}
+        REPO: ${{ github.repository }}
+        PR_NUMBER: ${{ github.event.pull_request.number }}
+      run: |
+        # Fetch all changed files via paginated API calls
+        CHANGED_FILES=""
+        PAGE=1
+        while true; do
+          PAGE_FILES=$(gh api \
+            "repos/$REPO/pulls/$PR_NUMBER/files?per_page=100&page=$PAGE" \
+            -q '.[].filename')
+          [ -z "$PAGE_FILES" ] && break
+          CHANGED_FILES="${CHANGED_FILES}${PAGE_FILES}"$'\n'
+          # If fewer than 100 results, we've reached the last page
+          COUNT=$(echo "$PAGE_FILES" | wc -l | xargs)
+          [ "$COUNT" -lt 100 ] && break
+          PAGE=$((PAGE + 1))
+        done
+        echo "Changed files:"
+        echo "$CHANGED_FILES"
+
+        # Single combined regex for files that DO affect the app build / release.
+        # If any changed file matches, we should NOT skip the version bump.
+        APP_PATTERN="^(app/|build\.gradle\.kts$|settings\.gradle\.kts$|gradle/|gradlew$|gradlew\.bat$|gradle\.properties$|fastlane/|metadata/|scripts/)"
+
+        if echo "$CHANGED_FILES" | grep -qE "$APP_PATTERN"; then
+          echo "⚙️  App-affecting file(s) detected — removing skip-release label (if present)"
+          if gh pr edit "$PR_NUMBER" --repo "$REPO" --remove-label "skip-release"; then
+            echo "✅ skip-release label removed"
+          else
+            echo "ℹ️  skip-release label was not present (nothing to remove)"
+          fi
+        else
+          echo "🔖 No app changes detected — applying skip-release label"
+          gh pr edit "$PR_NUMBER" --repo "$REPO" --add-label "skip-release"
+          echo "✅ skip-release label applied"
+        fi

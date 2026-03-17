@@ -29,7 +29,8 @@ jobs:
   prepare-release:
     if: >-
       github.event.pull_request.merged == true &&
-      !contains(github.event.pull_request.labels.*.name, 'release')
+      !contains(github.event.pull_request.labels.*.name, 'release') &&
+      !contains(github.event.pull_request.labels.*.name, 'skip-release')
     name: Prepare Release PR
     runs-on: ubuntu-latest
 
