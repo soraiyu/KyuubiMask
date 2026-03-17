@@ -26,6 +26,8 @@
     <string name="label_select_apps_title">Select Apps to Mask</string>
     <string name="label_select_apps_hint">Check any app you want to mask notifications from</string>
     <string name="label_work_profile">Work</string>
+    <string name="chip_sort_by_name">Sort A–Z</string>
+    <string name="chip_work_only">Work only</string>
     
     <!-- Notification Settings -->
     <string name="label_notification_settings">Notification Settings</string>

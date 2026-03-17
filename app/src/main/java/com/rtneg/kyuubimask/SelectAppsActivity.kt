@@ -29,6 +29,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.chip.Chip
 import com.rtneg.kyuubimask.data.PreferencesRepository
 import com.rtneg.kyuubimask.strategy.DiscordMaskStrategy
 import com.rtneg.kyuubimask.strategy.LineMaskStrategy
@@ -91,14 +92,30 @@ class SelectAppsActivity : AppCompatActivity() {
         val recyclerView = findViewById<RecyclerView>(R.id.recyclerViewApps)
         recyclerView.layoutManager = LinearLayoutManager(this)
 
+        val chipSortByName = findViewById<Chip>(R.id.chipSortByName)
+        val chipWorkOnly = findViewById<Chip>(R.id.chipWorkOnly)
+
         lifecycleScope.launch {
             val items = loadAppItems()
-            recyclerView.adapter = AppListAdapter(items, getString(R.string.label_work_profile)) { item, checked ->
+            val adapter = AppListAdapter(items, getString(R.string.label_work_profile)) { item, checked ->
                 if (checked) {
                     prefsRepository.addUserSelectedPackage(item.storageKey)
                 } else {
                     prefsRepository.removeUserSelectedPackage(item.storageKey)
                 }
+            }
+            recyclerView.adapter = adapter
+
+            // Show "Work only" chip only when work-profile apps are present
+            if (items.any { it.userId != 0 }) {
+                chipWorkOnly.visibility = View.VISIBLE
+            }
+
+            chipSortByName.setOnCheckedChangeListener { _, isChecked ->
+                adapter.sortByName = isChecked
+            }
+            chipWorkOnly.setOnCheckedChangeListener { _, isChecked ->
+                adapter.filterWorkOnly = isChecked
             }
         }
     }
@@ -241,14 +258,44 @@ class SelectAppsActivity : AppCompatActivity() {
         private val onToggle: (AppItem, Boolean) -> Unit,
     ) : RecyclerView.Adapter<AppListAdapter.ViewHolder>() {
 
-        private val mutableItems: MutableList<AppItem> = items.toMutableList()
+        private val allItems: List<AppItem> = items
         private val selectedKeys: MutableSet<String> =
             items.filter { it.isSelected }.map { it.storageKey }.toMutableSet()
+
+        /** When true, list is sorted purely A–Z; when false, selected items appear first. */
+        var sortByName: Boolean = false
+            set(value) { field = value; refreshDisplayList() }
+
+        /** When true, only work-profile apps (userId != 0) are shown. */
+        var filterWorkOnly: Boolean = false
+            set(value) { field = value; refreshDisplayList() }
+
+        // NOTE: mutableItems must be declared after selectedKeys because computeDisplayList()
+        // reads selectedKeys. Kotlin var properties initialize the backing field directly (the
+        // setter is NOT invoked), so sortByName/filterWorkOnly are safely false at this point.
+        private val mutableItems: MutableList<AppItem> = computeDisplayList().toMutableList()
 
         class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
             val tvLabel: TextView = view.findViewById(R.id.tvAppLabel)
             val tvPackage: TextView = view.findViewById(R.id.tvAppPackage)
             val checkBox: CheckBox = view.findViewById(R.id.checkBoxApp)
+        }
+
+        private fun computeDisplayList(): List<AppItem> {
+            val source = if (filterWorkOnly) allItems.filter { it.userId != 0 } else allItems
+            return if (sortByName) {
+                source.sortedBy { it.label }
+            } else {
+                source.sortedWith(
+                    compareByDescending<AppItem> { it.storageKey in selectedKeys }.thenBy { it.label }
+                )
+            }
+        }
+
+        private fun refreshDisplayList() {
+            mutableItems.clear()
+            mutableItems.addAll(computeDisplayList())
+            notifyDataSetChanged()
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder =
@@ -283,11 +330,8 @@ class SelectAppsActivity : AppCompatActivity() {
                     selectedKeys.remove(item.storageKey)
                 }
                 onToggle(item, isChecked)
-                // Re-sort to keep selected apps at the top
-                mutableItems.sortWith(
-                    compareByDescending<AppItem> { it.storageKey in selectedKeys }.thenBy { it.label }
-                )
-                notifyDataSetChanged()
+                // Re-apply current sort/filter (selected-first sort depends on selectedKeys)
+                refreshDisplayList()
             }
             holder.itemView.setOnClickListener {
                 holder.checkBox.toggle()
