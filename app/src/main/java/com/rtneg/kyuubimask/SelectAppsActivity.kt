@@ -27,7 +27,9 @@ import android.widget.CheckBox
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.chip.Chip
 import com.rtneg.kyuubimask.data.PreferencesRepository
@@ -256,7 +258,7 @@ class SelectAppsActivity : AppCompatActivity() {
         items: List<AppItem>,
         private val workProfileLabel: String,
         private val onToggle: (AppItem, Boolean) -> Unit,
-    ) : RecyclerView.Adapter<AppListAdapter.ViewHolder>() {
+    ) : ListAdapter<AppItem, AppListAdapter.ViewHolder>(AppItemDiffCallback()) {
 
         private val allItems: List<AppItem> = items
         private val selectedKeys: MutableSet<String> =
@@ -270,15 +272,23 @@ class SelectAppsActivity : AppCompatActivity() {
         var filterWorkOnly: Boolean = false
             set(value) { field = value; refreshDisplayList() }
 
-        // NOTE: mutableItems must be declared after selectedKeys because computeDisplayList()
-        // reads selectedKeys. Kotlin var properties initialize the backing field directly (the
-        // setter is NOT invoked), so sortByName/filterWorkOnly are safely false at this point.
-        private val mutableItems: MutableList<AppItem> = computeDisplayList().toMutableList()
+        init {
+            // Submit the initial list; DiffUtil will diff subsequent calls automatically.
+            refreshDisplayList()
+        }
 
         class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
             val tvLabel: TextView = view.findViewById(R.id.tvAppLabel)
             val tvPackage: TextView = view.findViewById(R.id.tvAppPackage)
             val checkBox: CheckBox = view.findViewById(R.id.checkBoxApp)
+        }
+
+        private class AppItemDiffCallback : DiffUtil.ItemCallback<AppItem>() {
+            override fun areItemsTheSame(oldItem: AppItem, newItem: AppItem): Boolean =
+                oldItem.storageKey == newItem.storageKey
+
+            override fun areContentsTheSame(oldItem: AppItem, newItem: AppItem): Boolean =
+                oldItem == newItem
         }
 
         private fun computeDisplayList(): List<AppItem> {
@@ -293,9 +303,7 @@ class SelectAppsActivity : AppCompatActivity() {
         }
 
         private fun refreshDisplayList() {
-            mutableItems.clear()
-            mutableItems.addAll(computeDisplayList())
-            notifyDataSetChanged()
+            submitList(computeDisplayList())
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder =
@@ -304,10 +312,8 @@ class SelectAppsActivity : AppCompatActivity() {
                     .inflate(R.layout.item_app, parent, false)
             )
 
-        override fun getItemCount(): Int = mutableItems.size
-
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-            val item = mutableItems[position]
+            val item = getItem(position)
             holder.tvLabel.text = item.label
             // For work-profile apps, append the profile badge to the package name line so the
             // user can clearly distinguish them from the same app in their personal profile.
