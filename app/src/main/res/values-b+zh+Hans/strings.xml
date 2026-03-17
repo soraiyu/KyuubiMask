@@ -26,6 +26,7 @@
     <string name="label_select_apps_title">选择要遮罩的应用</string>
     <string name="label_select_apps_hint">勾选您希望隐藏通知的应用</string>
     <string name="label_work_profile">工作</string>
+    <string name="chip_work_only">仅工作</string>
 
     <!-- Notification Settings -->
     <string name="label_notification_settings">通知设置</string>

@@ -19,6 +19,7 @@ import android.content.Intent
 import android.content.pm.LauncherApps
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.os.Process
 import android.os.UserManager
 import android.view.LayoutInflater
 import android.view.View
@@ -27,8 +28,12 @@ import android.widget.CheckBox
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.chip.Chip
+import com.google.android.material.chip.ChipGroup
 import com.rtneg.kyuubimask.data.PreferencesRepository
 import com.rtneg.kyuubimask.strategy.DiscordMaskStrategy
 import com.rtneg.kyuubimask.strategy.LineMaskStrategy
@@ -75,6 +80,8 @@ class SelectAppsActivity : AppCompatActivity() {
          */
         val storageKey: String,
         val isSelected: Boolean,
+        /** True when this app belongs to a managed/work profile (i.e. not the calling user's profile). */
+        val isWorkProfile: Boolean,
     )
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -91,14 +98,27 @@ class SelectAppsActivity : AppCompatActivity() {
         val recyclerView = findViewById<RecyclerView>(R.id.recyclerViewApps)
         recyclerView.layoutManager = LinearLayoutManager(this)
 
+        val chipGroupFilters = findViewById<ChipGroup>(R.id.chipGroupFilters)
+        val chipWorkOnly = findViewById<Chip>(R.id.chipWorkOnly)
+
         lifecycleScope.launch {
             val items = loadAppItems()
-            recyclerView.adapter = AppListAdapter(items, getString(R.string.label_work_profile)) { item, checked ->
+            val adapter = AppListAdapter(items, getString(R.string.label_work_profile)) { item, checked ->
                 if (checked) {
                     prefsRepository.addUserSelectedPackage(item.storageKey)
                 } else {
                     prefsRepository.removeUserSelectedPackage(item.storageKey)
                 }
+            }
+            recyclerView.adapter = adapter
+
+            // Show the filter chip group only when work-profile apps are present
+            if (items.any { it.isWorkProfile }) {
+                chipGroupFilters.visibility = View.VISIBLE
+            }
+
+            chipWorkOnly.setOnCheckedChangeListener { _, isChecked ->
+                adapter.filterWorkOnly = isChecked
             }
         }
     }
@@ -114,6 +134,7 @@ class SelectAppsActivity : AppCompatActivity() {
         val launcherApps = getSystemService(LauncherApps::class.java)
         val userManager = getSystemService(UserManager::class.java)
         val profiles = userManager?.userProfiles
+        val myHandle = Process.myUserHandle()
 
         if (launcherApps != null && !profiles.isNullOrEmpty()) {
             // Enumerate apps across all profiles (personal + work/managed)
@@ -125,6 +146,8 @@ class SelectAppsActivity : AppCompatActivity() {
                 // so hashCode() is the only non-reflective way to retrieve the numeric user ID
                 // at this project's minSdk (26).
                 val userId = profile.hashCode()
+                // A profile is a work/managed profile when it is not the calling user's own profile.
+                val isWorkProfile = (profile != myHandle)
 
                 try {
                     // Use the LauncherActivityInfo objects from the initial call directly so
@@ -142,6 +165,7 @@ class SelectAppsActivity : AppCompatActivity() {
                                     userId = userId,
                                     storageKey = storageKey,
                                     isSelected = prefsRepository.isUserSelectedApp(pkg, userId),
+                                    isWorkProfile = isWorkProfile,
                                 )
                             )
                         }
@@ -177,6 +201,7 @@ class SelectAppsActivity : AppCompatActivity() {
                             userId = 0,
                             storageKey = storageKey,
                             isSelected = prefsRepository.isUserSelectedApp(pkg, 0),
+                            isWorkProfile = false,
                         )
                     )
                 }
@@ -239,16 +264,47 @@ class SelectAppsActivity : AppCompatActivity() {
         items: List<AppItem>,
         private val workProfileLabel: String,
         private val onToggle: (AppItem, Boolean) -> Unit,
-    ) : RecyclerView.Adapter<AppListAdapter.ViewHolder>() {
+    ) : ListAdapter<AppItem, AppListAdapter.ViewHolder>(AppItemDiffCallback()) {
 
-        private val mutableItems: MutableList<AppItem> = items.toMutableList()
+        private val allItems: List<AppItem> = items
         private val selectedKeys: MutableSet<String> =
             items.filter { it.isSelected }.map { it.storageKey }.toMutableSet()
+
+        /** When true, only work-profile apps are shown. */
+        var filterWorkOnly: Boolean = false
+            set(value) {
+                field = value
+                refreshDisplayList()
+            }
+
+        init {
+            // Submit the initial list; DiffUtil will diff subsequent calls automatically.
+            refreshDisplayList()
+        }
 
         class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
             val tvLabel: TextView = view.findViewById(R.id.tvAppLabel)
             val tvPackage: TextView = view.findViewById(R.id.tvAppPackage)
             val checkBox: CheckBox = view.findViewById(R.id.checkBoxApp)
+        }
+
+        private class AppItemDiffCallback : DiffUtil.ItemCallback<AppItem>() {
+            override fun areItemsTheSame(oldItem: AppItem, newItem: AppItem): Boolean =
+                oldItem.storageKey == newItem.storageKey
+
+            override fun areContentsTheSame(oldItem: AppItem, newItem: AppItem): Boolean =
+                oldItem == newItem
+        }
+
+        private fun computeDisplayList(): List<AppItem> {
+            val source = if (filterWorkOnly) allItems.filter { it.isWorkProfile } else allItems
+            return source.sortedWith(
+                compareByDescending<AppItem> { it.storageKey in selectedKeys }.thenBy { it.label }
+            )
+        }
+
+        private fun refreshDisplayList() {
+            submitList(computeDisplayList())
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder =
@@ -257,19 +313,17 @@ class SelectAppsActivity : AppCompatActivity() {
                     .inflate(R.layout.item_app, parent, false)
             )
 
-        override fun getItemCount(): Int = mutableItems.size
-
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-            val item = mutableItems[position]
+            val item = getItem(position)
             holder.tvLabel.text = item.label
             // For work-profile apps, append the profile badge to the package name line so the
             // user can clearly distinguish them from the same app in their personal profile.
-            holder.tvPackage.text = if (item.userId != 0) {
+            holder.tvPackage.text = if (item.isWorkProfile) {
                 "${item.packageName} • $workProfileLabel"
             } else {
                 item.packageName
             }
-            holder.checkBox.contentDescription = if (item.userId != 0) {
+            holder.checkBox.contentDescription = if (item.isWorkProfile) {
                 "${item.label} • $workProfileLabel"
             } else {
                 item.label
@@ -283,11 +337,8 @@ class SelectAppsActivity : AppCompatActivity() {
                     selectedKeys.remove(item.storageKey)
                 }
                 onToggle(item, isChecked)
-                // Re-sort to keep selected apps at the top
-                mutableItems.sortWith(
-                    compareByDescending<AppItem> { it.storageKey in selectedKeys }.thenBy { it.label }
-                )
-                notifyDataSetChanged()
+                // Re-apply current sort/filter (selected-first sort depends on selectedKeys)
+                refreshDisplayList()
             }
             holder.itemView.setOnClickListener {
                 holder.checkBox.toggle()
