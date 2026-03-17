@@ -1,1 +1,1 @@
-Version 1.7.5
+• "Work only" filter chip in app selection: quickly narrow the list to managed/work-profile apps only.

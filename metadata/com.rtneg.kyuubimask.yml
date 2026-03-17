@@ -12,6 +12,18 @@ RepoType: git
 Repo: https://github.com/soraiyu/KyuubiMask
 
 Builds:
+  - versionName: 1.7.5
+    versionCode: 17
+    commit: c2fefa5a54b365144e0a1b65c036fdad4b359864
+    subdir: app
+    gradle:
+      - yes
+  - versionName: 1.7.4
+    versionCode: 16
+    commit: 923f331588a76495081d1ca7a864d8318d6c443f
+    subdir: app
+    gradle:
+      - yes
   - versionName: 1.7.3
     versionCode: 15
     commit: v1.7.3
@@ -51,5 +63,5 @@ Builds:
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 1.7.3
-CurrentVersionCode: 15
+CurrentVersion: 1.7.5
+CurrentVersionCode: 17
