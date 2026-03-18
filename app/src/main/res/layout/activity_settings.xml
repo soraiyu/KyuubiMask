@@ -158,12 +158,14 @@
                     android:paddingBottom="@dimen/app_mask_row_vertical_padding">
 
                     <TextView
+                        android:id="@+id/tvLabelSlack"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:text="@string/label_app_slack"
                         android:textColor="@color/text_primary"
-                        android:textSize="14sp" />
+                        android:textSize="14sp"
+                        android:labelFor="@id/switchSlack" />
 
                     <com.google.android.material.switchmaterial.SwitchMaterial
                         android:id="@+id/switchSlack"
@@ -185,12 +187,14 @@
                     android:paddingBottom="@dimen/app_mask_row_vertical_padding">
 
                     <TextView
+                        android:id="@+id/tvLabelDiscord"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:text="@string/label_app_discord"
                         android:textColor="@color/text_primary"
-                        android:textSize="14sp" />
+                        android:textSize="14sp"
+                        android:labelFor="@id/switchDiscord" />
 
                     <com.google.android.material.switchmaterial.SwitchMaterial
                         android:id="@+id/switchDiscord"
@@ -212,12 +216,14 @@
                     android:paddingBottom="@dimen/app_mask_row_vertical_padding">
 
                     <TextView
+                        android:id="@+id/tvLabelWhatsApp"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:text="@string/label_app_whatsapp"
                         android:textColor="@color/text_primary"
-                        android:textSize="14sp" />
+                        android:textSize="14sp"
+                        android:labelFor="@id/switchWhatsApp" />
 
                     <com.google.android.material.switchmaterial.SwitchMaterial
                         android:id="@+id/switchWhatsApp"
@@ -239,12 +245,14 @@
                     android:paddingBottom="@dimen/app_mask_row_vertical_padding">
 
                     <TextView
+                        android:id="@+id/tvLabelLine"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:text="@string/label_app_line"
                         android:textColor="@color/text_primary"
-                        android:textSize="14sp" />
+                        android:textSize="14sp"
+                        android:labelFor="@id/switchLine" />
 
                     <com.google.android.material.switchmaterial.SwitchMaterial
                         android:id="@+id/switchLine"
