@@ -5,7 +5,7 @@
     
     <!-- Status -->
     <string name="label_status">Service Status</string>
-    <string name="status_active">🦊 Active &amp; Protecting</string>
+    <string name="status_active">Active &amp; Protecting</string>
     <string name="status_disabled">Disabled</string>
     <string name="status_permission_required">⚠️ Permission Required</string>
     <string name="status_checking">Checking…</string>
