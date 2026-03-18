@@ -5,7 +5,7 @@
 
     <!-- Status -->
     <string name="label_status">服务状态</string>
-    <string name="status_active">🦊 保护中</string>
+    <string name="status_active">保护中</string>
     <string name="status_disabled">已停用</string>
     <string name="status_permission_required">⚠️ 需要权限</string>
     <string name="status_checking">检查中…</string>

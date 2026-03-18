@@ -35,9 +35,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
 // Colors used by MainToggleScreen are defined in res/values/colors.xml.
-private const val SWITCH_SCALE = 2.0f
-private val SWITCH_SPACER_HEIGHT = 32.dp
-private val HINT_SPACER_HEIGHT = 48.dp
+private const val SWITCH_SCALE = 1.5f
+private val SWITCH_SPACER_HEIGHT = 24.dp
+private val HINT_SPACER_HEIGHT = 32.dp
 
 /**
  * Full-screen toggle composable for enabling / disabling notification masking.
@@ -64,7 +64,7 @@ fun MainToggleScreen(
     ) {
         Text(
             text = statusText,
-            style = MaterialTheme.typography.headlineMedium,
+            style = MaterialTheme.typography.titleMedium,
             color = textColor,
             textAlign = TextAlign.Center,
         )
