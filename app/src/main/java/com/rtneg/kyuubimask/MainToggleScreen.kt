@@ -28,13 +28,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.rtneg.kyuubimask.ui.theme.KyuubiMaskTheme
 
-// Colors used by MainToggleScreen are defined in res/values/colors.xml.
 private const val SWITCH_SCALE = 1.5f
 private val SWITCH_SPACER_HEIGHT = 24.dp
 private val HINT_SPACER_HEIGHT = 32.dp
@@ -50,9 +49,11 @@ fun MainToggleScreen(
     isMaskingEnabled: Boolean,
     onToggle: (Boolean) -> Unit,
 ) {
-    val background = colorResource(if (isMaskingEnabled) R.color.masking_on_background else R.color.masking_off_background)
-    val textColor = colorResource(if (isMaskingEnabled) R.color.masking_on_text else R.color.masking_off_text)
-    val hintColor = colorResource(if (isMaskingEnabled) R.color.masking_on_hint else R.color.masking_off_hint)
+    val background = if (isMaskingEnabled) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.background
+    val textColor = if (isMaskingEnabled) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface
+    // Use onPrimaryContainer at reduced opacity for a subtle hint on the dark-blue container;
+    // this approximates the visual intent of the previous distinct #B0BEC5 hint color.
+    val hintColor = if (isMaskingEnabled) MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f) else MaterialTheme.colorScheme.onSurfaceVariant
     val statusText = stringResource(if (isMaskingEnabled) R.string.toggle_status_masking_on else R.string.toggle_status_masking_off)
 
     Column(
@@ -90,11 +91,11 @@ fun MainToggleScreen(
 @Preview(showBackground = true, name = "Masking ON")
 @Composable
 private fun MainToggleScreenOnPreview() {
-    MainToggleScreen(isMaskingEnabled = true, onToggle = {})
+    KyuubiMaskTheme { MainToggleScreen(isMaskingEnabled = true, onToggle = {}) }
 }
 
 @Preview(showBackground = true, name = "Masking OFF")
 @Composable
 private fun MainToggleScreenOffPreview() {
-    MainToggleScreen(isMaskingEnabled = false, onToggle = {})
+    KyuubiMaskTheme { MainToggleScreen(isMaskingEnabled = false, onToggle = {}) }
 }

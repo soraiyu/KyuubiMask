@@ -34,14 +34,6 @@
     <!-- App tile background (slightly lighter than card) -->
     <color name="tile_background">#2E2E2E</color>
 
-    <!-- MainToggleScreen colors -->
-    <color name="masking_on_background">#1A237E</color>
-    <color name="masking_off_background">#1C1C1C</color>
-    <color name="masking_on_text">#FFFFFF</color>
-    <color name="masking_off_text">#D0D0D0</color>
-    <color name="masking_on_hint">#B0BEC5</color>
-    <color name="masking_off_hint">#909090</color>
-
     <!-- Icon colors -->
     <color name="mask_off_icon">#9E9E9E</color>
 </resources>
