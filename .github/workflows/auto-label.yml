@@ -10,8 +10,10 @@ on:
 jobs:
   label-skip-release:
     # Don't run on the automated release PRs created by auto-tag.yml
+    # Don't run on the automated F-Droid metadata PRs created by update-fdroid.yml
     if: >-
-      !contains(github.event.pull_request.labels.*.name, 'release')
+      !contains(github.event.pull_request.labels.*.name, 'release') &&
+      !contains(github.event.pull_request.labels.*.name, 'fdroid')
     name: Apply skip-release label for non-app changes
     runs-on: ubuntu-latest
 
