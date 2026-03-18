@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Vertical padding for each app-mask row in the settings card -->
+    <dimen name="app_mask_row_vertical_padding">4dp</dimen>
+</resources>
