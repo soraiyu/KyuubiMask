@@ -44,14 +44,18 @@ class MaskToggleTileService : TileService() {
     /** Called when the tile is added to the Quick Settings panel. */
     override fun onTileAdded() {
         super.onTileAdded()
-        Log.d(TAG, "Tile added")
+        if (BuildConfig.DEBUG) {
+            Log.d(TAG, "Tile added")
+        }
         updateTileState()
     }
 
     /** Called when the tile is removed from the Quick Settings panel. */
     override fun onTileRemoved() {
         super.onTileRemoved()
-        Log.d(TAG, "Tile removed")
+        if (BuildConfig.DEBUG) {
+            Log.d(TAG, "Tile removed")
+        }
     }
 
     /**
@@ -79,7 +83,9 @@ class MaskToggleTileService : TileService() {
         sendBroadcast(intent)
 
         updateTileState()
-        Log.d(TAG, "Toggled masking: enabled=$newEnabled")
+        if (BuildConfig.DEBUG) {
+            Log.d(TAG, "Toggled masking: enabled=$newEnabled")
+        }
     }
 
     // -------------------------------------------------------------------------
