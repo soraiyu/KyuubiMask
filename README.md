@@ -60,8 +60,6 @@ KyuubiMask protects your notifications everywhere—in crowded trains, at the of
 ### Installation
 
 #### F-Droid (Recommended)
-Available on F-Droid: https://f-droid.org/packages/com.rtneg.kyuubimask/
-
 [<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png" alt="Get it on F-Droid" height="80">](https://f-droid.org/packages/com.rtneg.kyuubimask/)
 
 #### GitHub Releases
@@ -217,8 +215,6 @@ KyuubiMaskは、満員電車、オフィス、家族の近く、カフェなど�
 ### インストール
 
 #### F-Droid (推奨)
-F-Droidで公開中です: https://f-droid.org/packages/com.rtneg.kyuubimask/
-
 [<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png" alt="F-Droidで入手" height="80">](https://f-droid.org/packages/com.rtneg.kyuubimask/)
 
 #### GitHub Releases
