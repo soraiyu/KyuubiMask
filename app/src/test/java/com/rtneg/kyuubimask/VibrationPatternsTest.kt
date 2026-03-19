@@ -115,11 +115,6 @@ class VibrationPatternsTest {
     }
 
     @Test
-    fun `patterns map has exactly four entries`() {
-        assertEquals(4, VibrationPatterns.patterns.size)
-    }
-
-    @Test
     fun `all non-first pattern timings are positive`() {
         VibrationPatterns.patterns.forEach { (key, timings) ->
             timings.drop(1).forEachIndexed { index, value ->

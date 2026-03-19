@@ -127,6 +127,6 @@ class DebugLogRepositoryTest {
     @Test
     fun `entries count never exceeds max entries regardless of how many are added`() {
         repeat(200) { DebugLogRepository.add("msg $it") }
-        assertTrue(DebugLogRepository.entries().size <= 50)
+        assertEquals(50, DebugLogRepository.entries().size)
     }
 }
