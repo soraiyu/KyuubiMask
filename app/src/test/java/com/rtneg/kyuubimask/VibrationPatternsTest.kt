@@ -107,4 +107,24 @@ class VibrationPatternsTest {
     fun `patterns map preserves insertion order - short is first`() {
         assertEquals("short", VibrationPatterns.patterns.keys.first())
     }
+
+    @Test
+    fun `getVibrationTimings for empty key returns default pattern`() {
+        val expected = VibrationPatterns.getVibrationTimings(VibrationPatterns.DEFAULT_VIBE_PATTERN)
+        assertContentEquals(expected, VibrationPatterns.getVibrationTimings(""))
+    }
+
+    @Test
+    fun `patterns map has exactly four entries`() {
+        assertEquals(4, VibrationPatterns.patterns.size)
+    }
+
+    @Test
+    fun `all non-first pattern timings are positive`() {
+        VibrationPatterns.patterns.forEach { (key, timings) ->
+            timings.drop(1).forEachIndexed { index, value ->
+                assertTrue(value > 0, "Pattern '$key' timing at index ${index + 1} must be positive, got $value")
+            }
+        }
+    }
 }
