@@ -4,6 +4,7 @@
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Android CI](https://github.com/soraiyu/KyuubiMask/actions/workflows/android-ci.yml/badge.svg)](https://github.com/soraiyu/KyuubiMask/actions/workflows/android-ci.yml)
+[![F-Droid](https://img.shields.io/f-droid/v/com.rtneg.kyuubimask.svg)](https://f-droid.org/packages/com.rtneg.kyuubimask/)
 
 [English](#english) | [日本語](#日本語)
 
@@ -59,7 +60,7 @@ KyuubiMask protects your notifications everywhere—in crowded trains, at the of
 ### Installation
 
 #### F-Droid (Recommended)
-Preparing for F-Droid submission. Perfect for privacy-conscious users who value open source software.
+[<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png" alt="Get it on F-Droid" height="80">](https://f-droid.org/packages/com.rtneg.kyuubimask/)
 
 #### GitHub Releases
 Download the latest APK from the releases page.
@@ -214,7 +215,7 @@ KyuubiMaskは、満員電車、オフィス、家族の近く、カフェなど�
 ### インストール
 
 #### F-Droid (推奨)
-F-Droid申請準備中です。完全にオープンソースで、プライバシーを重視するユーザーに最適です。
+[<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png" alt="F-Droidで入手" height="80">](https://f-droid.org/packages/com.rtneg.kyuubimask/)
 
 #### GitHub Releases
 リリースページから最新のAPKをダウンロードできます。
