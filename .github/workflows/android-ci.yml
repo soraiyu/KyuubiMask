@@ -3,8 +3,26 @@ name: Android CI
 on:
   push:
     branches: [ main, master, develop ]
+    paths:
+      - 'app/**'
+      - 'build.gradle.kts'
+      - 'settings.gradle.kts'
+      - 'gradle/**'
+      - 'gradlew'
+      - 'gradlew.bat'
+      - 'gradle.properties'
+      - '.github/workflows/android-ci.yml'
   pull_request:
     branches: [ main, master, develop ]
+    paths:
+      - 'app/**'
+      - 'build.gradle.kts'
+      - 'settings.gradle.kts'
+      - 'gradle/**'
+      - 'gradlew'
+      - 'gradlew.bat'
+      - 'gradle.properties'
+      - '.github/workflows/android-ci.yml'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
