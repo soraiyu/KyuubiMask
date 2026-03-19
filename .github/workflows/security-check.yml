@@ -1,0 +1,169 @@
+name: Security Check
+
+on:
+  push:
+    branches: [ main, master, develop ]
+    paths:
+      - 'app/**'
+      - '.github/workflows/security-check.yml'
+  pull_request:
+    branches: [ main, master, develop ]
+    paths:
+      - 'app/**'
+      - '.github/workflows/security-check.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  security-check:
+    name: Security Check
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v6
+
+    - name: Check - No INTERNET permission
+      run: |
+        if grep -q "android.permission.INTERNET" app/src/main/AndroidManifest.xml; then
+          echo "❌ INTERNET permission found in AndroidManifest.xml"
+          exit 1
+        else
+          echo "✅ No INTERNET permission found"
+        fi
+
+    - name: Check - allowBackup is false
+      run: |
+        if grep -q 'android:allowBackup="false"' app/src/main/AndroidManifest.xml; then
+          echo "✅ allowBackup is false"
+        else
+          echo "❌ allowBackup is not false or is missing"
+          exit 1
+        fi
+
+    - name: Check - ProGuard/R8 minification enabled for release
+      run: |
+        if grep -q "isMinifyEnabled = true" app/build.gradle.kts; then
+          echo "✅ ProGuard/R8 minification is enabled for release builds"
+        else
+          echo "❌ ProGuard/R8 minification is not enabled in build.gradle.kts"
+          exit 1
+        fi
+
+    - name: Check - No dangerous permissions
+      run: |
+        DANGEROUS_PERMISSIONS=(
+          "android.permission.READ_CONTACTS"
+          "android.permission.WRITE_CONTACTS"
+          "android.permission.ACCESS_FINE_LOCATION"
+          "android.permission.ACCESS_COARSE_LOCATION"
+          "android.permission.CAMERA"
+          "android.permission.READ_EXTERNAL_STORAGE"
+          "android.permission.WRITE_EXTERNAL_STORAGE"
+          "android.permission.RECORD_AUDIO"
+          "android.permission.READ_PHONE_STATE"
+          "android.permission.READ_SMS"
+          "android.permission.RECEIVE_SMS"
+          "android.permission.SEND_SMS"
+          "android.permission.READ_CALL_LOG"
+          "android.permission.PROCESS_OUTGOING_CALLS"
+        )
+        FOUND=0
+        for PERM in "${DANGEROUS_PERMISSIONS[@]}"; do
+          if grep -q "$PERM" app/src/main/AndroidManifest.xml; then
+            echo "❌ Dangerous permission found: $PERM"
+            FOUND=1
+          fi
+        done
+        if [ "$FOUND" -eq 0 ]; then
+          echo "✅ No dangerous permissions found"
+        else
+          exit 1
+        fi
+
+    - name: Check - All Log calls guarded by BuildConfig.DEBUG
+      run: |
+        # Find Log.* calls that are NOT inside a BuildConfig.DEBUG block.
+        # Strategy: collect all lines with Log.d/v/i/w/e calls, then filter out
+        # those that appear inside an if (BuildConfig.DEBUG) block.
+        # We look for Log calls not preceded by BuildConfig.DEBUG on nearby lines.
+        UNGUARDED=0
+        while IFS= read -r FILE; do
+          # Use python to parse the file and detect unguarded Log calls
+          python3 - "$FILE" <<'PYEOF'
+        import sys, re
+
+        LOOKBACK_WINDOW = 5  # number of lines to look back for a BuildConfig.DEBUG guard
+
+        filepath = sys.argv[1]
+        with open(filepath, encoding='utf-8') as f:
+            lines = f.readlines()
+
+        log_pattern = re.compile(r'\bLog\.(d|v|i|w|e)\s*\(')
+        found_unguarded = False
+
+        for i, line in enumerate(lines):
+            if log_pattern.search(line):
+                # Look back up to LOOKBACK_WINDOW lines for a BuildConfig.DEBUG guard
+                window_start = max(0, i - LOOKBACK_WINDOW)
+                window = ''.join(lines[window_start:i])
+                if 'BuildConfig.DEBUG' not in window:
+                    print(f"  UNGUARDED: {filepath}:{i+1}: {line.rstrip()}")
+                    found_unguarded = True
+
+        if found_unguarded:
+            sys.exit(1)
+        PYEOF
+          if [ $? -ne 0 ]; then
+            UNGUARDED=1
+          fi
+        done < <(find app/src/main/java -name "*.kt")
+
+        if [ "$UNGUARDED" -eq 0 ]; then
+          echo "✅ All Log calls are guarded by BuildConfig.DEBUG"
+        else
+          echo "❌ Unguarded Log calls found - wrap them in if (BuildConfig.DEBUG) { ... }"
+          exit 1
+        fi
+
+    - name: Check - No hardcoded secrets or API keys
+      run: |
+        # Check for common secret patterns in source code
+        SECRET_PATTERNS=(
+          "AIza[0-9A-Za-z_-]{35}"
+          "AAAA[A-Za-z0-9_-]{7}:[A-Za-z0-9_-]{140}"
+          "api[_-]?key\s*=\s*['\"][^'\"]{10,}"
+          "secret\s*=\s*['\"][^'\"]{10,}"
+          "password\s*=\s*['\"][^'\"]{6,}"
+        )
+        FOUND=0
+        for PATTERN in "${SECRET_PATTERNS[@]}"; do
+          if grep -rEi "$PATTERN" app/src/main/java/ --include="*.kt" 2>/dev/null; then
+            echo "❌ Potential hardcoded secret pattern found: $PATTERN"
+            FOUND=1
+          fi
+        done
+        if [ "$FOUND" -eq 0 ]; then
+          echo "✅ No hardcoded secret patterns found"
+        else
+          exit 1
+        fi
+
+    - name: Security check summary
+      if: success()
+      run: |
+        echo ""
+        echo "✅ All security checks passed!"
+        echo ""
+        echo "Verified:"
+        echo "  - No INTERNET permission"
+        echo "  - allowBackup=false"
+        echo "  - ProGuard/R8 minification enabled for release"
+        echo "  - No dangerous permissions"
+        echo "  - All Log calls guarded by BuildConfig.DEBUG"
+        echo "  - No hardcoded secrets or API keys"
