@@ -194,4 +194,34 @@ class NotificationMaskStrategyTest {
     fun `appNameFromPackage handles single-segment package name`() {
         kotlin.test.assertEquals("Slack", AbstractMaskStrategy.appNameFromPackage("slack"))
     }
+
+    @Test
+    fun `appNameFromPackage skips multiple trailing skip words`() {
+        // "mobile" and "app" are both skip words; "com" is the last non-skip segment
+        kotlin.test.assertEquals("Com", AbstractMaskStrategy.appNameFromPackage("com.mobile.app"))
+    }
+
+    @Test
+    fun `appNameFromPackage handles numbers in segment`() {
+        // "app" is skipped; "test123" is not a skip word and gets title-cased
+        kotlin.test.assertEquals("Test123", AbstractMaskStrategy.appNameFromPackage("com.test123.app"))
+    }
+
+    @Test
+    fun `appNameFromPackage falls back to full package name for single skip-word segment`() {
+        // "mobile" is the only segment and is in the skip list; falls back to the raw package name
+        kotlin.test.assertEquals("mobile", AbstractMaskStrategy.appNameFromPackage("mobile"))
+    }
+
+    @Test
+    fun `appNameFromPackage falls back to full package name for empty string`() {
+        // Empty string produces one empty segment which is filtered out; falls back to the input
+        kotlin.test.assertEquals("", AbstractMaskStrategy.appNameFromPackage(""))
+    }
+
+    @Test
+    fun `appNameFromPackage preserves existing capitalisation in the chosen segment`() {
+        // "MyApp" already starts with uppercase; title-casing is idempotent
+        kotlin.test.assertEquals("MyApp", AbstractMaskStrategy.appNameFromPackage("com.android.MyApp"))
+    }
 }

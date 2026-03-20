@@ -100,4 +100,33 @@ class DebugLogRepositoryTest {
         DebugLogRepository.add("")
         assertEquals(1, DebugLogRepository.entries().size)
     }
+
+    @Test
+    fun `adding exactly max entries fills buffer without any eviction`() {
+        repeat(50) { DebugLogRepository.add("entry $it") }
+        val entries = DebugLogRepository.entries()
+        assertEquals(50, entries.size)
+        // The very first entry must still be present (no eviction yet)
+        assertTrue(entries[0].contains("entry 0"))
+    }
+
+    @Test
+    fun `entry at capacity boundary is evicted when one more is added`() {
+        repeat(50) { DebugLogRepository.add("old $it") }
+        DebugLogRepository.add("overflow")
+        val entries = DebugLogRepository.entries()
+        assertEquals(50, entries.size)
+        // The overflow entry must be the newest (last)
+        assertTrue(entries.last().contains("overflow"))
+        // The oldest entry must have been evicted
+        assertTrue(entries.none { it.contains("old 0") })
+        // Second-oldest entry must still be present
+        assertTrue(entries.any { it.contains("old 1") })
+    }
+
+    @Test
+    fun `entries count never exceeds max entries regardless of how many are added`() {
+        repeat(200) { DebugLogRepository.add("msg $it") }
+        assertEquals(50, DebugLogRepository.entries().size)
+    }
 }
