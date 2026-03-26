@@ -123,7 +123,9 @@ class NotificationMaskService : NotificationListenerService() {
             Log.w(TAG, "Listener disconnected – requesting rebind")
             DebugLogRepository.add("Listener disconnected – rebinding")
         }
-        requestRebind(ComponentName(this, NotificationMaskService::class.java))
+        NotificationListenerService.requestRebind(
+            ComponentName(this, NotificationMaskService::class.java)
+        )
     }
     
     /**
