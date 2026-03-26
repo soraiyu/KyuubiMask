@@ -20,6 +20,7 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.BroadcastReceiver
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
@@ -94,6 +95,35 @@ class NotificationMaskService : NotificationListenerService() {
         unregisterReceiver(toggleReceiver)
         // Stop foreground service
         stopForeground(STOP_FOREGROUND_REMOVE)
+    }
+
+    /**
+     * Called when this listener is connected and ready to receive notifications.
+     * Invoked by the system after the service is bound, including after a rebind.
+     */
+    override fun onListenerConnected() {
+        super.onListenerConnected()
+        if (BuildConfig.DEBUG) {
+            Log.d(TAG, "Listener connected")
+            DebugLogRepository.add("Listener connected")
+        }
+    }
+
+    /**
+     * Called when this listener is disconnected from the system (e.g. due to memory pressure
+     * or battery optimization).  Requests an immediate rebind so masking resumes without
+     * requiring a device restart or manual permission toggle.
+     *
+     * [requestRebind] requires API 24 (Android 7.0). This project's minSdk is 26, so no
+     * runtime API-level guard is needed.
+     */
+    override fun onListenerDisconnected() {
+        super.onListenerDisconnected()
+        if (BuildConfig.DEBUG) {
+            Log.w(TAG, "Listener disconnected – requesting rebind")
+            DebugLogRepository.add("Listener disconnected – rebinding")
+        }
+        requestRebind(ComponentName(this, NotificationMaskService::class.java))
     }
     
     /**
