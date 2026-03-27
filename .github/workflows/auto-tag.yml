@@ -13,27 +13,25 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  # Single-phase release: triggered by any regular (non-release/fdroid) PR merged
-  # to main/master. Bumps the version if the tag already exists, updates release
-  # files (build.gradle.kts, CHANGELOG.md, fastlane changelogs), commits directly
-  # to the base branch, and pushes the vX.Y.Z git tag — all in one step.
+  # Phase 1: Triggered by any regular (non-release/fdroid) PR merged to main.
+  # Creates a release/vX.Y.Z branch with version bumps + changelog updates,
+  # then opens a PR with the 'release' label.
+  # GitHub Actions never pushes directly to main — no branch protection bypass needed.
   #
   # Prerequisites:
-  #   • GitHub Actions must be allowed to push to the default branch.
-  #     If branch protection rules are enabled on main, add a bypass rule:
-  #     Settings → Rules → Rulesets → (your main ruleset) → Bypass list
-  #     → Add "GitHub Actions" (or remove the branch protection for this personal repo).
-  release:
+  #   • Settings → Actions → General → "Allow GitHub Actions to create and approve pull requests"
+  prepare-release:
     if: >-
       github.event.pull_request.merged == true &&
       !contains(github.event.pull_request.labels.*.name, 'release') &&
       !contains(github.event.pull_request.labels.*.name, 'fdroid') &&
       !contains(github.event.pull_request.labels.*.name, 'skip-release')
-    name: Tag and Release
+    name: Prepare Release PR
     runs-on: ubuntu-latest
 
     permissions:
-      contents: write  # push version-bump commit + git tag
+      contents: write       # push release/v* branch
+      pull-requests: write  # open release PR
 
     steps:
     - name: Checkout code
@@ -79,13 +77,15 @@ jobs:
         ORIGINAL_VERSION="$VERSION"
         ORIGINAL_VERSION_CODE="$VERSION_CODE"
 
-        # Auto-bump patch version until we find a version whose tag does not exist yet.
-        while git rev-parse "v$VERSION" >/dev/null 2>&1; do
+        # Auto-bump patch version until we find a version whose tag does not exist yet
+        # and no remote release/v* branch is already in flight for that version.
+        while git rev-parse "v$VERSION" >/dev/null 2>&1 || \
+              git ls-remote --exit-code origin "refs/heads/release/v$VERSION" >/dev/null 2>&1; do
           PREV_VERSION="$VERSION"
           IFS='.' read -ra PARTS <<< "$VERSION"
           VERSION="${PARTS[0]}.${PARTS[1]}.$((${PARTS[2]} + 1))"
           VERSION_CODE=$((VERSION_CODE + 1))
-          echo "⚠️  Tag v$PREV_VERSION already exists — auto-bumping to v$VERSION (code: $VERSION_CODE)"
+          echo "⚠️  Tag or release branch for v$PREV_VERSION already exists — auto-bumping to v$VERSION (code: $VERSION_CODE)"
         done
 
         # Update build.gradle.kts if version was bumped
@@ -225,33 +225,63 @@ jobs:
             print(f'ℹ️  {ja_path} already exists, skipping')
         PYEOF
 
-    - name: Commit version files and push to main
+    - name: Push release branch and open PR
       env:
         VERSION: ${{ steps.get_version.outputs.version }}
         BASE: ${{ github.event.pull_request.base.ref }}
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
+        BRANCH="release/v$VERSION"
         TAG="v$VERSION"
 
+        git checkout -b "$BRANCH"
         git add app/build.gradle.kts CHANGELOG.md \
           fastlane/metadata/android/en-US/changelogs/ \
           fastlane/metadata/android/ja-JP/changelogs/
 
         if git diff --staged --quiet; then
-          echo "ℹ️  No file changes needed — version files are already up to date"
+          echo "ℹ️  No file changes — committing empty release marker"
+          git commit --allow-empty -m "chore: release $TAG"
         else
           git commit -m "chore: release $TAG"
-          git push origin "HEAD:$BASE"
-          echo "✅ Version files committed and pushed to $BASE"
         fi
+
+        git push origin "$BRANCH"
+        echo "✅ Release branch $BRANCH pushed"
+
+        gh pr create \
+          --title "chore: release $TAG" \
+          --body "Automated release PR for \`$TAG\`. Merge this PR to create the git tag and trigger the release build." \
+          --base "$BASE" \
+          --head "$BRANCH" \
+          --label "release"
+        echo "✅ Release PR opened for $TAG"
+
+  # Phase 2: Triggered when the release PR (with 'release' label, head = release/v*)
+  # is merged. Pushes the vX.Y.Z git tag. Tags are not restricted by branch
+  # protection rules, so no bypass is needed here either.
+  create-tag:
+    if: >-
+      github.event.pull_request.merged == true &&
+      contains(github.event.pull_request.labels.*.name, 'release') &&
+      startsWith(github.event.pull_request.head.ref, 'release/')
+    name: Create and Push Tag
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write  # push git tag
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v6
+      with:
+        ref: ${{ github.event.pull_request.base.ref }}
+        fetch-depth: 0
 
     - name: Create and push tag
       run: |
-        TAG="v${{ steps.get_version.outputs.version }}"
-        BASE="${{ github.event.pull_request.base.ref }}"
-
-        # Fetch to get the latest commit (includes the version-bump commit if we just pushed one)
-        git fetch origin "$BASE"
-        git reset --hard "origin/$BASE"
+        VERSION=$(grep -E '^\s*versionName\s*=\s*"' app/build.gradle.kts | sed -E 's/.*"(.+)".*/\1/')
+        TAG="v$VERSION"
 
         if git rev-parse "$TAG" >/dev/null 2>&1; then
           echo "⚠️  Tag $TAG already exists — skipping"
