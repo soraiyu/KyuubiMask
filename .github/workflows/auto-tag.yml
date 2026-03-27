@@ -32,6 +32,7 @@ jobs:
     permissions:
       contents: write       # push release/v* branch
       pull-requests: write  # open release PR
+      issues: write         # create/update 'release' label
 
     steps:
     - name: Checkout code
@@ -229,7 +230,7 @@ jobs:
       env:
         VERSION: ${{ steps.get_version.outputs.version }}
         BASE: ${{ github.event.pull_request.base.ref }}
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GH_TOKEN: ${{ github.token }}
       run: |
         BRANCH="release/v$VERSION"
         TAG="v$VERSION"
@@ -246,16 +247,37 @@ jobs:
           git commit -m "chore: release $TAG"
         fi
 
-        git push origin "$BRANCH"
+        # --force handles re-runs where the branch already exists remotely
+        git push origin "$BRANCH" --force
         echo "✅ Release branch $BRANCH pushed"
 
-        gh pr create \
+        # Ensure 'release' label exists (--force is idempotent)
+        gh label create release \
+          --description "Automated release PR" \
+          --color "0075ca" \
+          --force
+        echo "✅ 'release' label is ready"
+
+        # Create PR; fall back to finding the existing PR on re-runs
+        if ! PR_URL=$(gh pr create \
           --title "chore: release $TAG" \
           --body "Automated release PR for \`$TAG\`. Merge this PR to create the git tag and trigger the release build." \
           --base "$BASE" \
           --head "$BRANCH" \
-          --label "release"
-        echo "✅ Release PR opened for $TAG"
+          --label "release"); then
+          PR_URL=$(gh pr list --head "$BRANCH" --base "$BASE" --json url -q '.[0].url')
+          if [ -z "$PR_URL" ]; then
+            echo "❌ Failed to create PR and no existing PR found for $BRANCH → $BASE"
+            echo ""
+            echo "   'Allow GitHub Actions to create and approve pull requests' may be"
+            echo "   disabled. Enable it under Settings → Actions → General."
+            exit 1
+          fi
+          echo "ℹ️  Using existing PR: $PR_URL"
+        else
+          echo "✅ Release PR created: $PR_URL"
+        fi
+        echo "📋 Review and merge the PR to trigger tag creation: $PR_URL"
 
   # Phase 2: Triggered when the release PR (with 'release' label, head = release/v*)
   # is merged. Pushes the vX.Y.Z git tag. Tags are not restricted by branch
@@ -264,7 +286,8 @@ jobs:
     if: >-
       github.event.pull_request.merged == true &&
       contains(github.event.pull_request.labels.*.name, 'release') &&
-      startsWith(github.event.pull_request.head.ref, 'release/')
+      github.event.pull_request.user.login == 'github-actions[bot]' &&
+      startsWith(github.event.pull_request.head.ref, 'release/v')
     name: Create and Push Tag
     runs-on: ubuntu-latest
 
@@ -277,6 +300,11 @@ jobs:
       with:
         ref: ${{ github.event.pull_request.base.ref }}
         fetch-depth: 0
+
+    - name: Configure Git
+      run: |
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
 
     - name: Create and push tag
       run: |
