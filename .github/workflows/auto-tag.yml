@@ -6,14 +6,21 @@ on:
     branches:
       - main
       - master
+  workflow_dispatch:
+    inputs:
+      base_branch:
+        description: 'Base branch to release from (default: main)'
+        required: false
+        default: 'main'
 
 concurrency:
   # Serialize release runs on the same base branch to prevent version/tag races
-  group: release-${{ github.event.pull_request.base.ref }}
+  group: release-${{ github.event.pull_request.base.ref || inputs.base_branch || 'main' }}
   cancel-in-progress: false
 
 jobs:
-  # Phase 1: Triggered by any regular (non-release/fdroid) PR merged to main.
+  # Phase 1: Triggered by any regular (non-release/fdroid) PR merged to main,
+  # or manually via workflow_dispatch.
   # Creates a release/vX.Y.Z branch with version bumps + changelog updates,
   # then opens a PR with the 'release' label.
   # GitHub Actions never pushes directly to main — no branch protection bypass needed.
@@ -22,12 +29,16 @@ jobs:
   #   • Settings → Actions → General → "Allow GitHub Actions to create and approve pull requests"
   prepare-release:
     if: >-
-      github.event.pull_request.merged == true &&
+      (github.event_name == 'workflow_dispatch') ||
+      (github.event.pull_request.merged == true &&
       !contains(github.event.pull_request.labels.*.name, 'release') &&
       !contains(github.event.pull_request.labels.*.name, 'fdroid') &&
-      !contains(github.event.pull_request.labels.*.name, 'skip-release')
+      !contains(github.event.pull_request.labels.*.name, 'skip-release'))
     name: Prepare Release PR
     runs-on: ubuntu-latest
+
+    env:
+      BASE_BRANCH: ${{ github.event_name == 'workflow_dispatch' && inputs.base_branch || github.event.pull_request.base.ref }}
 
     permissions:
       contents: write       # push release/v* branch
@@ -40,7 +51,7 @@ jobs:
       with:
         # Check out the base branch (e.g. main) at the post-merge state,
         # not the synthetic refs/pull/*/merge commit.
-        ref: ${{ github.event.pull_request.base.ref }}
+        ref: ${{ env.BASE_BRANCH }}
         fetch-depth: 0
 
     - name: Configure Git
@@ -229,7 +240,7 @@ jobs:
     - name: Push release branch and open PR
       env:
         VERSION: ${{ steps.get_version.outputs.version }}
-        BASE: ${{ github.event.pull_request.base.ref }}
+        BASE: ${{ env.BASE_BRANCH }}
         GH_TOKEN: ${{ github.token }}
       run: |
         BRANCH="release/v$VERSION"
