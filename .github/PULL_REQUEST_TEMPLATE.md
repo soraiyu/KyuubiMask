@@ -10,8 +10,6 @@
 <!-- 書かない場合は、PRタイトルが自動で使われます。 -->
 <!-- If left blank, the PR title will be used automatically. -->
 
-- 
-
 ## チェックリスト / Checklist
 
 - [ ] コードが既存のスタイルに沿っている / Code follows existing style

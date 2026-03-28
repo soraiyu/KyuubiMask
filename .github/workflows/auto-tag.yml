@@ -121,7 +121,6 @@ jobs:
         PR_NUMBER: ${{ github.event.pull_request.number }}
         PR_BODY: ${{ github.event.pull_request.body }}
         PR_LABELS: ${{ join(github.event.pull_request.labels.*.name, ',') }}
-        GITHUB_REPOSITORY: ${{ github.repository }}
       run: |
         python3 - <<'PYEOF'
         import re, os, subprocess
@@ -133,19 +132,23 @@ jobs:
         pr_number  = os.environ.get('PR_NUMBER', '').strip()
         pr_body    = os.environ.get('PR_BODY', '').strip()
         pr_labels  = [l.strip().lower() for l in os.environ.get('PR_LABELS', '').split(',') if l.strip()]
-        repo       = os.environ.get('GITHUB_REPOSITORY', '')
 
         with open('CHANGELOG.md', 'r') as f:
             content = f.read()
 
-        # Check whether [Unreleased] already has content
+        # Check whether [Unreleased] already has *real* content (at least one list item)
         unreleased_match = re.search(
             r'^## \[Unreleased\]\n(.*?)(?=^## \[|\Z)',
             content, re.MULTILINE | re.DOTALL
         )
         unreleased_body = unreleased_match.group(1).strip() if unreleased_match else ''
 
-        if unreleased_body:
+        # Consider [Unreleased] to have content only if there is at least one bullet list item
+        has_unreleased_entries = bool(
+            unreleased_body and re.search(r'^[ \t]*[-*] ', unreleased_body, re.MULTILINE)
+        )
+
+        if has_unreleased_entries:
             print('ℹ️  [Unreleased] already has content — skipping auto-fill')
             exit(0)
 
@@ -170,9 +173,9 @@ jobs:
                 if section_match:
                     for line in section_match.group(1).splitlines():
                         line = line.strip()
-                        if line.startswith('- ') or line.startswith('* '):
+                        if (line.startswith('- ') or line.startswith('* ')) and line[2:].strip():
                             extracted.append(line if line.startswith('- ') else '- ' + line[2:])
-                        elif line and not line.startswith('#'):
+                        elif line and not line.startswith('#') and not re.match(r'<!--.*?-->', line):
                             extracted.append('- ' + line)
 
             if extracted:
