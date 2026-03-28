@@ -1,1 +1,2 @@
-Version 1.7.7
+• Settings screen: app-mask preset toggles now displayed as compact horizontal rows
+• Main toggle screen: oversized text reduced; full Material 3 theming applied

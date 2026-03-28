@@ -1,1 +1,1 @@
-Version 1.7.3
+• Work-profile notification masking: notifications from apps in Android work/managed profiles are now correctly masked; work-profile apps appear with a badge in the app-selection screen

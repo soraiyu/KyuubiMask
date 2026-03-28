@@ -9,13 +9,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.7.10] - 2026-03-28
 
+### Fixed
+- NotificationListenerService now automatically reconnects after being stopped by the system, eliminating the need for a device restart to restore masking functionality
+
+### Added
+- App store icon (512×512 PNG) added for F-Droid and other distribution channels
+
 ## [1.7.9] - 2026-03-19
+
+### Added
+- Comprehensive unit tests for `GenericMaskStrategy` covering edge cases
+- Automated security verification CI workflow
 
 ## [1.7.8] - 2026-03-18
 
+### Fixed
+- F-Droid metadata PRs no longer trigger an additional release cycle
+
 ## [1.7.7] - 2026-03-18
 
+### Changed
+- Settings screen: app-mask preset toggles converted from a 2×2 tile grid to compact horizontal rows for better readability
+- Main toggle screen: oversized center text reduced to follow Material Design sizing guidelines
+- Migrated card views to `MaterialCardView` with full Material 3 theming and color scheme support
+
 ## [1.7.6] - 2026-03-17
+
+No user-facing changes; release artifact cleanup.
 
 ## [1.7.5] - 2026-03-17
 
@@ -24,18 +44,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.7.4] - 2026-03-17
 
+### Fixed
+- Release automation: F-Droid metadata is now updated after the git tag is pushed, ensuring the correct commit hash is recorded in the metadata
+
 ## [1.7.3] - 2026-03-17
+
+### Added
+- Per-profile notification masking: notifications from apps installed in Android work/managed profiles are now correctly masked and distinguished from personal-profile apps; work-profile apps appear with a badge in the app-selection screen
 
 ## [1.7.2] - 2026-03-16
 
-## [1.7.1] - 2026-03-16
-
-## [1.7.1] - 2026-03-16
+### Fixed
+- Masked notifications from Slack now correctly display "Slack" as the source app name instead of the generic "App"
 
 ## [1.7.1] - 2026-03-16
 
 ### Added
 - Per-app language selection: Language card in Settings lets users switch the app language independently of the system locale (English / 日本語 / 中文（简体）/ 中文（繁體）/ System default). Uses `AppCompatDelegate.setApplicationLocales()` for compatibility with all Android versions and syncs with Android 13+'s native per-app language preference.
+- Simplified Chinese (zh-Hans) and Traditional Chinese (zh-Hant) localizations for all UI strings
+- Monochrome adaptive icon layer for Android 13+ themed icons
 
 ## [1.7.0] - 2026-03-14
 

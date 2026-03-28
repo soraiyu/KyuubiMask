@@ -1,1 +1,2 @@
-Version 1.7.10
+• Fixed: masking service now automatically reconnects after being stopped by the system — no device restart needed
+• Added app store icon for F-Droid and other distribution channels

@@ -1,1 +1,1 @@
-Version 1.7.9
+• Expanded test coverage and security verification CI; no changes to app functionality
