@@ -114,6 +114,115 @@ jobs:
         echo "tag=v$VERSION" >> $GITHUB_OUTPUT
         echo "📦 Final version: $VERSION (code: $VERSION_CODE)"
 
+    - name: Populate [Unreleased] from PR or recent commits
+      env:
+        EVENT_NAME: ${{ github.event_name }}
+        PR_TITLE: ${{ github.event.pull_request.title }}
+        PR_NUMBER: ${{ github.event.pull_request.number }}
+        PR_BODY: ${{ github.event.pull_request.body }}
+        PR_LABELS: ${{ join(github.event.pull_request.labels.*.name, ',') }}
+        GITHUB_REPOSITORY: ${{ github.repository }}
+      run: |
+        python3 - <<'PYEOF'
+        import re, os, subprocess
+
+        MAX_COMMITS = 15
+
+        event_name = os.environ.get('EVENT_NAME', '')
+        pr_title   = os.environ.get('PR_TITLE', '').strip()
+        pr_number  = os.environ.get('PR_NUMBER', '').strip()
+        pr_body    = os.environ.get('PR_BODY', '').strip()
+        pr_labels  = [l.strip().lower() for l in os.environ.get('PR_LABELS', '').split(',') if l.strip()]
+        repo       = os.environ.get('GITHUB_REPOSITORY', '')
+
+        with open('CHANGELOG.md', 'r') as f:
+            content = f.read()
+
+        # Check whether [Unreleased] already has content
+        unreleased_match = re.search(
+            r'^## \[Unreleased\]\n(.*?)(?=^## \[|\Z)',
+            content, re.MULTILINE | re.DOTALL
+        )
+        unreleased_body = unreleased_match.group(1).strip() if unreleased_match else ''
+
+        if unreleased_body:
+            print('ℹ️  [Unreleased] already has content — skipping auto-fill')
+            exit(0)
+
+        new_lines = []
+
+        if event_name == 'pull_request' and pr_title:
+            # Determine changelog category from PR labels
+            if any(l in ('bug', 'fix', 'bugfix', 'type: bug') for l in pr_labels):
+                category = 'Fixed'
+            elif any(l in ('enhancement', 'feature', 'new feature', 'type: enhancement') for l in pr_labels):
+                category = 'Added'
+            else:
+                category = 'Changed'
+
+            # Try to extract a "## Changelog" / "## Changes" section from the PR body
+            extracted = []
+            if pr_body:
+                section_match = re.search(
+                    r'(?:^|\n)#{1,3}[ \t]*(?:changelog|changes?)\s*\n(.*?)(?=\n#{1,3}|\Z)',
+                    pr_body, re.IGNORECASE | re.DOTALL
+                )
+                if section_match:
+                    for line in section_match.group(1).splitlines():
+                        line = line.strip()
+                        if line.startswith('- ') or line.startswith('* '):
+                            extracted.append(line if line.startswith('- ') else '- ' + line[2:])
+                        elif line and not line.startswith('#'):
+                            extracted.append('- ' + line)
+
+            if extracted:
+                new_lines.append(f'### {category}')
+                new_lines.extend(extracted)
+            else:
+                # Fall back to PR title
+                pr_ref = f' (#{pr_number})' if pr_number else ''
+                new_lines.append(f'### {category}')
+                new_lines.append(f'- {pr_title}{pr_ref}')
+
+        else:
+            # workflow_dispatch: collect commits since the most recent tag
+            tag_result = subprocess.run(
+                ['git', 'describe', '--tags', '--abbrev=0'],
+                capture_output=True, text=True
+            )
+            if tag_result.returncode == 0:
+                since = tag_result.stdout.strip()
+                log_range = f'{since}..HEAD'
+            else:
+                log_range = f'-{MAX_COMMITS}'  # fallback: last N commits
+
+            log_result = subprocess.run(
+                ['git', 'log', log_range, '--pretty=format:- %s', '--no-merges'],
+                capture_output=True, text=True
+            )
+            if log_result.returncode == 0 and log_result.stdout.strip():
+                commits = [l for l in log_result.stdout.strip().splitlines() if l.strip()][:MAX_COMMITS]
+                new_lines.append('### Changed')
+                new_lines.extend(commits)
+
+        if not new_lines:
+            print('ℹ️  No entries to add to [Unreleased]')
+            exit(0)
+
+        new_content = '\n'.join(new_lines)
+        content = re.sub(
+            r'^(## \[Unreleased\])\n',
+            f'## [Unreleased]\n\n{new_content}\n\n',
+            content,
+            flags=re.MULTILINE
+        )
+
+        with open('CHANGELOG.md', 'w') as f:
+            f.write(content)
+
+        print(f'✅ Populated [Unreleased] with:\n{new_content}')
+        PYEOF
+
     - name: Update CHANGELOG.md
       env:
         VERSION: ${{ steps.get_version.outputs.version }}
