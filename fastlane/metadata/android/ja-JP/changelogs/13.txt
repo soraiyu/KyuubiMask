@@ -1,1 +1,3 @@
-• Per-app language selection: Language card in Settings lets users switch the app language independently of the system locale (English / 日本語 / 中文（简体）/ 中文（繁體）/ System default). Uses `AppCompatDelegate.setApplicationLocales()` for compatibility with all Android versions and syncs with Android 13+'s native per-app language preference.
+• アプリ内言語切り替え機能を追加：設定画面の「言語」カードでシステムロケールとは独立してアプリの言語（English / 日本語 / 中文（简体）/ 中文（繁體）/ システム既定）を選択できます
+• 簡体字中国語（zh-Hans）と繁体字中国語（zh-Hant）のローカライズを追加
+• Android 13以降のテーマアイコンに対応したモノクロアダプティブアイコンを追加

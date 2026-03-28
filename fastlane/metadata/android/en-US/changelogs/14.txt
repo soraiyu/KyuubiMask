@@ -1,1 +1,1 @@
-Version 1.7.2
+• Fixed: masked notifications from Slack now correctly show "Slack" as the app name instead of the generic "App"

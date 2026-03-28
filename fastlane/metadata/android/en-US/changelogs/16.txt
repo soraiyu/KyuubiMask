@@ -1,1 +1,1 @@
-Version 1.7.4
+• Internal release automation improvements; no changes to app functionality

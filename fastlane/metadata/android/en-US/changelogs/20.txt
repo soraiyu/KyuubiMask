@@ -1,1 +1,1 @@
-Version 1.7.8
+• Internal fix: F-Droid metadata updates no longer trigger an additional release; no changes to app functionality
