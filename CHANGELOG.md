@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.7.10] - 2026-03-28
 
 ### Fixed
-- NotificationListenerService now automatically reconnects after being stopped by the system, eliminating the need for a device restart to restore masking functionality
+- `NotificationListenerService` now automatically reconnects after being stopped by the system, eliminating the need for a device restart to restore masking functionality
 
 ### Added
 - App store icon (512×512 PNG) added for F-Droid and other distribution channels
@@ -35,7 +35,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.7.6] - 2026-03-17
 
-No user-facing changes; release artifact cleanup.
+### Changed
+- No user-facing changes; release artifact cleanup.
 
 ## [1.7.5] - 2026-03-17
 
