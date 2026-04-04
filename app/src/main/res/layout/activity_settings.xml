@@ -560,6 +560,19 @@
             android:drawablePadding="8dp"
             android:gravity="center_vertical" />
 
+        <!-- Donation Link -->
+        <TextView
+            android:id="@+id/tvDonateLink"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="@string/donate_label"
+            android:textColor="@color/text_secondary"
+            android:textSize="12sp"
+            android:gravity="center_vertical"
+            android:clickable="true"
+            android:focusable="true" />
+
     </LinearLayout>
 
 </ScrollView>

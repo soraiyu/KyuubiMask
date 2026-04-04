@@ -112,4 +112,7 @@
     <string name="toggle_status_masking_on">Masking ON\n(Hiding notifications)</string>
     <string name="toggle_status_masking_off">Masking OFF\n(Showing notifications)</string>
     <string name="toggle_hint">Tap to toggle</string>
+
+    <!-- Donation -->
+    <string name="donate_label">Support development on Liberapay ♥</string>
 </resources>

@@ -228,6 +228,12 @@ class SettingsActivity : AppCompatActivity() {
                 refreshDebugLog()
             }
         }
+
+        // Donation link
+        binding.tvDonateLink.setOnClickListener {
+            val uri = android.net.Uri.parse("https://liberapay.com/rtneg/")
+            startActivity(Intent(Intent.ACTION_VIEW, uri))
+        }
     }
 
     /** Refresh the in-app debug log display from the in-memory buffer. */
