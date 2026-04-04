@@ -114,5 +114,5 @@
     <string name="toggle_hint">タップで切り替え</string>
 
     <!-- Donation -->
-    <string name="donate_label">Liberapayで開発を支援する ♥</string>
+    <string name="donate_label">開発を支援する ♥</string>
 </resources>

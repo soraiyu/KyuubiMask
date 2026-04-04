@@ -114,5 +114,5 @@
     <string name="toggle_hint">點擊切換</string>
 
     <!-- Donation -->
-    <string name="donate_label">在 Liberapay 上支持開發 ♥</string>
+    <string name="donate_label">支持開發 ♥</string>
 </resources>

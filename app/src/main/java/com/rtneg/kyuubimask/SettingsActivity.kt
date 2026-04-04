@@ -231,7 +231,7 @@ class SettingsActivity : AppCompatActivity() {
 
         // Donation link
         binding.tvDonateLink.setOnClickListener {
-            val uri = android.net.Uri.parse("https://liberapay.com/rtneg/")
+            val uri = android.net.Uri.parse("https://github.com/sponsors/soraiyu")
             val intent = Intent(Intent.ACTION_VIEW, uri)
             try {
                 startActivity(intent)
