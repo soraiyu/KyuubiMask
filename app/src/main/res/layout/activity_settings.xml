@@ -565,7 +565,7 @@
             android:id="@+id/tvDonateLink"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
+            android:layout_marginTop="8dp"
             android:text="@string/donate_label"
             android:textColor="@color/text_secondary"
             android:textSize="12sp"

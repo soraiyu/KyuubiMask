@@ -232,7 +232,12 @@ class SettingsActivity : AppCompatActivity() {
         // Donation link
         binding.tvDonateLink.setOnClickListener {
             val uri = android.net.Uri.parse("https://liberapay.com/rtneg/")
-            startActivity(Intent(Intent.ACTION_VIEW, uri))
+            val intent = Intent(Intent.ACTION_VIEW, uri)
+            try {
+                startActivity(intent)
+            } catch (e: android.content.ActivityNotFoundException) {
+                Toast.makeText(this, R.string.error_open_settings, Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
