@@ -68,6 +68,7 @@
 
     <!-- Errors -->
     <string name="error_open_settings">設定を開けませんでした</string>
+    <string name="error_open_link">リンクを開けませんでした</string>
     <string name="error_post_notification_denied">通知の送信権限が許可されていません</string>
 
     <!-- Onboarding -->
@@ -112,4 +113,7 @@
     <string name="toggle_status_masking_on">マスク有効\n(通知を隠しています)</string>
     <string name="toggle_status_masking_off">通常表示\n(通知をそのまま表示)</string>
     <string name="toggle_hint">タップで切り替え</string>
+
+    <!-- Donation -->
+    <string name="donate_label">開発を支援する ♥</string>
 </resources>

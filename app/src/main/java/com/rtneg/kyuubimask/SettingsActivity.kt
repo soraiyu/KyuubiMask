@@ -65,6 +65,7 @@ class SettingsActivity : AppCompatActivity() {
 
     companion object {
         private const val DEBUG_POLL_INTERVAL_MS = 1000L
+        private const val DONATE_URL = "https://github.com/sponsors/soraiyu"
 
         /** BCP-47 locale tag (empty = system default) paired with its display string resource. */
         private val LANGUAGE_OPTIONS = listOf(
@@ -226,6 +227,17 @@ class SettingsActivity : AppCompatActivity() {
             binding.btnClearLog.setOnClickListener {
                 DebugLogRepository.clear()
                 refreshDebugLog()
+            }
+        }
+
+        // Donation link
+        binding.tvDonateLink.setOnClickListener {
+            val uri = android.net.Uri.parse(DONATE_URL)
+            val intent = Intent(Intent.ACTION_VIEW, uri)
+            if (intent.resolveActivity(packageManager) != null) {
+                startActivity(intent)
+            } else {
+                Toast.makeText(this, R.string.error_open_link, Toast.LENGTH_SHORT).show()
             }
         }
     }

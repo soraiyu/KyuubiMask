@@ -68,6 +68,7 @@
 
     <!-- Errors -->
     <string name="error_open_settings">無法開啟設定</string>
+    <string name="error_open_link">無法開啟連結</string>
     <string name="error_post_notification_denied">未授予通知發送權限</string>
 
     <!-- Onboarding -->
@@ -112,4 +113,7 @@
     <string name="toggle_status_masking_on">遮罩已啟用\n（正在隱藏通知）</string>
     <string name="toggle_status_masking_off">遮罩已停用\n（正在顯示通知）</string>
     <string name="toggle_hint">點擊切換</string>
+
+    <!-- Donation -->
+    <string name="donate_label">支持開發 ♥</string>
 </resources>
