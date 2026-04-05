@@ -68,6 +68,7 @@
 
     <!-- Errors -->
     <string name="error_open_settings">設定を開けませんでした</string>
+    <string name="error_open_link">リンクを開けませんでした</string>
     <string name="error_post_notification_denied">通知の送信権限が許可されていません</string>
 
     <!-- Onboarding -->

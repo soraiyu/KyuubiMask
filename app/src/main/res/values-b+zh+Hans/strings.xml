@@ -68,6 +68,7 @@
 
     <!-- Errors -->
     <string name="error_open_settings">无法打开设置</string>
+    <string name="error_open_link">无法打开链接</string>
     <string name="error_post_notification_denied">未授予通知发送权限</string>
 
     <!-- Onboarding -->

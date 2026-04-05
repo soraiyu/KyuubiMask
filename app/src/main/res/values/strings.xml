@@ -68,6 +68,7 @@
     
     <!-- Errors -->
     <string name="error_open_settings">Cannot open settings</string>
+    <string name="error_open_link">Cannot open link</string>
     <string name="error_post_notification_denied">POST_NOTIFICATION permission not granted</string>
 
     <!-- Onboarding -->
