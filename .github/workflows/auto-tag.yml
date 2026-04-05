@@ -140,7 +140,7 @@ jobs:
         EVENT_NAME: ${{ github.event_name }}
         PR_TITLE: ${{ github.event.pull_request.title }}
         PR_NUMBER: ${{ github.event.pull_request.number }}
-        PR_LABELS: ${{ join(github.event.pull_request.labels.*.name, ',') }}
+        PR_LABELS: ${{ github.event_name == 'pull_request' && join(github.event.pull_request.labels.*.name, ',') || '' }}
       run: |
         python3 - <<'PYEOF'
         import re, os, subprocess
@@ -176,19 +176,65 @@ jobs:
                 return 'Fixed'
             return 'Changed'
 
-        # Collect ALL commits since the last release tag — this captures every change
-        # merged since the previous release, not just the single triggering PR.
-        tag_result = subprocess.run(
-            ['git', 'describe', '--tags', '--abbrev=0'],
+        def release_branch_version(ref_name):
+            """Return a sortable version tuple for release/vX.Y.Z branch names."""
+            match = re.search(r'release/v(\d+)\.(\d+)\.(\d+)$', ref_name)
+            if not match:
+                return None
+            return tuple(int(part) for part in match.groups())
+
+        # If a release branch is already in flight, only collect commits added after
+        # that branch was cut so queued release PRs do not duplicate changelog entries.
+        log_range = None
+
+        remote_release_result = subprocess.run(
+            ['git', 'ls-remote', '--heads', 'origin', 'release/v*'],
             capture_output=True, text=True
         )
-        if tag_result.returncode == 0:
-            since_tag = tag_result.stdout.strip()
-            log_range = f'{since_tag}..HEAD'
-            print(f'📍 Collecting commits since {since_tag}')
-        else:
-            log_range = f'-{MAX_COMMITS}'
-            print(f'📍 No tags found; collecting last {MAX_COMMITS} commits')
+        if remote_release_result.returncode == 0 and remote_release_result.stdout.strip():
+            release_branches = []
+            for line in remote_release_result.stdout.strip().splitlines():
+                parts = line.split()
+                if len(parts) != 2:
+                    continue
+                remote_ref = parts[1]
+                version = release_branch_version(remote_ref)
+                if version is None:
+                    continue
+                release_branches.append((version, remote_ref.replace('refs/heads/', '')))
+
+            if release_branches:
+                _, newest_release_branch = max(release_branches, key=lambda item: item[0])
+                local_release_ref = f'refs/remotes/origin/{newest_release_branch}'
+
+                fetch_result = subprocess.run(
+                    ['git', 'fetch', '--no-tags', 'origin',
+                     f'{newest_release_branch}:{local_release_ref}'],
+                    capture_output=True, text=True
+                )
+                if fetch_result.returncode == 0:
+                    merge_base_result = subprocess.run(
+                        ['git', 'merge-base', 'HEAD', local_release_ref],
+                        capture_output=True, text=True
+                    )
+                    if merge_base_result.returncode == 0 and merge_base_result.stdout.strip():
+                        branch_point = merge_base_result.stdout.strip()
+                        log_range = f'{branch_point}..HEAD'
+                        print(f'📍 Collecting commits since branch point of {newest_release_branch}')
+
+        if not log_range:
+            # No in-flight release branch found; collect all commits since the last release tag.
+            tag_result = subprocess.run(
+                ['git', 'describe', '--tags', '--abbrev=0'],
+                capture_output=True, text=True
+            )
+            if tag_result.returncode == 0:
+                since_tag = tag_result.stdout.strip()
+                log_range = f'{since_tag}..HEAD'
+                print(f'📍 Collecting commits since {since_tag}')
+            else:
+                log_range = f'-{MAX_COMMITS}'
+                print(f'📍 No tags found; collecting last {MAX_COMMITS} commits')
 
         log_result = subprocess.run(
             ['git', 'log', log_range, '--pretty=format:- %s', '--no-merges'],
