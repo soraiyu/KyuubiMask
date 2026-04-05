@@ -17,8 +17,8 @@ android {
         applicationId = "com.rtneg.kyuubimask"
         minSdk = 26
         targetSdk = 35
-        versionCode = 22
-        versionName = "1.7.10"
+        versionCode = 27
+        versionName = "1.7.15"
     }
 
     buildTypes {

@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.7.15] - 2026-04-05
+
+### Changed
+- feat: add donation link to FUNDING.yml and in-app settings (#116)
+
 ## [1.7.10] - 2026-03-28
 
 ### Fixed
@@ -168,7 +173,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Real-time debug log viewer
 - Complete offline operation
 
-[Unreleased]: https://github.com/soraiyu/KyuubiMask/compare/v1.7.10...HEAD
+[Unreleased]: https://github.com/soraiyu/KyuubiMask/compare/v1.7.15...HEAD
+[1.7.15]: https://github.com/soraiyu/KyuubiMask/compare/v1.7.10...v1.7.15
 [1.7.10]: https://github.com/soraiyu/KyuubiMask/compare/v1.7.9...v1.7.10
 [1.7.9]: https://github.com/soraiyu/KyuubiMask/compare/v1.7.8...v1.7.9
 [1.7.8]: https://github.com/soraiyu/KyuubiMask/compare/v1.7.7...v1.7.8

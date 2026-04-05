@@ -1,0 +1,1 @@
+• feat: add donation link to FUNDING.yml and in-app settings (#116)
