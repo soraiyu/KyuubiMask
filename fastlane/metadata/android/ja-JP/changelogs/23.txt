@@ -1,0 +1,1 @@
+• 設定画面に「開発を支援 ♥」寄付リンクを追加 — GitHubスポンサーページへのリンク（Liberapay・Ko-fi・Buy Me a Coffeeに対応）
