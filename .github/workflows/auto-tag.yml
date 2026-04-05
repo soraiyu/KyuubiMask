@@ -67,7 +67,7 @@ jobs:
         # regardless of what versionName is currently in build.gradle.kts.
         LATEST_TAG=$(git tag --sort=-version:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -1)
 
-        # Read values from build.gradle.kts (used as fallback / versionCode baseline)
+        # Read values from build.gradle.kts
         GRADLE_VERSION=$(grep -E '^\s*versionName\s*=\s*"' app/build.gradle.kts | sed -E 's/.*"(.+)".*/\1/')
         GRADLE_VERSION_CODE=$(grep -E '^\s*versionCode\s*=\s*' app/build.gradle.kts | sed -E 's/.*=\s*([0-9]+).*/\1/')
 
@@ -78,30 +78,39 @@ jobs:
 
         if [ -n "$LATEST_TAG" ]; then
           BASE_VERSION="${LATEST_TAG#v}"
-          # Read the versionCode that was current at the tagged commit so the new
-          # code is always exactly TAGGED_CODE + N (one per patch bump).
+          # Read the versionCode that was recorded at the tagged commit.
+          # This guarantees the new code is exactly TAGGED_CODE + N regardless of
+          # any manual edits to build.gradle.kts after the last release.
           TAGGED_CODE=$(git show "${LATEST_TAG}:app/build.gradle.kts" 2>/dev/null \
             | grep -E '^\s*versionCode\s*=\s*' | sed -E 's/.*=\s*([0-9]+).*/\1/')
           if [ -z "$TAGGED_CODE" ]; then
-            echo "⚠️  Could not read versionCode from $LATEST_TAG — falling back to current build.gradle.kts"
+            echo "⚠️  Could not read versionCode from ${LATEST_TAG}:app/build.gradle.kts"
+            echo "   Falling back to current build.gradle.kts versionCode ($GRADLE_VERSION_CODE)."
+            echo "   If build.gradle.kts has been manually edited since the last release"
+            echo "   the generated versionCode may not match expectations — please verify."
             TAGGED_CODE="$GRADLE_VERSION_CODE"
           fi
           echo "📍 Latest git tag: $LATEST_TAG (code: $TAGGED_CODE) — using as base for version bump"
+
+          # Compute first candidate: latest_tag_patch + 1
+          IFS='.' read -ra PARTS <<< "$BASE_VERSION"
+          VERSION="${PARTS[0]}.${PARTS[1]}.$((${PARTS[2]} + 1))"
+          VERSION_CODE=$((TAGGED_CODE + 1))
         elif [ -n "$GRADLE_VERSION" ] && echo "$GRADLE_VERSION" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+$'; then
-          # No tags yet: treat the version in build.gradle.kts as the previously released one.
-          IFS='.' read -ra PARTS <<< "$GRADLE_VERSION"
-          BASE_VERSION="${PARTS[0]}.${PARTS[1]}.$((${PARTS[2]} - 1))"
-          TAGGED_CODE=$((GRADLE_VERSION_CODE - 1))
-          echo "📍 No git tags found — treating build.gradle.kts version $GRADLE_VERSION as starting point"
+          # No tags yet: use the version in build.gradle.kts as the first release candidate.
+          # The bump loop below will skip further if that version happens to be taken.
+          VERSION="$GRADLE_VERSION"
+          VERSION_CODE="$GRADLE_VERSION_CODE"
+          echo "📍 No git tags found — using build.gradle.kts version $GRADLE_VERSION as first release candidate"
         else
           echo "❌ No git tags found and build.gradle.kts has no valid x.y.z versionName"
           exit 1
         fi
 
-        # Compute the initial candidate: one patch bump above the base
-        IFS='.' read -ra PARTS <<< "$BASE_VERSION"
-        VERSION="${PARTS[0]}.${PARTS[1]}.$((${PARTS[2]} + 1))"
-        VERSION_CODE=$((TAGGED_CODE + 1))
+        # Ensure versionCode satisfies Android's minimum requirement of 1
+        if [ "$VERSION_CODE" -lt 1 ]; then
+          VERSION_CODE=1
+        fi
 
         # Keep bumping until we find a version with neither an existing tag nor an
         # in-flight release branch.
