@@ -1,1 +1,1 @@
-• feat: add donation link to FUNDING.yml and in-app settings (#116)
+• Added "Support development ♥" donation link to Settings — opens GitHub Sponsors page (Liberapay, Ko-fi, and Buy Me a Coffee)

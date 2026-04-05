@@ -9,8 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.7.15] - 2026-04-05
 
-### Changed
-- feat: add donation link to FUNDING.yml and in-app settings (#116)
+### Added
+- "Support development ♥" donation link at the bottom of the Settings screen, opening the GitHub Sponsors page (aggregates Liberapay, Ko-fi, and Buy Me a Coffee)
 
 ## [1.7.10] - 2026-03-28
 
