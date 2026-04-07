@@ -1,0 +1,1 @@
+• Masking service no longer requires a device restart after it stops working following extended use. Opening the app now automatically re-establishes the listener connection.

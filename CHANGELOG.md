@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.7.15] - 2026-04-07
+
 ### Fixed
 - Masking service no longer requires a device restart after it stops working following extended use. Opening the app now automatically re-establishes the listener connection.
 
@@ -176,7 +178,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Real-time debug log viewer
 - Complete offline operation
 
-[Unreleased]: https://github.com/soraiyu/KyuubiMask/compare/v1.7.11...HEAD
+[Unreleased]: https://github.com/soraiyu/KyuubiMask/compare/v1.7.15...HEAD
+[1.7.15]: https://github.com/soraiyu/KyuubiMask/compare/v1.7.11...v1.7.15
 [1.7.11]: https://github.com/soraiyu/KyuubiMask/compare/v1.7.10...v1.7.11
 [1.7.10]: https://github.com/soraiyu/KyuubiMask/compare/v1.7.9...v1.7.10
 [1.7.9]: https://github.com/soraiyu/KyuubiMask/compare/v1.7.8...v1.7.9
