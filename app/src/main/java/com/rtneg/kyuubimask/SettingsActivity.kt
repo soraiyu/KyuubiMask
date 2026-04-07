@@ -25,6 +25,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
+import android.service.notification.NotificationListenerService
 import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.AdapterView
@@ -113,7 +114,21 @@ class SettingsActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        updateServiceStatus()
+        val notificationServiceEnabled = updateServiceStatus()
+        // If notification listener permission is granted, request a rebind every time
+        // the app is opened. This recovers from the stuck state where the service stops
+        // working after long running or after a force-stop, without requiring a device
+        // restart. It is equivalent to the system-level reconnect that occurs on reboot.
+        if (notificationServiceEnabled) {
+            try {
+                NotificationListenerService.requestRebind(
+                    ComponentName(this, NotificationMaskService::class.java)
+                )
+            } catch (e: Exception) {
+                if (BuildConfig.DEBUG) DebugLogRepository.add("requestRebind failed: $e")
+                // Release builds: rebind is best-effort; service will reconnect on next opportunity
+            }
+        }
         if (BuildConfig.DEBUG) {
             refreshDebugLog()
             debugHandler.postDelayed(debugRefreshRunnable, DEBUG_POLL_INTERVAL_MS)
@@ -328,9 +343,10 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     /**
-     * Updates UI based on service status
+     * Updates UI based on service status.
+     * @return true if the notification listener permission is currently granted
      */
-    private fun updateServiceStatus() {
+    private fun updateServiceStatus(): Boolean {
         val hasNotificationListenerPermission = isNotificationServiceEnabled()
         val hasPostNotificationPermission = hasPostNotificationPermission()
         val isEnabled = prefsRepository.isServiceEnabled
@@ -353,6 +369,7 @@ class SettingsActivity : AppCompatActivity() {
                 else R.color.status_inactive
             )
         )
+        return hasNotificationListenerPermission
     }
 
     /**

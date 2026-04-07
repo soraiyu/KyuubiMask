@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- Masking service no longer requires a device restart after it stops working following extended use. Opening the app now automatically re-establishes the listener connection.
+
 ## [1.7.11] - 2026-04-05
 
 ### Added
