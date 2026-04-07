@@ -25,6 +25,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
+import android.service.notification.NotificationListenerService
 import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.AdapterView
@@ -114,6 +115,15 @@ class SettingsActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         updateServiceStatus()
+        // If notification listener permission is granted, request a rebind every time
+        // the app is opened. This recovers from the stuck state where the service stops
+        // working after long running or after a force-stop, without requiring a device
+        // restart. It is equivalent to the system-level reconnect that occurs on reboot.
+        if (isNotificationServiceEnabled()) {
+            NotificationListenerService.requestRebind(
+                ComponentName(this, NotificationMaskService::class.java)
+            )
+        }
         if (BuildConfig.DEBUG) {
             refreshDebugLog()
             debugHandler.postDelayed(debugRefreshRunnable, DEBUG_POLL_INTERVAL_MS)
