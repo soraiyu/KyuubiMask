@@ -120,9 +120,13 @@ class SettingsActivity : AppCompatActivity() {
         // working after long running or after a force-stop, without requiring a device
         // restart. It is equivalent to the system-level reconnect that occurs on reboot.
         if (isNotificationServiceEnabled()) {
-            NotificationListenerService.requestRebind(
-                ComponentName(this, NotificationMaskService::class.java)
-            )
+            try {
+                NotificationListenerService.requestRebind(
+                    ComponentName(this, NotificationMaskService::class.java)
+                )
+            } catch (_: Exception) {
+                // Ignore: rebind is best-effort; the service will reconnect on next opportunity
+            }
         }
         if (BuildConfig.DEBUG) {
             refreshDebugLog()
