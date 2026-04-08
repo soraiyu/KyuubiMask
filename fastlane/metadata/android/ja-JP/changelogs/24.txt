@@ -1,1 +1,1 @@
-• Notification masking service now recovers automatically when it gets stuck, without requiring a device reboot
+• 通知マスキングサービスが停止しても、デバイスを再起動しなくても自動的に復旧するようになりました
