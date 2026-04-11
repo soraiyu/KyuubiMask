@@ -1,1 +1,0 @@
-• License changed from Apache-2.0 to MIT
