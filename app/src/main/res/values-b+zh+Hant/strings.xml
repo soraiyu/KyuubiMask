@@ -88,7 +88,7 @@
 
     <!-- Privacy Dialog (shown on first launch) -->
     <string name="privacy_dialog_title">歡迎使用九尾面具</string>
-    <string name="privacy_dialog_message">• 通知內容不會被儲存或傳輸，在記憶體中處理後立即丟棄。\n• 本應用程式無網路權限，資料不可能離開您的裝置。\n• 僅儲存設定（遮罩應用程式清單、開/關狀態、振動模式）。\n• 通知存取權限僅用於遮罩內容，不會記錄任何內容。\n• 九尾面具完全開源（Apache 2.0），任何人均可審查程式碼。\n• 安心保護您的隱私 🦊</string>
+    <string name="privacy_dialog_message">• 通知內容不會被儲存或傳輸，在記憶體中處理後立即丟棄。\n• 本應用程式無網路權限，資料不可能離開您的裝置。\n• 僅儲存設定（遮罩應用程式清單、開/關狀態、振動模式）。\n• 通知存取權限僅用於遮罩內容，不會記錄任何內容。\n• 九尾面具完全開源（MIT），任何人均可審查程式碼。\n• 安心保護您的隱私 🦊</string>
     <string name="privacy_dialog_button_ok">我知道了</string>
 
     <!-- Language Settings -->

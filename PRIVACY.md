@@ -67,7 +67,7 @@ https://github.com/soraiyu/KyuubiMask
 
 ### ライセンス
 
-Apache License 2.0
+MIT License
 
 詳細は[LICENSE](LICENSE)ファイルをご覧ください。
 
@@ -143,7 +143,7 @@ https://github.com/soraiyu/KyuubiMask
 
 ### License
 
-Apache License 2.0
+MIT License
 
 See [LICENSE](LICENSE) file for details.
 
