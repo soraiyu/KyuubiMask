@@ -7,7 +7,7 @@ KyuubiMask is a privacy-first notification masking tool that protects your sensi
 • No data collection or storage
 • No tracking, analytics, or ads
 • Notification content is never logged or saved
-• Open source with Apache 2.0 license
+• Open source with MIT license
 
 ✨ FEATURES
 • Masks notifications from any app you choose with generic text

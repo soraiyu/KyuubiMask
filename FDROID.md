@@ -5,7 +5,7 @@ This document outlines KyuubiMask's readiness for F-Droid distribution.
 ## Compliance Status ✅
 
 ### License
-- **License**: Apache 2.0
+- **License**: MIT
 - **Status**: ✅ F-Droid compatible
 - **File**: [LICENSE](LICENSE)
 
@@ -48,7 +48,7 @@ This document outlines KyuubiMask's readiness for F-Droid distribution.
 
 ### ✅ All required items are complete
 
-- [x] Apache 2.0 license
+- [x] MIT license
 - [x] No proprietary dependencies
 - [x] No tracking or analytics
 - [x] No internet permission

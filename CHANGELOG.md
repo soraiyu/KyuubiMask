@@ -148,7 +148,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Test infrastructure with JUnit and AndroidX Test
 - PreferencesRepository for centralized settings management
-- LICENSE file (Apache 2.0) for open source
+- LICENSE file (MIT) for open source
 - CONTRIBUTING.md with contribution guidelines
 - Debug logging now gated with BuildConfig.DEBUG
 - BUILD_AND_TEST.md with comprehensive build and testing guide

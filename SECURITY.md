@@ -39,7 +39,7 @@ KyuubiMask is designed with privacy and security in mind:
 - **No Data Collection**: No user data is collected or stored
 - **No External Dependencies**: Minimal use of third-party libraries
 - **Open Source**: All code is publicly available for review
-- **Apache 2.0 License**: Transparent licensing
+- **MIT License**: Transparent licensing
 
 ## Privacy Commitment
 
