@@ -21,7 +21,7 @@ APKは以下の方法で入手できます：
 1. [Obtainium の Releases ページ](https://github.com/ImranR98/Obtainium/releases) から Obtainium 本体をインストール
 2. 以下のリンクをタップして KyuubiMask を追加（Obtainiumが起動します）：
 
-   [**Obtainiumで KyuubiMask を追加する →**](https://apps.obtainium.imrans.dev/redirect?r=obtainium://app/%7B%22id%22%3A%22com.rtneg.kyuubimask%22%2C%22url%22%3A%22https%3A%2F%2Fgithub.com%2Fsoraiyu%2FKyuubiMask%22%2C%22apkFilterRegEx%22%3A%22app-release%5C%5C.apk%22%7D)
+   [**Obtainiumで KyuubiMask を追加する →**](https://apps.obtainium.imranr.dev/redirect?r=obtainium://app/%7B%22id%22%3A%22com.rtneg.kyuubimask%22%2C%22url%22%3A%22https%3A%2F%2Fgithub.com%2Fsoraiyu%2FKyuubiMask%22%2C%22apkFilterRegEx%22%3A%22app-release%5C%5C.apk%22%7D)
 
    **または、設定ファイルからインポートする場合:**
    - Obtainium を開き、**「アプリ追加」→「インポート」** を選択
