@@ -5,7 +5,7 @@
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Android CI](https://github.com/soraiyu/KyuubiMask/actions/workflows/android-ci.yml/badge.svg)](https://github.com/soraiyu/KyuubiMask/actions/workflows/android-ci.yml)
 [![F-Droid](https://img.shields.io/f-droid/v/com.rtneg.kyuubimask.svg)](https://f-droid.org/packages/com.rtneg.kyuubimask/)
-[![Obtainium](https://img.shields.io/badge/Get%20it%20on-Obtainium-cyan)](https://apps.obtainium.imranr.dev/redirect?r=obtainium://app/%7B%22id%22%3A%22com.rtneg.kyuubimask%22%2C%22url%22%3A%22https%3A%2F%2Fgithub.com%2Fsoraiyu%2FKyuubiMask%22%2C%22apkFilterRegEx%22%3A%22app-release%5C%5C.apk%22%7D)
+[![Obtainium](https://img.shields.io/badge/Get%20it%20on-Obtainium-cyan)](https://apps.obtainium.imranr.dev/redirect?r=obtainium://app/%7B%22id%22%3A%22com.rtneg.kyuubimask%22%2C%22url%22%3A%22https%3A%2F%2Fgithub.com%2Fsoraiyu%2FKyuubiMask%22%2C%22name%22%3A%22KyuubiMask%22%2C%22apkFilterRegEx%22%3A%22app-release%5C%5C.apk%22%7D)
 
 [English](#english) | [日本語](#日本語)
 
@@ -66,7 +66,7 @@ KyuubiMask protects your notifications everywhere—in crowded trains, at the of
 #### Obtainium
 Install and receive automatic update notifications directly from GitHub Releases using [Obtainium](https://github.com/ImranR98/Obtainium).
 
-[<img src="https://raw.githubusercontent.com/ImranR98/Obtainium/main/assets/graphics/badge_obtainium.png" alt="Get it on Obtainium" height="54">](https://apps.obtainium.imranr.dev/redirect?r=obtainium://app/%7B%22id%22%3A%22com.rtneg.kyuubimask%22%2C%22url%22%3A%22https%3A%2F%2Fgithub.com%2Fsoraiyu%2FKyuubiMask%22%2C%22apkFilterRegEx%22%3A%22app-release%5C%5C.apk%22%7D)
+[<img src="https://raw.githubusercontent.com/ImranR98/Obtainium/main/assets/graphics/badge_obtainium.png" alt="Get it on Obtainium" height="54">](https://apps.obtainium.imranr.dev/redirect?r=obtainium://app/%7B%22id%22%3A%22com.rtneg.kyuubimask%22%2C%22url%22%3A%22https%3A%2F%2Fgithub.com%2Fsoraiyu%2FKyuubiMask%22%2C%22name%22%3A%22KyuubiMask%22%2C%22apkFilterRegEx%22%3A%22app-release%5C%5C.apk%22%7D)
 
 Alternatively, import [`obtainium_config.json`](obtainium_config.json) directly in Obtainium via **Add App → Import** to add KyuubiMask with the correct settings.
 
@@ -228,7 +228,7 @@ KyuubiMaskは、満員電車、オフィス、家族の近く、カフェなど�
 #### Obtainium
 [Obtainium](https://github.com/ImranR98/Obtainium) を使うと、GitHub Releases から直接インストールし、自動アップデート通知を受け取ることができます。
 
-[<img src="https://raw.githubusercontent.com/ImranR98/Obtainium/main/assets/graphics/badge_obtainium.png" alt="Obtainiumで入手" height="54">](https://apps.obtainium.imranr.dev/redirect?r=obtainium://app/%7B%22id%22%3A%22com.rtneg.kyuubimask%22%2C%22url%22%3A%22https%3A%2F%2Fgithub.com%2Fsoraiyu%2FKyuubiMask%22%2C%22apkFilterRegEx%22%3A%22app-release%5C%5C.apk%22%7D)
+[<img src="https://raw.githubusercontent.com/ImranR98/Obtainium/main/assets/graphics/badge_obtainium.png" alt="Obtainiumで入手" height="54">](https://apps.obtainium.imranr.dev/redirect?r=obtainium://app/%7B%22id%22%3A%22com.rtneg.kyuubimask%22%2C%22url%22%3A%22https%3A%2F%2Fgithub.com%2Fsoraiyu%2FKyuubiMask%22%2C%22name%22%3A%22KyuubiMask%22%2C%22apkFilterRegEx%22%3A%22app-release%5C%5C.apk%22%7D)
 
 または、[`obtainium_config.json`](obtainium_config.json) を Obtainium の **「アプリ追加 → インポート」** から読み込むことで、正しい設定でKyuubiMaskを追加できます。
 
