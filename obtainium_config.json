@@ -1,0 +1,15 @@
+{
+  "apps": [
+    {
+      "id": "com.rtneg.kyuubimask",
+      "url": "https://github.com/soraiyu/KyuubiMask",
+      "author": "soraiyu",
+      "name": "KyuubiMask",
+      "preferredApkIndex": 0,
+      "additionalSettings": "{\"includePrereleases\":false,\"fallbackToOlderReleases\":true,\"filterReleaseTitlesByRegEx\":\"\",\"filterReleaseNotesByRegEx\":\"\",\"verifyLatestTag\":false,\"dontSortReleasesList\":false,\"useLatestAssetDateAsReleaseDate\":false,\"trackOnly\":false,\"versionDetection\":true,\"releaseTitleAsVersion\":false,\"castNonInstallableLinksAsDownloadLinks\":false,\"autoApkFilterByArch\":true,\"appName\":\"\",\"shizukuPretendToBeGooglePlay\":false,\"allowInsecure\":false,\"exemptFromBackgroundUpdates\":false,\"skipUpdateNotifications\":false,\"about\":\"\"}",
+      "apkFilterRegEx": "app-release\\.apk",
+      "overrideSource": null
+    }
+  ],
+  "groups": {}
+}
